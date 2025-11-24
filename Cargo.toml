@@ -1,0 +1,5 @@
+[workspace]
+resolver = "3"
+members = ["aht20","async-icp20100", "async-stcc4",
+    "firmware",
+]
