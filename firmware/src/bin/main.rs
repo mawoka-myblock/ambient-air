@@ -6,33 +6,44 @@
     holding buffers for the duration of a data transfer."
 )]
 
-use core::cell::RefCell;
-
 use aht20::AHT20;
 use async_icp20100::Icp20100;
 use async_stcc4::Stcc4;
-use bt_hci::controller::ExternalController;
-use defmt::{error, info};
+use defmt::info;
+use embassy_embedded_hal::shared_bus::asynch::i2c::I2cDevice;
 use embassy_executor::Spawner;
-use embassy_time::{Delay, Duration, Timer};
-use embedded_hal_bus::i2c;
-use esp_hal::analog::adc::{Adc, AdcCalBasic, AdcCalCurve, AdcCalLine, AdcConfig};
-use esp_hal::i2c::master as I2C;
+use embassy_sync::blocking_mutex::raw::NoopRawMutex;
+use embassy_sync::mutex::Mutex;
+use embassy_time::{Duration, Timer};
+use esp_hal::Async;
+use esp_hal::analog::adc::{Adc, AdcCalBasic, AdcConfig};
+use esp_hal::i2c::master::{self as I2C, I2c};
+use esp_hal::ledc::channel::ChannelIFace;
+use esp_hal::ledc::timer::TimerIFace;
+use esp_hal::ledc::{Ledc, LowSpeed, channel, timer};
 use esp_hal::peripherals::ADC1;
+use esp_hal::time::Rate;
 use esp_hal::timer::systimer::SystemTimer;
 use esp_hal::timer::timg::TimerGroup;
+use esp_hal::tsens::{self, TemperatureSensor};
 use esp_hal::{analog::adc::Attenuation, clock::CpuClock};
-use esp_wifi::ble::controller::BleConnector;
+use esp_radio::ble::controller::BleConnector;
+use firmware::bluetooth::run;
+use firmware::data::{Devices, State};
+use firmware::measurements::measure;
 use sgp40::Sgp40;
+use static_cell::StaticCell;
+use trouble_host::prelude::ExternalController;
 use {esp_backtrace as _, esp_println as _};
 
 extern crate alloc;
-
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
 esp_bootloader_esp_idf::esp_app_desc!();
 
-#[esp_hal_embassy::main]
+static I2C_BUS: StaticCell<Mutex<NoopRawMutex, I2c<'static, Async>>> = StaticCell::new();
+static STATE: StaticCell<State> = StaticCell::new();
+#[esp_rtos::main]
 async fn main(spawner: Spawner) {
     // generator version: 0.5.0
 
@@ -41,75 +52,122 @@ async fn main(spawner: Spawner) {
 
     esp_alloc::heap_allocator!(size: 64 * 1024);
 
-    let timer0 = SystemTimer::new(peripherals.SYSTIMER);
-    esp_hal_embassy::init(timer0.alarm0);
+    let timg0 = TimerGroup::new(peripherals.TIMG0);
+    let sw_interrupt =
+        esp_hal::interrupt::software::SoftwareInterruptControl::new(peripherals.SW_INTERRUPT);
+    esp_rtos::start(timg0.timer0, sw_interrupt.software_interrupt0);
 
     info!("Embassy initialized!");
 
-    let rng = esp_hal::rng::Rng::new(peripherals.RNG);
-    let timer1 = TimerGroup::new(peripherals.TIMG0);
-    // let wifi_init =
-    // esp_wifi::init(timer1.timer0, rng).expect("Failed to initialize WIFI/BLE controller");
-    // find more examples https://github.com/embassy-rs/trouble/tree/main/examples/esp32
-    // let transport = BleConnector::new(&wifi_init, peripherals.BT);
-    // let _ble_controller = ExternalController::<_, 20>::new(transport);
-
     // TODO: Spawn some tasks
-    let _ = spawner;
 
     let mut adc1_config: AdcConfig<ADC1> = AdcConfig::new();
     let mut pin =
         adc1_config.enable_pin_with_cal::<_, AdcCalBasic<_>>(peripherals.GPIO2, Attenuation::_11dB);
     let mut adc1 = Adc::new(peripherals.ADC1, adc1_config).into_async();
 
+    let mut ledc = Ledc::new(peripherals.LEDC);
+    ledc.set_global_slow_clock(esp_hal::ledc::LSGlobalClkSource::APBClk);
+
+    let mut lstimer0 = ledc.timer::<LowSpeed>(timer::Number::Timer2);
+    lstimer0
+        .configure(timer::config::Config {
+            duty: timer::config::Duty::Duty10Bit,
+            clock_source: timer::LSClockSource::APBClk,
+            frequency: Rate::from_khz(24),
+        })
+        .unwrap();
+    let mut channel0 = ledc.channel::<LowSpeed>(channel::Number::Channel0, peripherals.GPIO5);
+    channel0
+        .configure(channel::config::Config {
+            timer: &lstimer0,
+            duty_pct: 0,
+            drive_mode: esp_hal::gpio::DriveMode::PushPull,
+        })
+        .unwrap();
+    let mut channel1 = ledc.channel::<LowSpeed>(channel::Number::Channel2, peripherals.GPIO10);
+    channel1
+        .configure(channel::config::Config {
+            timer: &lstimer0,
+            duty_pct: 0,
+            drive_mode: esp_hal::gpio::DriveMode::PushPull,
+        })
+        .unwrap();
+
+    let internal_temp_sensor =
+        TemperatureSensor::new(peripherals.TSENS, tsens::Config::default()).unwrap();
+
     let i2c_hal = I2C::I2c::new(peripherals.I2C0, I2C::Config::default())
         .unwrap()
         .with_sda(peripherals.GPIO20)
-        .with_scl(peripherals.GPIO21);
-    let i2c_ref_cell = RefCell::new(i2c_hal);
-    let mut icp = Icp20100::new(
-        0x63,
-        i2c::RefCellDevice::new(&i2c_ref_cell),
-        embassy_time::Delay,
-    )
-    .await
-    .unwrap();
-    let mut stcc4 = Stcc4::new(
-        0x65,
-        i2c::RefCellDevice::new(&i2c_ref_cell),
-        embassy_time::Delay,
-    );
-    let mut sgp40 = Sgp40::new(
-        i2c::RefCellDevice::new(&i2c_ref_cell),
-        0x59,
-        embassy_time::Delay,
-    );
-    let mut aht20 = AHT20::new(
-        i2c::RefCellDevice::new(&i2c_ref_cell),
-        0x38,
-        embassy_time::Delay,
-    )
-    .await
-    .unwrap();
-
+        .with_scl(peripherals.GPIO21)
+        .into_async();
+    let i2c_bus = Mutex::new(i2c_hal);
+    let i2c_bus = I2C_BUS.init(i2c_bus);
+    let i2c_dev1 = I2cDevice::new(i2c_bus);
+    let icp = Icp20100::new(0x63, i2c_dev1, embassy_time::Delay)
+        .await
+        .unwrap();
+    let i2c_dev2 = I2cDevice::new(i2c_bus);
+    let stcc4 = Stcc4::new(0x65, i2c_dev2, embassy_time::Delay);
+    let i2c_dev3 = I2cDevice::new(i2c_bus);
+    let sgp40 = Sgp40::new(i2c_dev3, 0x59, embassy_time::Delay);
+    let i2c_dev4 = I2cDevice::new(i2c_bus);
+    let aht20 = AHT20::new(i2c_dev4, 0x38, embassy_time::Delay)
+        .await
+        .unwrap();
+    let devices = Devices {
+        icp,
+        stcc4,
+        sgp40,
+        aht20,
+        adc: adc1,
+    };
+    let state: &'static State = STATE.init(State::default());
+    spawner.spawn(measure(state, devices)).unwrap();
+    let radio = esp_radio::init().unwrap();
+    let bluetooth = peripherals.BT;
+    let connector = BleConnector::new(&radio, bluetooth, Default::default()).unwrap();
+    let controller: ExternalController<_, 20> = ExternalController::new(connector);
+    run(controller, state).await;
     loop {
         // let raw_data: u16 = adc1.read_oneshot(&mut pin).await;
         // let raw_voltage = raw_data as u32 * 2500 / 4095;
         // let bat_voltage: f32 = raw_voltage as f32 * 2.2 / 1000.0; // voltage in volts
-        let data = icp.read_pressure_and_temperature().unwrap();
-        info!("ICP: data: {:?}", data);
-        stcc4.single_shot().await.unwrap();
-        let (co2, t, rh) = stcc4.read_measurement().await.unwrap();
-        info!("STCC4: CO2: {}, t: {}, rh: {}", co2, t, rh);
-        let d = sgp40
-            .measure_voc_index_with_rht((rh * 1000.0) as u16, (t * 1000.0) as i16)
-            .unwrap();
-        info!("SGP40: {}", d);
-        let aht20_data = aht20.measure().await.unwrap();
-        info!(
-            "AHT20 data: Temp: {:?}, humidity: {}",
-            aht20_data.temperature, aht20_data.humidity
-        );
+        {
+            let data = state.pressure.lock().await;
+            info!(
+                "ICP: Pressure: {:?}, Temperature: {:?}",
+                data.pressure, data.temperature
+            );
+        }
+        {
+            let data = state.co2.lock().await;
+            info!("STCC4: CO2: {:?}", data.co2);
+        }
+        {
+            let data = state.voc.lock().await;
+            info!(
+                "SGP40: VOC Index: {:?}, Readings until warm: {:?}",
+                data.value, data.readings_until_warmup_complete
+            );
+        }
+        {
+            let data = state.temperature.lock().await;
+            info!(
+                "AHT20: Temperature: {:?}, Humidity: {:?}",
+                data.temperature, data.humidity
+            );
+        }
+        {
+            let data = state.battery.lock().await;
+            info!(
+                "Battery: Voltage: {:?}, Percentage: {:?}, Charging: {:?}",
+                data.voltage, data.percentage, data.charging
+            );
+        }
+        let internal_temp = internal_temp_sensor.get_temperature().to_celsius();
+        info!("Internal temperature: {}°C", internal_temp);
         Timer::after(Duration::from_secs(1)).await;
     }
 

@@ -21,7 +21,7 @@ impl<E> From<E> for Error<E> {
     }
 }
 
-impl<I2C: embedded_hal::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
+impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
     pub fn new(addr: u8, i2c: I2C, delay: Delay) -> Self {
         Self {
             addr,
@@ -53,26 +53,26 @@ impl<I2C: embedded_hal::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
         }
     }
 
-    fn write_raw(&mut self, buf: &[u8]) -> Result<(), Error<I2C::Error>> {
-        self.i2c.write(self.addr, buf)?;
+    async fn write_raw(&mut self, buf: &[u8]) -> Result<(), Error<I2C::Error>> {
+        self.i2c.write(self.addr, buf).await?;
         Ok(())
     }
 
-    fn read_raw(&mut self, buf: &mut [u8]) -> Result<(), Error<I2C::Error>> {
-        self.i2c.read(self.addr, buf)?;
+    async fn read_raw(&mut self, buf: &mut [u8]) -> Result<(), Error<I2C::Error>> {
+        self.i2c.read(self.addr, buf).await?;
         Ok(())
     }
 
     /// Write command (16-bit)
-    pub fn write_command(&mut self, command: u16) -> Result<(), Error<I2C::Error>> {
+    pub async fn write_command(&mut self, command: u16) -> Result<(), Error<I2C::Error>> {
         self.buffer[0] = (command >> 8) as u8;
         self.buffer[1] = (command & 0xFF) as u8;
-        self.i2c.write(self.addr, &self.buffer[..2])?;
+        self.i2c.write(self.addr, &self.buffer[..2]).await?;
         Ok(())
     }
 
     /// Send a 16-bit command with a 16-bit argument
-    pub fn read_words(&mut self, _: u16, words: &mut [u16]) -> Result<(), Error<I2C::Error>> {
+    pub async fn read_words(&mut self, _: u16, words: &mut [u16]) -> Result<(), Error<I2C::Error>> {
         // self.write_command(command)?;
         let num_bytes = words.len() * 3; // 2 data bytes + 1 CRC each
 
@@ -80,7 +80,7 @@ impl<I2C: embedded_hal::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
         let buf = &mut tmp[..num_bytes];
 
         // safe: no borrow of `self`'s fields while calling read_raw
-        self.read_raw(buf)?;
+        self.read_raw(buf).await?;
 
         // copy into self.buffer if you still want to keep the data there
         self.buffer[..num_bytes].copy_from_slice(buf);
@@ -103,17 +103,17 @@ impl<I2C: embedded_hal::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
         delay_us: u32,
         words: &mut [u16],
     ) -> Result<(), Error<I2C::Error>> {
-        self.write_command(command)?;
+        self.write_command(command).await?;
         info!("Finished writing");
         if delay_us > 0 {
             self.delay.delay_us(delay_us).await;
         }
         info!("Now reading");
-        self.read_words(command, words)
+        self.read_words(command, words).await
     }
 
-    pub fn start_continuous(&mut self) -> Result<(), Error<I2C::Error>> {
-        self.write_command(constants::START_CONTINUOUS)
+    pub async fn start_continuous(&mut self) -> Result<(), Error<I2C::Error>> {
+        self.write_command(constants::START_CONTINUOUS).await
     }
 
     pub async fn read_measurement_raw(
@@ -131,12 +131,12 @@ impl<I2C: embedded_hal::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
         Ok((res.0, temperature_out, rh_out))
     }
 
-    pub fn stop_continuous(&mut self) -> Result<(), Error<I2C::Error>> {
-        self.write_command(constants::STOP_CONTINUOUS)
+    pub async fn stop_continuous(&mut self) -> Result<(), Error<I2C::Error>> {
+        self.write_command(constants::STOP_CONTINUOUS).await
     }
 
     pub async fn single_shot(&mut self) -> Result<(), Error<I2C::Error>> {
-        self.write_command(constants::SINGLE_SHOT)?;
+        self.write_command(constants::SINGLE_SHOT).await?;
         self.delay.delay_us(500_000).await;
         Ok(())
     }

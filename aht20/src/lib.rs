@@ -114,8 +114,8 @@
 //! ```
 
 use crc_any::CRCu8;
-use embedded_hal::i2c::I2c;
 use embedded_hal_async::delay::DelayNs;
+use embedded_hal_async::i2c::I2c;
 
 /// AHT20 sensor's I2C address.
 pub const SENSOR_ADDRESS: u8 = 0b0011_1000; // This is I2C address 0x38;
@@ -339,8 +339,8 @@ where
         };
         sensor.delay.delay_ms(40).await;
 
-        while !sensor.check_status()?.is_calibrated() {
-            sensor.send_initialize()?;
+        while !sensor.check_status().await?.is_calibrated() {
+            sensor.send_initialize().await?;
             sensor.delay.delay_ms(10).await;
         }
         Ok(sensor)
@@ -377,11 +377,12 @@ where
     ///       can create a hang writing that command, and that just reading a status byte works.
     ///
     /// This is used by both measure_once and init.
-    fn check_status(&mut self) -> Result<SensorStatus, Error<I::Error>> {
+    async fn check_status(&mut self) -> Result<SensorStatus, Error<I::Error>> {
         let mut read_buffer = [0u8; 1];
 
         self.i2c
             .read(self.address, &mut read_buffer)
+            .await
             .map_err(Error::I2c)?;
 
         let status_byte = read_buffer[0];
@@ -392,7 +393,7 @@ where
     ///
     /// After sending initialize, there is a required 40ms wait period and verification
     /// that the sensor reports itself calibrated. See the `init` method.
-    fn send_initialize(&mut self) -> Result<(), Error<I::Error>> {
+    async fn send_initialize(&mut self) -> Result<(), Error<I::Error>> {
         let command: [u8; 3] = [
             // Initialize = 0b1011_1110. Equivalent to 0xBE, Section 5.3, page 8, Table 9
             Command::Initialize as u8,
@@ -403,7 +404,10 @@ where
             0b0000_0000, // 0x00
         ];
 
-        self.i2c.write(self.address, &command).map_err(Error::I2c)?;
+        self.i2c
+            .write(self.address, &command)
+            .await
+            .map_err(Error::I2c)?;
 
         Ok(())
     }
@@ -458,11 +462,11 @@ where
     /// This takes at least 80ms to complete, and only returns 2x20 bits in 5 bytes.
     /// This data is interpreted by the `measure` function.
     async fn measure_once(&mut self) -> Result<[u8; 5], Error<I::Error>> {
-        self.send_trigger_measurement()?;
+        self.send_trigger_measurement().await?;
         self.delay.delay_ms(80).await;
 
         // Wait for measurement to be ready
-        while !self.check_status()?.is_ready() {
+        while !self.check_status().await?.is_ready() {
             self.delay.delay_ms(1).await;
         }
 
@@ -470,6 +474,7 @@ where
         let mut read_buffer = [0u8; 7];
         self.i2c
             .read(self.address, &mut read_buffer)
+            .await
             .map_err(Error::I2c)?;
 
         let data: &[u8] = &read_buffer[..6];
@@ -499,7 +504,7 @@ where
     /// This does not return anything, it only instructs the sensor to get the data ready. After
     /// sending this command, you need to wait 80ms before attempting to read data back. See the
     /// `measure_once` function and the flowchart at the top of this file.
-    fn send_trigger_measurement(&mut self) -> Result<(), Error<I::Error>> {
+    async fn send_trigger_measurement(&mut self) -> Result<(), Error<I::Error>> {
         // TriggerMeasurement is 0b1010_1100. Equivalent to 0xAC: Section 5.3, page 8, Table 9
         // This command takes two bytes of parameter:  0b00110011 (0x33), then 0b0000_0000 (0x00).
         let command: [u8; 3] = [
@@ -511,7 +516,10 @@ where
             0b0000_0000, // 0x00
         ];
 
-        self.i2c.write(self.address, &command).map_err(Error::I2c)?;
+        self.i2c
+            .write(self.address, &command)
+            .await
+            .map_err(Error::I2c)?;
 
         Ok(())
     }
@@ -524,7 +532,10 @@ where
         // SoftReset is 0b1011_1010. Equivalent to 0xBA, Section 5.3, page 8, Table 9.
         let command: [u8; 1] = [Command::SoftReset as u8];
 
-        self.i2c.write(self.address, &command).map_err(Error::I2c)?;
+        self.i2c
+            .write(self.address, &command)
+            .await
+            .map_err(Error::I2c)?;
         // The datasheet in section 5.5 says there is a guarantee that the reset time does
         // not exceed 20ms. We wait the full 20ms to ensure you can trigger a measurement
         // immediately after this function.
