@@ -2,6 +2,7 @@ pub mod services;
 
 use defmt::{info, warn};
 use embassy_time::Timer;
+use esp_radio::ble::controller::BleConnector;
 use trouble_host::prelude::*;
 
 use crate::bluetooth::services::Server;
@@ -13,10 +14,8 @@ const CONNECTIONS_MAX: usize = 1;
 
 /// Max number of L2CAP channels.
 const L2CAP_CHANNELS_MAX: usize = 2; // Signal + att
-pub async fn run<C>(controller: C, state: &'static State)
-where
-    C: Controller,
-{
+#[embassy_executor::task]
+pub async fn run(controller: ExternalController<BleConnector<'static>, 20>, state: &'static State) {
     // Using a fixed "random" address can be useful for testing. In real scenarios, one would
     // use e.g. the MAC 6 byte array as the address (how to get that varies by the platform).
     let address: Address = Address::random([0xff, 0x8f, 0x1a, 0x05, 0xe4, 0xff]);
@@ -33,14 +32,14 @@ where
 
     info!("Starting advertising and GATT service");
     let server = Server::new_with_config(GapConfig::Peripheral(PeripheralConfig {
-        name: "TrouBLE",
+        name: "AmbientAir",
         appearance: &appearance::power_device::GENERIC_POWER_DEVICE,
     }))
     .unwrap();
 
     let _ = join(ble_task(runner), async {
         loop {
-            match advertise("Trouble Example", &mut peripheral, &server).await {
+            match advertise("AmbientAir", &mut peripheral, &server).await {
                 Ok(conn) => {
                     // set up tasks when the connection is established to a central, so they don't run when no one is connected.
                     let a = gatt_events_task(&server, &conn, state);

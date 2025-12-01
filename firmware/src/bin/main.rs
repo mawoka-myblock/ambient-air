@@ -17,18 +17,22 @@ use embassy_sync::mutex::Mutex;
 use embassy_time::{Duration, Timer};
 use esp_hal::Async;
 use esp_hal::analog::adc::{Adc, AdcCalBasic, AdcConfig};
+use esp_hal::gpio::{Input, InputConfig};
 use esp_hal::i2c::master::{self as I2C, I2c};
 use esp_hal::ledc::channel::ChannelIFace;
 use esp_hal::ledc::timer::TimerIFace;
 use esp_hal::ledc::{Ledc, LowSpeed, channel, timer};
 use esp_hal::peripherals::ADC1;
+use esp_hal::rtc_cntl::Rtc;
 use esp_hal::time::Rate;
 use esp_hal::timer::systimer::SystemTimer;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::tsens::{self, TemperatureSensor};
 use esp_hal::{analog::adc::Attenuation, clock::CpuClock};
+use esp_radio::Controller;
 use esp_radio::ble::controller::BleConnector;
 use firmware::bluetooth::run;
+use firmware::button::{ButtonDevices, button_task};
 use firmware::data::{Devices, State};
 use firmware::measurements::measure;
 use sgp40::Sgp40;
@@ -43,6 +47,11 @@ esp_bootloader_esp_idf::esp_app_desc!();
 
 static I2C_BUS: StaticCell<Mutex<NoopRawMutex, I2c<'static, Async>>> = StaticCell::new();
 static STATE: StaticCell<State> = StaticCell::new();
+static RADIO: StaticCell<Controller> = StaticCell::new();
+static BUTTON_DEVICES: StaticCell<ButtonDevices> = StaticCell::new();
+static INPUT_BUTTON: StaticCell<Input> = StaticCell::new();
+static RTC_CLOCK: StaticCell<Rtc> = StaticCell::new();
+
 #[esp_rtos::main]
 async fn main(spawner: Spawner) {
     // generator version: 0.5.0
@@ -97,6 +106,15 @@ async fn main(spawner: Spawner) {
     let internal_temp_sensor =
         TemperatureSensor::new(peripherals.TSENS, tsens::Config::default()).unwrap();
 
+    let input_btn: &'static mut Input = INPUT_BUTTON.init(Input::new(
+        peripherals.GPIO3,
+        InputConfig::default().with_pull(esp_hal::gpio::Pull::Up),
+    ));
+    input_btn
+        .wakeup_enable(true, esp_hal::gpio::WakeEvent::LowLevel)
+        .unwrap();
+    let rtc: &'static mut Rtc = RTC_CLOCK.init(Rtc::new(peripherals.LPWR));
+
     let i2c_hal = I2C::I2c::new(peripherals.I2C0, I2C::Config::default())
         .unwrap()
         .with_sda(peripherals.GPIO20)
@@ -125,50 +143,25 @@ async fn main(spawner: Spawner) {
     };
     let state: &'static State = STATE.init(State::default());
     spawner.spawn(measure(state, devices)).unwrap();
-    let radio = esp_radio::init().unwrap();
+    let radio: &'static Controller<'_> = RADIO.init(esp_radio::init().unwrap());
     let bluetooth = peripherals.BT;
     let connector = BleConnector::new(&radio, bluetooth, Default::default()).unwrap();
     let controller: ExternalController<_, 20> = ExternalController::new(connector);
-    run(controller, state).await;
+    info!("Init'ing button task");
+    spawner.spawn(button_task(input_btn, rtc, state)).unwrap();
+    info!("Init'ing bluetooth task");
+    spawner.spawn(run(controller, state)).unwrap();
+
     loop {
         // let raw_data: u16 = adc1.read_oneshot(&mut pin).await;
         // let raw_voltage = raw_data as u32 * 2500 / 4095;
         // let bat_voltage: f32 = raw_voltage as f32 * 2.2 / 1000.0; // voltage in volts
-        {
-            let data = state.pressure.lock().await;
-            info!(
-                "ICP: Pressure: {:?}, Temperature: {:?}",
-                data.pressure, data.temperature
-            );
-        }
-        {
-            let data = state.co2.lock().await;
-            info!("STCC4: CO2: {:?}", data.co2);
-        }
-        {
-            let data = state.voc.lock().await;
-            info!(
-                "SGP40: VOC Index: {:?}, Readings until warm: {:?}",
-                data.value, data.readings_until_warmup_complete
-            );
-        }
-        {
-            let data = state.temperature.lock().await;
-            info!(
-                "AHT20: Temperature: {:?}, Humidity: {:?}",
-                data.temperature, data.humidity
-            );
-        }
-        {
-            let data = state.battery.lock().await;
-            info!(
-                "Battery: Voltage: {:?}, Percentage: {:?}, Charging: {:?}",
-                data.voltage, data.percentage, data.charging
-            );
-        }
-        let internal_temp = internal_temp_sensor.get_temperature().to_celsius();
-        info!("Internal temperature: {}°C", internal_temp);
-        Timer::after(Duration::from_secs(1)).await;
+        channel1.start_duty_fade(0, 15, 2000).unwrap();
+        Timer::after_millis(2000).await;
+        channel1.start_duty_fade(15, 0, 2000).unwrap();
+        Timer::after_millis(2000).await;
+        // info!("Is button pressed: {}", input_btn.is_high());
+        // Timer::after_millis(500).await;
     }
 
     // for inspiration have a look at the examples at https://github.com/esp-rs/esp-hal/tree/esp-hal-v1.0.0-rc.0/examples/src/bin

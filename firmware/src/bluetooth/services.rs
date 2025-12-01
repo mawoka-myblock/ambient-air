@@ -40,7 +40,11 @@ pub struct Server {
     pub temperature: TemperatureService,
     pub pressure: PressureService,
     pub co2: Co2Service,
+    pub base: BaseData,
 }
+
+#[gatt_service(uuid = "1aba5096-5be2-4768-aef0-51c8667e1aa8")]
+pub struct BaseData {}
 
 #[gatt_service(uuid = service::BATTERY)]
 pub struct BatteryService {

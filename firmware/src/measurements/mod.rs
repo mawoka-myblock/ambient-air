@@ -1,4 +1,3 @@
-use defmt::info;
 use embassy_time::{Duration, Instant, Timer};
 
 use crate::data::{Devices, State};
