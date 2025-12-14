@@ -337,7 +337,6 @@ where
             address,
             delay,
         };
-        sensor.delay.delay_ms(40).await;
 
         while !sensor.check_status().await?.is_calibrated() {
             sensor.send_initialize().await?;

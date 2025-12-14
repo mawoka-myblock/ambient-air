@@ -5,10 +5,8 @@ use defmt::Format;
 use embassy_embedded_hal::shared_bus::asynch::i2c::I2cDevice;
 use embassy_sync::blocking_mutex::raw::NoopRawMutex;
 use embassy_sync::mutex::Mutex;
-use esp_hal::analog::adc::{Adc, AdcCalBasic, AdcPin};
-use esp_hal::i2c::master::I2c;
-use esp_hal::peripherals::{ADC1, GPIO2};
 use esp_hal::Async;
+use esp_hal::i2c::master::I2c;
 use sgp40::Sgp40;
 
 #[derive(Debug, Format)]
@@ -74,6 +72,4 @@ pub struct Devices<'a> {
     pub stcc4: Stcc4<ShortI2cDevice<'a>, embassy_time::Delay>,
     pub sgp40: Sgp40<ShortI2cDevice<'a>, embassy_time::Delay>,
     pub aht20: AHT20<ShortI2cDevice<'a>, embassy_time::Delay>,
-    pub adc: Adc<'a, ADC1<'a>, Async>,
-    // pub adc_pin: &'a mut AdcPin<GPIO2<'a>, AdcCalBasic<ADC1<'a>>>,
 }

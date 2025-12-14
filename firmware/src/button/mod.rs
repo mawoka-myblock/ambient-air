@@ -1,39 +1,52 @@
+use core::time::Duration;
+
+use async_button::{Button, ButtonConfig, ButtonEvent};
 use defmt::info;
 use embassy_time::Timer;
 use esp_hal::{
-    gpio::Input,
-    rtc_cntl::{Rtc, sleep::GpioWakeupSource},
+    gpio::{self, Input, InputConfig},
+    peripherals,
+    rtc_cntl::{
+        Rtc,
+        sleep::{RtcioWakeupSource, TimerWakeupSource, WakeupLevel},
+    },
 };
 
-use crate::data::State;
-
-pub struct ButtonDevices<'a> {
-    pub button: &'a mut Input<'a>,
-    pub rtc: &'a mut Rtc<'a>,
-}
+use crate::{POWER_STATE, PowerState, data::State};
 
 #[embassy_executor::task]
-pub async fn button_task(
-    button: &'static mut Input<'static>,
-    rtc: &'static mut Rtc<'static>,
-    _state: &'static State,
-) {
+pub async fn button_task(_state: &'static State) {
+    let input_btn = Input::new(
+        unsafe { peripherals::GPIO3::steal() },
+        InputConfig::default().with_pull(esp_hal::gpio::Pull::Up),
+    );
+
+    let mut btn = Button::new(input_btn, ButtonConfig::default());
     loop {
-        info!("Waiting now");
-        button.wait_for_falling_edge().await; // button pressed
-        info!("Button pressed");
-
-        // Short press: stop BLE
-
-        // Long press (e.g., 3 sec)
-        let mut held = true;
-        Timer::after_secs(3).await;
-        if button.is_high() {
-            held = false; // released before long press
-        }
-        if held {
-            info!("Long press detected: deep sleep!");
-            rtc.sleep_deep(&[&GpioWakeupSource::new()]); // sleep for 1 hour
+        match btn.update().await {
+            ButtonEvent::LongPress => {
+                info!("Long press detected: deep sleep!");
+                break;
+            }
+            ButtonEvent::ShortPress { count } => match count {
+                2 => {
+                    unsafe {
+                        POWER_STATE = PowerState::SensorActiveSleep as i8;
+                    }
+                    let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
+                    rtc.sleep_deep(&[&TimerWakeupSource::new(Duration::from_millis(20))]);
+                }
+                _ => (),
+            },
         }
     }
+    Timer::after_millis(1000).await;
+    core::mem::drop(btn);
+    let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
+    let mut pin = unsafe { peripherals::GPIO3::steal() };
+    let wakeup_pins: &mut [(&mut dyn gpio::RtcPinWithResistors, WakeupLevel)] =
+        &mut [(&mut pin, WakeupLevel::Low)];
+    let wakeup_gpio = RtcioWakeupSource::new(wakeup_pins);
+    Timer::after_millis(100).await;
+    rtc.sleep_deep(&[&wakeup_gpio]);
 }

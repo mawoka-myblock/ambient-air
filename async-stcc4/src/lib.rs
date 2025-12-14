@@ -104,11 +104,9 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
         words: &mut [u16],
     ) -> Result<(), Error<I2C::Error>> {
         self.write_command(command).await?;
-        info!("Finished writing");
         if delay_us > 0 {
             self.delay.delay_us(delay_us).await;
         }
-        info!("Now reading");
         self.read_words(command, words).await
     }
 

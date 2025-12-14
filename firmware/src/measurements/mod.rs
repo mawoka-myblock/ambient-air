@@ -1,6 +1,8 @@
+pub mod lp;
+pub mod sampling;
 use embassy_time::{Duration, Instant, Timer};
 
-use crate::data::{Devices, State};
+use crate::data::{Co2Data, Devices, PressureData, State, TemperatureData, VocData};
 
 #[embassy_executor::task]
 pub async fn measure(state: &'static State, mut devices: Devices<'static>) {
@@ -10,49 +12,29 @@ pub async fn measure(state: &'static State, mut devices: Devices<'static>) {
             s.update_interval
         };
         let beginning = Instant::now();
+        let d = measure_once(&mut devices).await;
         {
-            let reading = devices.icp.read_pressure_and_temperature().await.unwrap();
-            let mut s = state.pressure.lock().await;
-            s.pressure = reading.0;
-            s.temperature = reading.1;
-        }
-        let (humidity, temp) = {
-            let reading = devices.aht20.measure().await.unwrap();
             let mut s = state.temperature.lock().await;
-            s.humidity = reading.humidity;
-            s.temperature = reading.temperature;
-            (
-                (reading.humidity * 1000.0) as u16,
-                (reading.temperature * 1000.0) as i16,
-            )
-        };
+            s.humidity = d.temperature.humidity;
+            s.temperature = d.temperature.temperature;
+        }
         {
-            let reading = devices
-                .sgp40
-                .measure_voc_index_with_rht(humidity, temp)
-                .await
-                .unwrap() as i32;
+            let mut s = state.pressure.lock().await;
+            s.pressure = d.pressure.pressure;
+            s.temperature = d.pressure.temperature;
+        }
+        {
+            let mut s = state.co2.lock().await;
+            s.co2 = d.co2.co2;
+        }
+        {
             let mut s = state.voc.lock().await;
+            s.value = d.voc.value;
             if s.readings_until_warmup_complete > 0 {
                 s.readings_until_warmup_complete -= 1
             }
-            s.value = reading
-        };
-        {
-            devices.stcc4.single_shot().await.unwrap();
-            let (co2, _, _) = devices.stcc4.read_measurement().await.unwrap();
-            let mut s = state.co2.lock().await;
-            s.co2 = co2;
         }
-        // {
-        //     let raw_data = devices.adc.read_oneshot(devices.adc_pin).await;
-        //     let raw_voltage = raw_data as u32 * 2500 / 4095;
-        //     let bat_voltage: f32 = raw_voltage as f32 * 2.2 / 1000.0;
-        //     let mut s = state.battery.lock().await;
-        //     s.charging = false;
-        //     s.percentage = 50.0;
-        //     s.voltage = bat_voltage;
-        // }
+
         let time_passed = Instant::now() - beginning;
         let refresh_frequency_wanted = Duration::from_millis((refresh_secs * 1000) as u64);
         let sleep_time = if refresh_frequency_wanted > time_passed {
@@ -67,6 +49,54 @@ pub async fn measure(state: &'static State, mut devices: Devices<'static>) {
         //     time_passed.as_millis(),
         //     sleep_time.as_millis()
         // );
-        Timer::after(sleep_time).await;
+    }
+}
+
+pub struct MeasurementResult {
+    pub pressure: PressureData,
+    pub temperature: TemperatureData,
+    pub voc: VocData,
+    pub co2: Co2Data,
+}
+
+pub async fn measure_once(devices: &mut Devices<'static>) -> MeasurementResult {
+    let pressure = {
+        let reading = devices.icp.read_pressure_and_temperature().await.unwrap();
+        PressureData {
+            pressure: reading.0,
+            temperature: reading.1,
+        }
+    };
+    let temperature = {
+        let reading = devices.aht20.measure().await.unwrap();
+        TemperatureData {
+            humidity: reading.humidity,
+            temperature: reading.temperature,
+        }
+    };
+    let voc = {
+        let reading = devices
+            .sgp40
+            .measure_voc_index_with_rht(
+                (temperature.humidity * 1000.0) as u16,
+                (temperature.temperature * 1000.0) as i16,
+            )
+            .await
+            .unwrap() as i32;
+        VocData {
+            readings_until_warmup_complete: 0,
+            value: reading,
+        }
+    };
+    let co2 = {
+        devices.stcc4.single_shot().await.unwrap();
+        let (co2, _, _) = devices.stcc4.read_measurement().await.unwrap();
+        Co2Data { co2: co2 }
+    };
+    MeasurementResult {
+        co2,
+        pressure,
+        temperature,
+        voc,
     }
 }

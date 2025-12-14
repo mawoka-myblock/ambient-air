@@ -1,14 +1,14 @@
+pub mod long_write;
 pub mod services;
 
 use defmt::{info, warn};
-use embassy_time::Timer;
 use esp_radio::ble::controller::BleConnector;
 use trouble_host::prelude::*;
 
+use crate::bluetooth::long_write::{ConnectionContext, LongWriteAccumulator};
 use crate::bluetooth::services::Server;
 use crate::data::State;
 use embassy_futures::join::join;
-use embassy_futures::select::select;
 /// Max number of connections
 const CONNECTIONS_MAX: usize = 1;
 
@@ -43,10 +43,9 @@ pub async fn run(controller: ExternalController<BleConnector<'static>, 20>, stat
                 Ok(conn) => {
                     // set up tasks when the connection is established to a central, so they don't run when no one is connected.
                     let a = gatt_events_task(&server, &conn, state);
-                    let b = custom_task(&server, &conn, &stack);
                     // run until any task ends (usually because the connection has been closed),
                     // then return to advertising state.
-                    select(a, b).await;
+                    a.await.unwrap();
                 }
                 Err(e) => {
                     let e = defmt::Debug2Format(&e);
@@ -72,15 +71,50 @@ async fn gatt_events_task<P: PacketPool>(
     conn: &GattConnection<'_, '_, P>,
     state: &'static State,
 ) -> Result<(), Error> {
+    let mut ctx = ConnectionContext {
+        long_write: LongWriteAccumulator::new(),
+    };
     let reason = loop {
         match conn.next().await {
             GattConnectionEvent::Disconnected { reason } => break reason,
             GattConnectionEvent::Gatt { event } => {
+                let long_write = match &event {
+                    GattEvent::Other(e) => {
+                        let acc = e.payload();
+                        let inc = acc.incoming();
+                        match inc {
+                            trouble_host::att::AttClient::Request(req) => match req {
+                                trouble_host::att::AttReq::PrepareWrite {
+                                    handle,
+                                    offset,
+                                    value,
+                                } => {
+                                    let _ = ctx.long_write.prepare(handle, offset as usize, value);
+                                    None
+                                }
+                                trouble_host::att::AttReq::ExecuteWrite { .. } => {
+                                    Some(ctx.long_write.execute())
+                                }
+                                _ => None,
+                            },
+                            _ => None,
+                        }
+                    }
+                    _ => None,
+                };
                 server.temperature.handle(&event, server, state).await;
                 server.pressure.handle(&event, server, state).await;
                 server.co2.handle(&event, server, state).await;
+                server.voc.handle(&event, server, state).await;
+                server
+                    .measurement
+                    .handle(&event, server, state, long_write)
+                    .await;
                 // This step is also performed at drop(), but writing it explicitly is necessary
                 // in order to ensure reply is sent.
+                if long_write.is_some() {
+                    ctx.long_write.reset()
+                }
                 match event.accept() {
                     Ok(reply) => reply.send().await,
                     Err(e) => warn!("[gatt] error sending response: {:?}", e),
@@ -123,10 +157,7 @@ async fn advertise<'values, 'server, C: Controller>(
     Ok(conn)
 }
 
-/// Example task to use the BLE notifier interface.
-/// This task will notify the connected central of a counter value every 2 seconds.
-/// It will also read the RSSI value every 2 seconds.
-/// and will stop when the connection is closed by the central or an error occurs.
+/*
 async fn custom_task<C: Controller, P: PacketPool>(
     server: &Server<'_>,
     conn: &GattConnection<'_, '_, P>,
@@ -151,3 +182,4 @@ async fn custom_task<C: Controller, P: PacketPool>(
         Timer::after_secs(2).await;
     }
 }
+ */

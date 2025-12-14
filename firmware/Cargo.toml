@@ -55,9 +55,16 @@ esp-radio = { version = "0.17", features = [
   "esp32c3",
   "unstable"
 ]  }
-
+portable-atomic = { version = "1.11.1", default-features = false }
 tickv = { version = "2" }
-
+esp-storage = {version  = "*", features = ["esp32c3"]}
+anyhow = {version = "*", default-features = false}
+embedded-storage = {version = "*"}
+bytemuck = {version = "*", features = ["derive"]}
+async-button = {version = "0.2"}
+serde = {version = "1", default-features = false, features = ["derive"]}
+serde-json-core = {version = "0.6"}
+heapless = { version = "0.9", features = ["serde"] }
 
 [profile.dev]
 # Rust debug is too slow.
@@ -72,3 +79,6 @@ incremental      = false
 lto              = 'fat'
 opt-level        = 's'
 overflow-checks  = false
+
+# [package.metadata.espflash.idf]
+# partition_table = "./partition-table.bin"
