@@ -238,8 +238,7 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Icp20100<I2C, Delay> {
         // bits 1:0 = FIFO_READOUT_MODE (00: pressure first)
         let mode_select = (0b000 << 5) | // MODE0 (works)
             (1 << 3)     | // MEAS_MODE = continuous
-            (1 << 2)     | // POWER_MODE = active
-            0b00; // pressure-first FIFO
+            (1 << 2); // POWER_MODE = active
 
         self.write_register(0xC0, mode_select).await?;
         Ok(())
@@ -250,6 +249,17 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Icp20100<I2C, Delay> {
         let pressure = self.convert_pressure(p_raw);
         let temperature = self.convert_temperature(t_raw);
         Ok((pressure, temperature))
+    }
+
+    pub async fn read_pressure(&mut self) -> Result<f32, Error<I2C::Error>> {
+        let (p_raw, _) = self.read_fifo_sample().await?;
+        let pressure = self.convert_pressure(p_raw);
+        Ok(pressure)
+    }
+    pub async fn read_temperature(&mut self) -> Result<f32, Error<I2C::Error>> {
+        let (_, t_raw) = self.read_fifo_sample().await?;
+        let temperature = self.convert_temperature(t_raw);
+        Ok(temperature)
     }
 
     /// Converts raw pressure value to kPa.

@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 pub const START_CONTINUOUS: u16 = 0x218B;
 pub const READ_MEAS_RAW: u16 = 0xEC05;
 pub const STOP_CONTINUOUS: u16 = 0x3F86;
@@ -12,7 +13,7 @@ pub const SELF_TEST: u16 = 0x278C;
 pub const CONDITIONING: u16 = 0x29BC;
 
 pub const ENTER_SLEEP: u16 = 0x3650;
-pub const EXIT_SLEEP: u8 = 0x00;
+pub const EXIT_SLEEP: u16 = 0x00;
 
 pub const ENABLE_TESTING: u16 = 0x3FBC;
 pub const DISABLE_TESTING: u16 = 0x3F3D;

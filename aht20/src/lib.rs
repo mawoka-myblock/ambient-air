@@ -364,7 +364,7 @@ where
     ///                 │
     ///                 ▼
     ///                Yes
-
+    ///
     /// check_Status reads a status byte from the AHT20 sensor to check its status.
     ///
     /// The sensor can be calibrated or not, also busy generating a sensor measurement or ready.
