@@ -9,6 +9,7 @@
 use aht20::AHT20;
 use async_icp20100::Icp20100;
 use async_stcc4::Stcc4;
+use bq27441::Bq27441;
 use embassy_embedded_hal::shared_bus::asynch::i2c::I2cDevice;
 use embassy_executor::Spawner;
 use embassy_sync::blocking_mutex::raw::NoopRawMutex;
@@ -30,6 +31,7 @@ use esp_radio::ble::controller::BleConnector;
 use firmware::bluetooth::run;
 use firmware::button::button_task;
 use firmware::data::{Devices, State};
+use firmware::energy::set_sgp40;
 use firmware::measurements::lp::lp_measurement;
 use firmware::measurements::measure;
 use firmware::measurements::sampling::record_sample;
@@ -40,14 +42,10 @@ use trouble_host::prelude::ExternalController;
 use {esp_backtrace as _, esp_println as _};
 
 extern crate alloc;
-// This creates a default app-descriptor required by the esp-idf bootloader.
-// For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
 esp_bootloader_esp_idf::esp_app_desc!();
 
 #[esp_rtos::main]
 async fn main(spawner: Spawner) {
-    // generator version: 0.5.0
-
     let beginning = embassy_time::Instant::now();
 
     let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
@@ -61,7 +59,7 @@ async fn main(spawner: Spawner) {
     esp_rtos::start(timg0.timer0, sw_interrupt.software_interrupt0);
     let wakeup_cause_var = wakeup_cause();
     if wakeup_cause_var as i8 != SleepSource::Timer as i8 {
-        // Just checking for Ext0 or Ext1 doesn't work, nee do figure out which event is the gpio button, but cheking for not timer works fine
+        // Just checking for Ext0 or Ext1 doesn't work, need to figure out which event is the gpio button, but cheking for not timer works fine
         unsafe { firmware::POWER_STATE = PowerState::BluetoothMode as i8 }
     }
 
@@ -71,54 +69,69 @@ async fn main(spawner: Spawner) {
             peripherals.GPIO20,
             peripherals.GPIO21,
             peripherals.LPWR,
-            beginning,
         )
         .await;
         unreachable!()
     }
 
     // I2C Block
-    let i2c_hal = I2C::I2c::new(peripherals.I2C0, I2C::Config::default())
-        .unwrap()
-        .with_sda(peripherals.GPIO20)
-        .with_scl(peripherals.GPIO21)
-        .into_async();
+    let i2c_hal = I2C::I2c::new(
+        peripherals.I2C0,
+        I2C::Config::default().with_frequency(Rate::from_khz(100)),
+    )
+    .unwrap()
+    .with_sda(peripherals.GPIO20)
+    .with_scl(peripherals.GPIO21)
+    .into_async();
+
     let i2c_bus =
         &*firmware::mk_static!(Mutex<NoopRawMutex, I2c<'static, Async>>, Mutex::new(i2c_hal));
-    let i2c_dev1 = I2cDevice::new(i2c_bus);
-    let icp = Icp20100::new(0x63, i2c_dev1, embassy_time::Delay)
-        .await
-        .unwrap();
+
     let i2c_dev2 = I2cDevice::new(i2c_bus);
-    let stcc4 = Stcc4::new(0x65, i2c_dev2, embassy_time::Delay);
-    let i2c_dev3 = I2cDevice::new(i2c_bus);
-    let sgp40 = Sgp40::new(i2c_dev3, 0x59, embassy_time::Delay);
+    let stcc4 = Mutex::new(Stcc4::new(0x65, i2c_dev2, embassy_time::Delay));
+
     let i2c_dev4 = I2cDevice::new(i2c_bus);
-    let aht20 = AHT20::new(i2c_dev4, 0x38, embassy_time::Delay)
-        .await
-        .unwrap();
-    let devices = Devices {
-        icp,
-        stcc4,
-        sgp40,
-        aht20,
-    };
+    let aht20 = Mutex::new(
+        AHT20::new(i2c_dev4, 0x38, embassy_time::Delay)
+            .await
+            .unwrap(),
+    );
+
+    let i2c_dev1 = I2cDevice::new(i2c_bus);
+    let icp = Mutex::new(
+        Icp20100::new(0x63, i2c_dev1, embassy_time::Delay)
+            .await
+            .unwrap(),
+    );
+
+    let i2c_dev3 = I2cDevice::new(i2c_bus);
+    let sgp40 = Mutex::new(Sgp40::new(i2c_dev3, 0x59, embassy_time::Delay));
+
+    let i2c_dev5 = I2cDevice::new(i2c_bus);
+    let bq27441 = Mutex::new(Bq27441::new(i2c_dev5, 0x55).await.unwrap());
+
+    let nvs =
+        Mutex::new(Nvs::new(firmware::NVS_OFFSET, firmware::NVS_SIZE, peripherals.FLASH).unwrap());
+
+    let devices: &'static Devices = firmware::mk_static!(
+        Devices,
+        Devices {
+            icp,
+            stcc4,
+            sgp40,
+            aht20,
+            bq27441,
+            nvs
+        }
+    );
 
     // END I2C Blocks
 
     if unsafe { firmware::POWER_STATE == PowerState::SampleMode as i8 } {
-        // unsafe {
-        //     firmware::MEASUREMENT_SAMPLES_TAKEN = 0;
-        //     firmware::MEASUREMENT_SAMPLES_REQUESTED = 1;
-        //     firmware::SAMPLE_EVERY_SECONDS = 2;
-        //     firmware::POWER_STATE = PowerState::SampleMode as i8;
-        // }
-        let mut nvs =
-            Nvs::new(firmware::NVS_OFFSET, firmware::NVS_SIZE, peripherals.FLASH).unwrap();
-        // nvs.append_key(b"test", b"buf").await.unwrap();
-        record_sample(devices, beginning, &mut nvs).await;
+        record_sample(devices, beginning, &mut *devices.nvs.lock().await).await;
         unreachable!();
     }
+    set_sgp40(devices).await;
 
     // LEDC Block
     let mut ledc = Ledc::new(peripherals.LEDC);
@@ -167,24 +180,15 @@ async fn main(spawner: Spawner) {
     let radio: &'static Controller<'_> =
         &*firmware::mk_static!(Controller, esp_radio::init().unwrap());
     let bluetooth = peripherals.BT;
-    let connector = BleConnector::new(&radio, bluetooth, Default::default()).unwrap();
+    let connector = BleConnector::new(radio, bluetooth, Default::default()).unwrap();
     let controller: ExternalController<_, 20> = ExternalController::new(connector);
     // END Bluetooth Block
 
-    spawner.spawn(run(controller, state)).unwrap();
-    // info!("Test key: {}", str::from_utf8(&test_key).unwrap());
-
+    spawner.spawn(run(controller, state, devices)).unwrap();
     loop {
-        // let raw_data: u16 = adc1.read_oneshot(&mut pin).await;
-        // let raw_voltage = raw_data as u32 * 2500 / 4095;
-        // let bat_voltage: f32 = raw_voltage as f32 * 2.2 / 1000.0; // voltage in volts
         channel1.start_duty_fade(0, 15, 2000).unwrap();
         Timer::after_millis(2000).await;
         channel1.start_duty_fade(15, 0, 2000).unwrap();
         Timer::after_millis(2000).await;
-        // info!("Is button pressed: {}", input_btn.is_high());
-        // Timer::after_millis(500).await;
     }
-
-    // for inspiration have a look at the examples at https://github.com/esp-rs/esp-hal/tree/esp-hal-v1.0.0-rc.0/examples/src/bin
 }

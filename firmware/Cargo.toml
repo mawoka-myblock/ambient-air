@@ -1,8 +1,7 @@
-cargo-features = ["edition2024"]
 [package]
 edition      = "2024"
 name         = "firmware"
-rust-version = "1.86"
+rust-version = "1.87"
 version      = "0.1.0"
 
 [[bin]]
@@ -14,6 +13,7 @@ async-icp20100 = {path= "../async-icp20100"}
 async-stcc4 = {path= "../async-stcc4"}
 sgp40 = {path = "../sgp40"}
 aht20 = {path="../aht20"}
+bq27441 = { path = "../bq27441" }
 
 embedded-hal-bus = {version = "*", features = ["async", "defmt-03"]}
 

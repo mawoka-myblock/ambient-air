@@ -28,20 +28,18 @@ pub async fn button_task(_state: &'static State) {
                 info!("Long press detected: deep sleep!");
                 break;
             }
-            ButtonEvent::ShortPress { count } => match count {
-                2 => {
+            ButtonEvent::ShortPress { count } => {
+                if count == 2 {
                     unsafe {
                         POWER_STATE = PowerState::SensorActiveSleep as i8;
                     }
                     let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
                     rtc.sleep_deep(&[&TimerWakeupSource::new(Duration::from_millis(20))]);
                 }
-                _ => (),
-            },
+            }
         }
     }
     Timer::after_millis(1000).await;
-    core::mem::drop(btn);
     let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
     let mut pin = unsafe { peripherals::GPIO3::steal() };
     let wakeup_pins: &mut [(&mut dyn gpio::RtcPinWithResistors, WakeupLevel)] =

@@ -2,12 +2,15 @@ pub mod long_write;
 pub mod services;
 
 use defmt::{info, warn};
+use embassy_futures::select::select;
+use embassy_time::{Instant, Timer};
 use esp_radio::ble::controller::BleConnector;
 use trouble_host::prelude::*;
 
 use crate::bluetooth::long_write::{ConnectionContext, LongWriteAccumulator};
 use crate::bluetooth::services::Server;
-use crate::data::State;
+use crate::data::{Devices, State};
+use crate::energy::sleep::go_sleep_without_devices;
 use embassy_futures::join::join;
 /// Max number of connections
 const CONNECTIONS_MAX: usize = 1;
@@ -15,7 +18,11 @@ const CONNECTIONS_MAX: usize = 1;
 /// Max number of L2CAP channels.
 const L2CAP_CHANNELS_MAX: usize = 2; // Signal + att
 #[embassy_executor::task]
-pub async fn run(controller: ExternalController<BleConnector<'static>, 20>, state: &'static State) {
+pub async fn run(
+    controller: ExternalController<BleConnector<'static>, 20>,
+    state: &'static State,
+    devices: &'static Devices<'static>,
+) {
     // Using a fixed "random" address can be useful for testing. In real scenarios, one would
     // use e.g. the MAC 6 byte array as the address (how to get that varies by the platform).
     let address: Address = Address::random([0xff, 0x8f, 0x1a, 0x05, 0xe4, 0xff]);
@@ -42,10 +49,12 @@ pub async fn run(controller: ExternalController<BleConnector<'static>, 20>, stat
             match advertise("AmbientAir", &mut peripheral, &server).await {
                 Ok(conn) => {
                     // set up tasks when the connection is established to a central, so they don't run when no one is connected.
-                    let a = gatt_events_task(&server, &conn, state);
+                    let a = gatt_events_task(&server, &conn, state, devices);
+                    let b = notify_task(&server, &conn, state, devices);
                     // run until any task ends (usually because the connection has been closed),
                     // then return to advertising state.
-                    a.await.unwrap();
+                    select(a, b).await;
+                    go_sleep_without_devices(crate::energy::sleep::SleepState::Standby).await;
                 }
                 Err(e) => {
                     let e = defmt::Debug2Format(&e);
@@ -70,6 +79,7 @@ async fn gatt_events_task<P: PacketPool>(
     server: &Server<'_>,
     conn: &GattConnection<'_, '_, P>,
     state: &'static State,
+    devices: &'static Devices<'static>,
 ) -> Result<(), Error> {
     let mut ctx = ConnectionContext {
         long_write: LongWriteAccumulator::new(),
@@ -102,14 +112,18 @@ async fn gatt_events_task<P: PacketPool>(
                     }
                     _ => None,
                 };
-                server.temperature.handle(&event, server, state).await;
-                server.pressure.handle(&event, server, state).await;
-                server.co2.handle(&event, server, state).await;
-                server.voc.handle(&event, server, state).await;
+                server
+                    .temperature
+                    .handle(&event, server, state, devices)
+                    .await;
+                server.pressure.handle(&event, server, state, devices).await;
+                server.co2.handle(&event, server, state, devices).await;
+                server.voc.handle(&event, server, state, devices).await;
                 server
                     .measurement
-                    .handle(&event, server, state, long_write)
+                    .handle(&event, server, state, devices, long_write)
                     .await;
+                server.battery.handle(&event, server, state, devices).await;
                 // This step is also performed at drop(), but writing it explicitly is necessary
                 // in order to ensure reply is sent.
                 if long_write.is_some() {
@@ -157,29 +171,21 @@ async fn advertise<'values, 'server, C: Controller>(
     Ok(conn)
 }
 
-/*
-async fn custom_task<C: Controller, P: PacketPool>(
+async fn notify_task<P: PacketPool>(
     server: &Server<'_>,
     conn: &GattConnection<'_, '_, P>,
-    stack: &Stack<'_, C, P>,
-) {
-    let mut tick: u8 = 0;
-    let level = server.battery_service.level;
+    state: &'static State,
+    _devices: &'static Devices<'static>,
+) -> Result<(), Error> {
     loop {
-        tick = tick.wrapping_add(1);
-        info!("[custom_task] notifying connection of tick {}", tick);
-        if level.notify(conn, &tick).await.is_err() {
-            info!("[custom_task] error notifying connection");
-            break;
-        };
-        // read RSSI (Received Signal Strength Indicator) of the connection.
-        if let Ok(rssi) = conn.raw().rssi(stack).await {
-            info!("[custom_task] RSSI: {:?}", rssi);
-        } else {
-            info!("[custom_task] error getting RSSI");
-            break;
-        };
+        let start = Instant::now();
+        server.battery.notify(conn, state).await?;
+        server.co2.notify(conn, state).await?;
+        server.pressure.notify(conn, state).await?;
+        server.temperature.notify(conn, state).await?;
+        server.voc.notify(conn, state).await?;
+        let time_taken = Instant::now() - start;
+        info!("Took: {}µs", time_taken.as_micros());
         Timer::after_secs(2).await;
     }
 }
- */

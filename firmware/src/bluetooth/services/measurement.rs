@@ -1,14 +1,12 @@
 use core::{str::FromStr, time::Duration};
 
-use alloc::format;
-use defmt::{Debug2Format, info};
+use defmt::info;
 use esp_hal::{
     peripherals,
     rtc_cntl::{Rtc, sleep::TimerWakeupSource},
 };
 use heapless::string::{OwnedStorage, StringInner};
 use serde::{Deserialize, Serialize};
-use serde_json_core::heapless::String;
 use trouble_host::{
     PacketPool,
     gatt::{GattEvent, ReadEvent},
@@ -21,9 +19,9 @@ use crate::{
         long_write::GenericWrite,
         services::{CommandBuf, MeasurementService, Server},
     },
-    data::State,
+    data::{Devices, State},
     handle_service,
-    measurements::sampling::{Measurement, from_nvs},
+    measurements::sampling::from_nvs,
     storage::Nvs,
 };
 
@@ -33,9 +31,10 @@ impl MeasurementService {
         event: &GattEvent<'_, '_, P>,
         server: &Server<'_>,
         state: &'static State,
+        devices: &'static Devices<'static>,
         long_write: Option<(&[u8], u16)>,
     ) {
-        handle_service!(self, server, event, state, long_write, {
+        handle_service!(self, server, event, state, devices, long_write, {
             command => (read_command, write_command),
             data    => (read_data, write_data),
         });
@@ -45,6 +44,7 @@ impl MeasurementService {
         _e: &ReadEvent<'_, '_, P>,
         _server: &Server<'_>,
         _state: &'static State,
+        _devices: &'static Devices<'static>,
     ) {
         unreachable!()
     }
@@ -53,6 +53,7 @@ impl MeasurementService {
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
         _state: &'static State,
+        _devices: &'static Devices<'static>,
     ) {
         let mut nvs = Nvs::new(crate::NVS_OFFSET, crate::NVS_SIZE, unsafe {
             peripherals::FLASH::steal()
@@ -70,6 +71,7 @@ impl MeasurementService {
         e: &GenericWrite<'_, CommandBuf>,
         _server: &Server<'_>,
         _state: &'static State,
+        _devices: &'static Devices<'static>,
     ) {
         info!("Writing command");
         let val = match e {
@@ -98,6 +100,7 @@ impl MeasurementService {
         _e: &GenericWrite<'_, heapless::String<4096>>,
         _server: &Server<'_>,
         _state: &'static State,
+        _devices: &'static Devices<'static>,
     ) {
         unreachable!()
     }

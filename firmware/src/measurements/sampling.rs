@@ -2,7 +2,7 @@ use core::time::Duration;
 
 use alloc::format;
 use bytemuck::{AnyBitPattern, NoUninit};
-use defmt::{Debug2Format, error, info};
+use defmt::{Debug2Format, error};
 use embassy_time::Instant;
 use esp_hal::{
     gpio, peripherals,
@@ -47,13 +47,10 @@ impl Measurement {
     }
 }
 
-pub async fn record_sample(mut devices: Devices<'static>, beginning: Instant, nvs: &mut Nvs) {
+pub async fn record_sample(devices: &'static Devices<'static>, beginning: Instant, nvs: &mut Nvs) {
     embassy_time::Timer::after_millis(400).await;
-    info!("Taking reading");
-    let reading = measure_once(&mut devices).await;
-    info!("Reading taken");
+    let reading = measure_once(devices).await;
     let measurement = Measurement::from_reading(reading);
-    info!("Savin mm");
     save(measurement, nvs).await;
 
     let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
@@ -74,14 +71,12 @@ pub async fn record_sample(mut devices: Devices<'static>, beginning: Instant, nv
                 .unwrap_or(Duration::from_millis(10));
             TimerWakeupSource::new(remaining)
         };
-    embassy_time::Timer::after_millis(1000).await;
     rtc.sleep_deep(&[&wakeup_gpio, &timer]);
 }
 
 async fn save(mm: Measurement, nvs: &mut Nvs) {
-    push_to_ram(mm, unsafe { crate::MEASUREMENT_SAMPLES_TAKEN } as usize);
-    info!("Pushed to ram");
     unsafe { crate::MEASUREMENT_SAMPLES_TAKEN += 1 }
+    push_to_ram(mm, unsafe { crate::MEASUREMENT_SAMPLES_TAKEN } as usize);
 
     let need_to_aggregate_samples =
         // Check if we got SAMPLES_PER_BUFFER amount of samples in RAM or if there are no samples left, then we move into nvs
@@ -89,7 +84,6 @@ async fn save(mm: Measurement, nvs: &mut Nvs) {
             % crate::SAMPLES_PER_BUFFER as i16
             == 0
             || unsafe { crate::MEASUREMENT_SAMPLES_TAKEN == crate::MEASUREMENT_SAMPLES_REQUESTED };
-    info!("Need to write to nvs? {}", need_to_aggregate_samples);
     if need_to_aggregate_samples {
         move_to_nvs(nvs, unsafe { crate::MEASUREMENT_SAMPLES_TAKEN } as usize).await;
     }
@@ -106,7 +100,7 @@ fn push_to_ram(m: Measurement, count: usize) {
 fn read_measurement(idx: usize) -> Measurement {
     unsafe {
         let offset = idx * MEAS_SIZE;
-        bytemuck::from_bytes::<Measurement>(&SAMPLE_BUFFER[offset..offset + MEAS_SIZE]).clone()
+        *bytemuck::from_bytes::<Measurement>(&SAMPLE_BUFFER[offset..offset + MEAS_SIZE])
     }
 }
 
@@ -119,7 +113,6 @@ async fn move_to_nvs(nvs: &mut Nvs, _sample: usize) {
     }
     let batch_index =
         unsafe { (crate::MEASUREMENT_SAMPLES_TAKEN - 1) / crate::SAMPLES_PER_BUFFER as i16 };
-    info!("Writing batch {}", batch_index);
     let mut buffer: [u8; 1000] = [0; 1000];
     let _ = nvs.invalidate_key(b"sample_1").await;
     buffer[0..2].copy_from_slice(&(measurements.len() as u16).to_le_bytes());
@@ -133,22 +126,19 @@ async fn move_to_nvs(nvs: &mut Nvs, _sample: usize) {
     )
     .await
     .unwrap();
-    info!("Wrote buffer!");
-    let buffer_res = match nvs.get_key(bytes_nvs_key).await {
+    let _ = match nvs.get_key(bytes_nvs_key).await {
         Ok(d) => d,
         Err(e) => {
             error!("{:?}", Debug2Format(&e));
             panic!("e")
         }
     };
-    info!("Readbing back buffer: {:?}", buffer_res);
     unsafe { SAMPLE_BUFFER = [0u8; SAMPLES_PER_BUFFER * MEAS_SIZE] }
 }
 
 pub async fn from_nvs(nvs: &mut Nvs, id: usize) -> Vec<Measurement, { crate::SAMPLES_PER_BUFFER }> {
     let nvs_key = format!("sample_{}", id);
     let bytes_nvs_key = nvs_key.as_bytes();
-    info!("Bytes nvs key: {:?}", bytes_nvs_key);
     let d = match nvs.get_key(bytes_nvs_key).await {
         Ok(d) => d,
         Err(e) => {
@@ -157,8 +147,6 @@ pub async fn from_nvs(nvs: &mut Nvs, id: usize) -> Vec<Measurement, { crate::SAM
         }
     };
     let count = u16::from_le_bytes(d[0..2].try_into().unwrap()) as usize;
-    info!("Count: {}", count);
-    info!("Data: {:?}", d);
 
     // 3. Convert bytes into Measurements
     let mut measurements: Vec<Measurement, { SAMPLES_PER_BUFFER }> = Vec::new();

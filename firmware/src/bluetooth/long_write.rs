@@ -4,6 +4,7 @@ pub struct ConnectionContext {
     pub long_write: LongWriteAccumulator<1024>,
 }
 
+#[derive(Debug)]
 pub struct LongWriteAccumulator<const N: usize> {
     buf: Vec<u8, N>,
     expected_handle: Option<u16>,
@@ -12,6 +13,12 @@ pub struct LongWriteAccumulator<const N: usize> {
 pub enum GenericWrite<'a, D> {
     Short(D),
     Long { data: &'a [u8], handle: u16 },
+}
+
+impl<const N: usize> Default for LongWriteAccumulator<N> {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<const N: usize> LongWriteAccumulator<N> {

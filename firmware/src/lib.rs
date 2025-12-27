@@ -7,6 +7,7 @@ extern crate alloc;
 pub mod bluetooth;
 pub mod button;
 pub mod data;
+pub mod energy;
 pub mod measurements;
 pub mod storage;
 
@@ -15,7 +16,7 @@ macro_rules! mk_static {
     ($t:ty,$val:expr) => {{
         static STATIC_CELL: static_cell::StaticCell<$t> = static_cell::StaticCell::new();
         #[deny(unused_attributes)]
-        let x = STATIC_CELL.uninit().write(($val));
+        let x = STATIC_CELL.uninit().write($val);
         x
     }};
 }
@@ -26,9 +27,16 @@ pub enum PowerState {
     BluetoothMode = 2,
     SampleMode = 3,
 }
-
+/// Only use with PowerState enum
 #[ram(unstable(rtc_fast, persistent))]
 pub static mut POWER_STATE: i8 = 0;
+
+/// Must only be 0 or 1, as bool isn't allowed here
+#[ram(unstable(rtc_fast, persistent))]
+pub static mut SGP40_ENABLED: u8 = 0;
+
+#[ram(unstable(rtc_fast, persistent))]
+pub static mut STCC4_SAMPLE_RATE: i16 = 600;
 
 #[ram(unstable(rtc_fast, persistent))]
 pub static mut SGP40_READINGS: i16 = 0;
@@ -50,3 +58,7 @@ pub const SAMPLES_PER_BUFFER: usize = 160;
 
 pub const NVS_OFFSET: usize = 0x9000;
 pub const NVS_SIZE: usize = 0x6000;
+pub mod nvs_keys {
+    pub const SGP40_ENABLED_KEY: &[u8] = b"SGP40_EN";
+    pub const STCC4_SAMPLE_RATE_KEY: &[u8] = b"STCC4_SR";
+}
