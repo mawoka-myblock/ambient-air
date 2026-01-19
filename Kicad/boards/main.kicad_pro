@@ -51,58 +51,48 @@
           "min_clearance": 0.0
         }
       },
-      "diff_pair_dimensions": [],
+      "diff_pair_dimensions": [
+        {
+          "gap": 0.0,
+          "via_gap": 0.0,
+          "width": 0.0
+        }
+      ],
       "drc_exclusions": [
         [
-          "annular_width|125187500|47900000|a68f2ad8-552a-4ec8-92f5-f56440a0c545|00000000-0000-0000-0000-000000000000",
+          "annular_width|125187500|47900000|a0fd55c2-abc6-4700-9900-8f4460829229|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "annular_width|125187500|50900000|120905f3-f00d-4863-bbdb-565f2fbaa895|00000000-0000-0000-0000-000000000000",
+          "annular_width|125187500|50900000|30c6ef0e-25fc-439e-afd0-c263f2b0bfd2|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "drill_out_of_range|137150000|46762500|5b2be05e-c563-41b5-abca-039feb53c9ea|00000000-0000-0000-0000-000000000000",
+          "drill_out_of_range|137150000|46762500|96a28bf4-59ff-4b4f-8f88-e33a98b65c39|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "drill_out_of_range|138125000|46037500|fb80e5f1-b1f1-461c-9f55-46c64bdafea9|00000000-0000-0000-0000-000000000000",
+          "drill_out_of_range|138125000|46037500|a98b5e80-983d-4281-9505-b40079b6dda3|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "drill_out_of_range|138125000|46762500|4276c672-b45c-4404-8ad2-d1184e71da86|00000000-0000-0000-0000-000000000000",
+          "drill_out_of_range|138125000|46762500|0764b0b3-1d39-41e8-ba2a-51542371871f|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "drill_out_of_range|138125000|47487500|e7ac3158-9b10-4cdd-83c0-3d92e857daf4|00000000-0000-0000-0000-000000000000",
+          "drill_out_of_range|138125000|47487500|b09947e9-0168-4f07-9a19-b839cd1caccc|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "drill_out_of_range|139100000|46762500|3ca89a5d-1496-4711-a83f-4a4d371b1c0c|00000000-0000-0000-0000-000000000000",
+          "drill_out_of_range|139100000|46762500|858134a0-22ce-43b4-bcc3-e54f4b87774b|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "hole_clearance|130455000|34450000|22576e23-f300-4fc8-9ba4-efc9a073f75c|07e6487e-3f53-415e-8b01-e59d8c270001",
+          "padstack|125187500|47900000|a0fd55c2-abc6-4700-9900-8f4460829229|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "hole_clearance|130455000|34450000|22576e23-f300-4fc8-9ba4-efc9a073f75c|1ca9181e-5c44-41d9-910f-b10c47ed20e2",
-          ""
-        ],
-        [
-          "hole_clearance|130455000|40550000|cbd7b913-de34-4069-b06d-b2dbabdc5073|2ecda7ed-d68f-48f8-9e62-ac27857f932f",
-          ""
-        ],
-        [
-          "hole_clearance|130455000|40550000|cbd7b913-de34-4069-b06d-b2dbabdc5073|780eff0a-8407-4205-ba06-cee8a82348b5",
-          ""
-        ],
-        [
-          "padstack|125187500|47900000|a68f2ad8-552a-4ec8-92f5-f56440a0c545|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "padstack|125187500|50900000|120905f3-f00d-4863-bbdb-565f2fbaa895|00000000-0000-0000-0000-000000000000",
+          "padstack|125187500|50900000|30c6ef0e-25fc-439e-afd0-c263f2b0bfd2|00000000-0000-0000-0000-000000000000",
           ""
         ]
       ],
@@ -233,7 +223,9 @@
           "td_width_to_size_filter_ratio": 0.9
         }
       ],
-      "track_widths": [],
+      "track_widths": [
+        0.0
+      ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
           "corner_radius_percentage": 80,
@@ -260,7 +252,12 @@
           "spacing": 0.6
         }
       },
-      "via_dimensions": [],
+      "via_dimensions": [
+        {
+          "diameter": 0.0,
+          "drill": 0.0
+        }
+      ],
       "zones_allow_external_fillets": false
     },
     "ipc2581": {
@@ -315,111 +312,7 @@
     "netclass_patterns": [
       {
         "netclass": "Default",
-        "pattern": "Net-(U3-GPIO10)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U3-GPIO4{slash}ADC1_CH4-Pad3)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/SDA_EXT"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U10-NC-Pad11)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/EN_VBAT"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U3-GPIO5{slash}ADC2_CH0)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "VBUS"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(SW2-Pad4)_1"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U3-GPIO9-Pad8)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U4-NC-Pad7)"
-      },
-      {
-        "netclass": "Default",
         "pattern": "/SCL_EXT"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(D2-K)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U10-BIN)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(SW2-Pad1)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(SW2-Pad4)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U4-D2+-Pad4)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "GND"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U2-NC-Pad6)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(SW2-Pad5)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/SDA"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/VBAT_DIV"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U2-NC-Pad3)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/VBAT_PRE"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(J1-CC1)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U10-V_{DD})"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(SW2-Pad5)_1"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U9-INT-Pad7)"
       },
       {
         "netclass": "Default",
@@ -427,67 +320,7 @@
       },
       {
         "netclass": "Default",
-        "pattern": "/USB_D+"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U2-NC-Pad7)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U10-NC-Pad4)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U3-EN{slash}CHIP_PU)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U3-GPIO6-Pad5)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U5-SCL)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U3-GPIO1{slash}ADC1_CH1{slash}XTAL_32K_N-Pad17)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U4-D2--Pad5)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U8-VDD)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U10-GPOUT)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(D3-A)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U2-NC-Pad5)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U7-NC-Pad6)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/USB_D-"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "unconnected-(U3-GPIO0{slash}ADC1_CH0{slash}XTAL_32K_P-Pad18)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/VBAT"
+        "pattern": "Net-(U3-GPIO4{slash}ADC1_CH4)"
       },
       {
         "netclass": "Default",
@@ -495,31 +328,47 @@
       },
       {
         "netclass": "Default",
-        "pattern": "unconnected-(U7-NC-Pad1)"
+        "pattern": "/SDA"
       },
       {
         "netclass": "Default",
-        "pattern": "unconnected-(U3-GPIO8-Pad7)"
+        "pattern": "unconnected-(U9-INT-Pad7)"
       },
       {
         "netclass": "Default",
-        "pattern": "unconnected-(U4-NC-Pad6)"
+        "pattern": "unconnected-(U10-NC-Pad4)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(U1-PROG)"
+        "pattern": "unconnected-(SW2-Pad1)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(U3-GPIO3{slash}ADC1_CH3)"
+        "pattern": "/VBAT"
       },
       {
         "netclass": "Default",
-        "pattern": "unconnected-(U1-NC-Pad7)"
+        "pattern": "Net-(U3-GPIO10)"
       },
       {
         "netclass": "Default",
-        "pattern": "+3V3"
+        "pattern": "/VBAT_PRE"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/USB_D-"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U2-NC-Pad5)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U3-GPIO5{slash}ADC2_CH0)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(SW2-Pad4)_1"
       },
       {
         "netclass": "Default",
@@ -527,23 +376,35 @@
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(J1-CC2)"
+        "pattern": "VBUS"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(U5-SDA)"
+        "pattern": "/USB_D+"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(D4-A)"
+        "pattern": "GND"
       },
       {
         "netclass": "Default",
-        "pattern": "GND_EXT"
+        "pattern": "unconnected-(U1-NC-Pad7)"
       },
       {
         "netclass": "Default",
-        "pattern": "unconnected-(U3-GPIO7-Pad6)"
+        "pattern": "unconnected-(U4-D2--Pad5)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U10-NC-Pad9)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U3-GPIO6-Pad5)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U2-NC-Pad3)"
       },
       {
         "netclass": "Default",
@@ -551,11 +412,147 @@
       },
       {
         "netclass": "Default",
+        "pattern": "Net-(U10-V_{DD})"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U3-GPIO3{slash}ADC1_CH3)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U2-NC-Pad6)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U2-NC-Pad7)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U3-GPIO8-Pad7)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U3-GPIO9-Pad8)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U1-PROG)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U4-NC-Pad6)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U7-NC-Pad1)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U5-SCL)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U5-SDA)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "GND_EXT"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U10-NC-Pad11)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U10-BIN)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(SW2-Pad5)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/EN_VBAT"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U4-D2+-Pad4)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(J1-CC2)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/SDA_EXT"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U3-GPIO7-Pad6)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(D3-A)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U3-EN{slash}CHIP_PU)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U10-GPOUT)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U4-NC-Pad7)"
+      },
+      {
+        "netclass": "Default",
         "pattern": "unconnected-(U4-NC-Pad10)"
       },
       {
         "netclass": "Default",
-        "pattern": "unconnected-(U10-NC-Pad9)"
+        "pattern": "unconnected-(U3-GPIO0{slash}ADC1_CH0{slash}XTAL_32K_P-Pad18)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(SW2-Pad4)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "+3V3"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U7-NC-Pad6)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U8-VDD)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/VBAT_DIV"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(D4-A)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(U3-GPIO1{slash}ADC1_CH1{slash}XTAL_32K_N-Pad17)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "unconnected-(SW2-Pad5)_1"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(D2-K)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(J1-CC1)"
       }
     ]
   },
@@ -567,7 +564,7 @@
       "plot": "/home/mawoka/Downloads/ambient-air-gerber/Main/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "main.step",
       "svg": "",
       "vrml": ""
     },

@@ -124,6 +124,7 @@ async fn gatt_events_task<P: PacketPool>(
                     .handle(&event, server, state, devices, long_write)
                     .await;
                 server.battery.handle(&event, server, state, devices).await;
+                server.time.handle(&event, server, state, devices).await;
                 // This step is also performed at drop(), but writing it explicitly is necessary
                 // in order to ensure reply is sent.
                 if long_write.is_some() {

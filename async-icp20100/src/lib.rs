@@ -236,8 +236,7 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Icp20100<I2C, Delay> {
         // bit 3 = MEAS_MODE (continuous)
         // bit 2 = POWER_MODE (active)
         // bits 1:0 = FIFO_READOUT_MODE (00: pressure first)
-        let mode_select = (0b000 << 5) | // MODE0 (works)
-            (1 << 3)     | // MEAS_MODE = continuous
+        let mode_select = (1 << 3)     | // MEAS_MODE = continuous
             (1 << 2); // POWER_MODE = active
 
         self.write_register(0xC0, mode_select).await?;

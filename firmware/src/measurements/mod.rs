@@ -1,9 +1,12 @@
 pub mod lp;
 pub mod sampling;
 pub mod sensors;
+use embassy_embedded_hal::shared_bus::I2cDeviceError;
 use embassy_time::{Duration, Instant, Timer};
 
 use crate::data::{Battery, Co2Data, Devices, PressureData, State, TemperatureData, VocData};
+
+pub type I2cDevError = I2cDeviceError<esp_hal::i2c::master::Error>;
 
 #[embassy_executor::task]
 pub async fn measure(state: &'static State, devices: &'static Devices<'static>) {
@@ -49,13 +52,7 @@ pub async fn measure(state: &'static State, devices: &'static Devices<'static>) 
         } else {
             Duration::from_millis(0)
         };
-
         Timer::after(sleep_time).await;
-        // info!(
-        //     "Refresh took {:?}, now sleeping for {:?}",
-        //     time_passed.as_millis(),
-        //     sleep_time.as_millis()
-        // );
     }
 }
 #[derive(Debug)]
@@ -68,27 +65,36 @@ pub struct MeasurementResult {
 }
 
 pub async fn measure_once(devices: &'static Devices<'static>) -> MeasurementResult {
-    let pressure = {
+    let pressure = async {
         let reading: (f32, f32) = devices
             .icp
             .lock()
             .await
             .read_pressure_and_temperature()
-            .await
-            .unwrap();
-        PressureData {
+            .await?;
+        Ok::<_, async_icp20100::Error<I2cDevError>>(PressureData {
             pressure: reading.0,
             temperature: reading.1,
-        }
+            error: false,
+        })
+    }
+    .await
+    .unwrap_or_else(|_| PressureData {
+        error: true,
+        ..PressureData::default()
+    });
+    let temperature = match devices.aht20.lock().await.measure().await {
+        Ok(d) => TemperatureData {
+            humidity: d.humidity,
+            temperature: d.temperature,
+            error: false,
+        },
+        Err(_) => TemperatureData {
+            error: true,
+            ..TemperatureData::default()
+        },
     };
-    let temperature = {
-        let reading = devices.aht20.lock().await.measure().await.unwrap();
-        TemperatureData {
-            humidity: reading.humidity,
-            temperature: reading.temperature,
-        }
-    };
-    let voc = {
+    let voc = async {
         if unsafe { crate::SGP40_ENABLED == 1 } {
             let reading = devices
                 .sgp40
@@ -98,45 +104,60 @@ pub async fn measure_once(devices: &'static Devices<'static>) -> MeasurementResu
                     (temperature.humidity * 1000.0) as u16,
                     (temperature.temperature * 1000.0) as i16,
                 )
-                .await
-                .unwrap_or(0) as i32;
-            VocData {
+                .await?;
+            Ok::<_, sgp40::Error<I2cDevError>>(VocData {
                 readings_until_warmup_complete: 0,
-                value: reading,
-            }
+                value: reading as i32,
+                error: false,
+            })
         } else {
-            VocData {
+            Ok::<_, sgp40::Error<I2cDevError>>(VocData {
                 readings_until_warmup_complete: 0,
                 value: 0,
-            }
+                error: false,
+            })
         }
-    };
-    let co2 = {
+    }
+    .await
+    .unwrap_or_else(|_| VocData {
+        error: true,
+        ..VocData::default()
+    });
+    let co2 = async {
         let mut stcc4 = devices.stcc4.lock().await;
         stcc4
             .set_rht_compensation(temperature.temperature, temperature.humidity)
-            .await
-            .unwrap();
+            .await?;
         stcc4
             .set_pressure_compensation((pressure.pressure * 1000.0) as i32)
-            .await
-            .unwrap();
-        stcc4.single_shot(true).await.unwrap();
-        let (co2, _, _) = stcc4.read_measurement().await.unwrap();
-        Co2Data { co2 }
-    };
-    let battery = {
+            .await?;
+        stcc4.single_shot(true).await?;
+        let (co2, _, _) = stcc4.read_measurement().await?;
+        Ok::<_, async_stcc4::Error<I2cDevError>>(Co2Data { co2, error: false })
+    }
+    .await
+    .unwrap_or_else(|_| Co2Data {
+        error: true,
+        ..Co2Data::default()
+    });
+    let battery = async {
         let mut bq = devices.bq27441.lock().await;
-        let avg_power = bq.average_power_mw().await.unwrap();
+        let avg_power = bq.average_power_mw().await?;
         // let avg_current = bq.avg_current_ma().await.unwrap();
-        let voltage = bq.voltage_mv().await.unwrap();
-        let soc = bq.soc_percent().await.unwrap();
-        Battery {
+        let voltage = bq.voltage_mv().await?;
+        let soc = bq.soc_percent().await?;
+        Ok::<_, bq27441::Error<I2cDevError>>(Battery {
             percentage: soc as i8,
             power: avg_power,
             voltage,
-        }
-    };
+            error: false,
+        })
+    }
+    .await
+    .unwrap_or_else(|_| Battery {
+        error: true,
+        ..Battery::default()
+    });
     MeasurementResult {
         co2,
         pressure,

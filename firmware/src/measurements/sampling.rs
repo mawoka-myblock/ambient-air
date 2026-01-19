@@ -91,7 +91,7 @@ async fn save(mm: Measurement, nvs: &mut Nvs) {
 
 fn push_to_ram(m: Measurement, count: usize) {
     unsafe {
-        let offset = count * MEAS_SIZE;
+        let offset = (count - 1) * MEAS_SIZE;
         let bytes: &[u8] = bytemuck::bytes_of(&m);
         SAMPLE_BUFFER[offset..offset + MEAS_SIZE].copy_from_slice(bytes);
     }

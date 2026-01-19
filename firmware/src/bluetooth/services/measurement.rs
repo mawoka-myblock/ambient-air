@@ -1,11 +1,10 @@
-use core::{str::FromStr, time::Duration};
+use core::time::Duration;
 
 use defmt::info;
 use esp_hal::{
     peripherals,
     rtc_cntl::{Rtc, sleep::TimerWakeupSource},
 };
-use heapless::string::{OwnedStorage, StringInner};
 use serde::{Deserialize, Serialize};
 use trouble_host::{
     PacketPool,
@@ -17,7 +16,7 @@ use crate::{
     PowerState,
     bluetooth::{
         long_write::GenericWrite,
-        services::{CommandBuf, MeasurementService, Server},
+        services::{CommandBuf, MeasurementService, MeasurementVec, Server},
     },
     data::{Devices, State},
     handle_service,
@@ -53,17 +52,17 @@ impl MeasurementService {
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
         _state: &'static State,
-        _devices: &'static Devices<'static>,
+        devices: &'static Devices<'static>,
     ) {
-        let mut nvs = Nvs::new(crate::NVS_OFFSET, crate::NVS_SIZE, unsafe {
-            peripherals::FLASH::steal()
-        })
-        .unwrap();
-        let data = from_nvs(&mut nvs, 0).await;
-        let str_data = serde_json_core::to_string::<_, 4096>(&data).unwrap();
-        let d_test: StringInner<usize, OwnedStorage<4096>> =
-            StringInner::from_str(str_data.as_str()).unwrap();
-        server.measurement.data.set(server, &d_test).unwrap();
+        let data = {
+            let mut nvs = devices.nvs.lock().await;
+            from_nvs(&mut nvs, 0).await
+        };
+        server
+            .measurement
+            .data
+            .set(server, &MeasurementVec(data))
+            .unwrap();
     }
 
     pub async fn write_command<P: PacketPool>(
@@ -97,7 +96,7 @@ impl MeasurementService {
 
     pub async fn write_data<P: PacketPool>(
         &self,
-        _e: &GenericWrite<'_, heapless::String<4096>>,
+        _e: &GenericWrite<'_, MeasurementVec>,
         _server: &Server<'_>,
         _state: &'static State,
         _devices: &'static Devices<'static>,

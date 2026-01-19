@@ -18,12 +18,14 @@ pub struct VocData {
     pub value: i32,
     /// Sensor needs 60 readings until readings are stable
     pub readings_until_warmup_complete: i32,
+    pub error: bool,
 }
 impl Default for VocData {
     fn default() -> Self {
         Self {
             value: 0,
             readings_until_warmup_complete: 50,
+            error: false,
         }
     }
 }
@@ -33,6 +35,7 @@ pub struct PressureData {
     pub temperature: f32,
     /// Pressure in kPa
     pub pressure: f32,
+    pub error: bool,
 }
 
 #[derive(Debug, Default, Format)]
@@ -41,12 +44,14 @@ pub struct TemperatureData {
     pub temperature: f32,
     /// Humidity in RH %
     pub humidity: f32,
+    pub error: bool,
 }
 
 #[derive(Debug, Default, Format)]
 pub struct Co2Data {
     /// CO2 concentration in ppm
     pub co2: i16,
+    pub error: bool,
 }
 
 #[derive(Debug, Default, Format)]
@@ -57,6 +62,7 @@ pub struct Battery {
     pub percentage: i8,
     /// Power (in mW) pulled from battery
     pub power: i16,
+    pub error: bool,
 }
 
 #[derive(Debug, Default)]

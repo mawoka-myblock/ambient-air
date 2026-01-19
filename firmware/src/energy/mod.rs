@@ -1,3 +1,5 @@
+use defmt::{Debug2Format, error};
+
 use crate::data::Devices;
 
 pub mod sleep;
@@ -20,6 +22,9 @@ pub async fn set_sgp40(devices: &Devices<'static>) {
         }
     }
     if !sgp40_enabled {
-        devices.sgp40.lock().await.turn_heater_off().await.unwrap();
+        match devices.sgp40.lock().await.turn_heater_off().await {
+            Ok(_) => (),
+            Err(e) => error!("{:?}", Debug2Format(&e)),
+        };
     }
 }

@@ -133,9 +133,9 @@ impl VocService {
             .await
             .unwrap();
         }
-        if data {
-            let mut stcc4 = devices.stcc4.lock().await;
-            stcc4.exit_sleep_mode().await.unwrap();
+        if !data {
+            let mut sgp40 = devices.sgp40.lock().await;
+            sgp40.turn_heater_off().await.unwrap();
         }
 
         unsafe { crate::SGP40_ENABLED = if data { 1 } else { 0 } }

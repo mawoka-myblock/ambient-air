@@ -90,16 +90,16 @@ async fn main(spawner: Spawner) {
     let i2c_dev2 = I2cDevice::new(i2c_bus);
     let stcc4 = Mutex::new(Stcc4::new(0x65, i2c_dev2, embassy_time::Delay));
 
-    let i2c_dev4 = I2cDevice::new(i2c_bus);
-    let aht20 = Mutex::new(
-        AHT20::new(i2c_dev4, 0x38, embassy_time::Delay)
+    let i2c_dev1 = I2cDevice::new(i2c_bus);
+    let icp = Mutex::new(
+        Icp20100::new(0x63, i2c_dev1, embassy_time::Delay)
             .await
             .unwrap(),
     );
 
-    let i2c_dev1 = I2cDevice::new(i2c_bus);
-    let icp = Mutex::new(
-        Icp20100::new(0x63, i2c_dev1, embassy_time::Delay)
+    let i2c_dev4 = I2cDevice::new(i2c_bus);
+    let aht20 = Mutex::new(
+        AHT20::new(i2c_dev4, 0x38, embassy_time::Delay)
             .await
             .unwrap(),
     );
