@@ -51,7 +51,13 @@
           "min_clearance": 0.0
         }
       },
-      "diff_pair_dimensions": [],
+      "diff_pair_dimensions": [
+        {
+          "gap": 0.0,
+          "via_gap": 0.0,
+          "width": 0.0
+        }
+      ],
       "drc_exclusions": [
         [
           "annular_width|31687500|57900000|797e0217-150f-4ee3-8e84-36ce3cc8398c|00000000-0000-0000-0000-000000000000",
@@ -62,75 +68,23 @@
           ""
         ],
         [
-          "clearance|45371250|40881250|d4e24fa6-aea4-4e70-a6c5-474299eeb819|2975c130-a982-4dca-a5cb-e926c7dd0fa1",
+          "drill_out_of_range|43650000|56762500|06d352b4-d714-4787-84db-fc7fabd66dc6|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "clearance|45371250|41381250|2975c130-a982-4dca-a5cb-e926c7dd0fa1|d7209238-fa5c-40cf-ad57-595ef86d54e0",
+          "drill_out_of_range|44625000|56037500|bc86fdea-6207-42ff-9cc4-86b2873d9e4a|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "clearance|45400000|54900000|e2558c83-2c8c-4b5b-bb68-7c88f5da6d73|eb6050b6-504b-4b9f-9379-c4a790285959",
+          "drill_out_of_range|44625000|56762500|fc6aaf19-0585-4851-a13a-7c20e322b7e2|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "clearance|45400000|58050000|4f16b5f5-7bc1-4741-9444-5119f6d8288e|fd4d15f6-8dc1-4213-8923-16161428e824",
+          "drill_out_of_range|44625000|57487500|accc3254-39a0-4fe4-8f9f-0cb61356f4bc|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
-          "clearance|45631250|41931250|d7209238-fa5c-40cf-ad57-595ef86d54e0|1da52077-8f65-4367-b9fd-dd07a8ba7d5c",
-          ""
-        ],
-        [
-          "clearance|45868750|40371250|8db24a3f-e85b-46d2-9dfe-6eb79c5687f5|b7501e69-f14a-4fb5-af63-e50cbf8d4c29",
-          ""
-        ],
-        [
-          "clearance|46131250|41931250|1da52077-8f65-4367-b9fd-dd07a8ba7d5c|a2f0b7fb-c0c6-41cb-a80c-0cc1bd039cf3",
-          ""
-        ],
-        [
-          "clearance|46425000|57575000|fd4d15f6-8dc1-4213-8923-16161428e824|50fefb82-8fb3-4bc7-b1ea-5b929a1053f2",
-          ""
-        ],
-        [
-          "clearance|46600000|55375000|2a9df0e3-fcf6-47ab-bd49-74dc341cc566|eb6050b6-504b-4b9f-9379-c4a790285959",
-          ""
-        ],
-        [
-          "clearance|46628750|40618750|6d1b7e25-653b-4ec1-a572-cdac09ff8fc5|e2afc6c9-078e-4f1a-b5bf-589535026cc1",
-          ""
-        ],
-        [
-          "clearance|46631250|41628750|a2f0b7fb-c0c6-41cb-a80c-0cc1bd039cf3|8a34e3f2-67f9-491f-8b20-d533b5bdc2bb",
-          ""
-        ],
-        [
-          "clearance|46931250|41118750|8a34e3f2-67f9-491f-8b20-d533b5bdc2bb|6d1b7e25-653b-4ec1-a572-cdac09ff8fc5",
-          ""
-        ],
-        [
-          "copper_edge_clearance|30187500|56150000|47162f72-d2bc-4e92-b4fb-9d833c457738|66866f86-44a3-4025-b4f4-0e0baeba3b13",
-          ""
-        ],
-        [
-          "copper_edge_clearance|30187500|61650000|47162f72-d2bc-4e92-b4fb-9d833c457738|98514e7e-b989-4241-80eb-c2f630169b04",
-          ""
-        ],
-        [
-          "hole_clearance|36955000|44450000|0eac9445-189b-4f0e-a7fb-5e32e058c165|5ba7dc28-9df7-4579-b7c1-ec26547987b2",
-          ""
-        ],
-        [
-          "hole_clearance|36955000|44450000|0eac9445-189b-4f0e-a7fb-5e32e058c165|f032b612-2f5b-4725-835a-06b57fb889b3",
-          ""
-        ],
-        [
-          "hole_clearance|36955000|50550000|484b3f0a-6fe0-44c9-b0dd-8754f622eee8|5e9f9518-3281-4254-9d7b-98acabdff465",
-          ""
-        ],
-        [
-          "hole_clearance|36955000|50550000|484b3f0a-6fe0-44c9-b0dd-8754f622eee8|d51d626f-f0cc-49f9-aae8-50cd546d6b22",
+          "drill_out_of_range|45600000|56762500|793bc297-f8e0-44e3-955a-d794b4948492|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
@@ -139,58 +93,6 @@
         ],
         [
           "padstack|31687500|60900000|1e6066d7-e2dc-4464-88b9-707558548eaa|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "silk_edge_clearance|30000000|57900000|47162f72-d2bc-4e92-b4fb-9d833c457738|52fc4ed4-7923-4ae5-acc8-6782843c45c8",
-          ""
-        ],
-        [
-          "silk_edge_clearance|30000000|59650000|47162f72-d2bc-4e92-b4fb-9d833c457738|38848947-df26-4a75-a6ef-79f838ff6adf",
-          ""
-        ],
-        [
-          "silk_over_copper|39900000|40200000|9f1050a7-3c27-4688-99d1-68649f02923f|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "silk_overlap|57610000|36454819|9df878e5-e7de-4de1-ad09-cf946ee2f205|f35d0388-4651-4352-a75e-f4eda2262b7a",
-          ""
-        ],
-        [
-          "silk_overlap|57610000|36800000|2c317bd6-e103-4a2b-9081-a3557417f820|f35d0388-4651-4352-a75e-f4eda2262b7a",
-          ""
-        ],
-        [
-          "solder_mask_bridge|45371250|40881250|d4e24fa6-aea4-4e70-a6c5-474299eeb819|2975c130-a982-4dca-a5cb-e926c7dd0fa1",
-          ""
-        ],
-        [
-          "solder_mask_bridge|45371250|41381250|2975c130-a982-4dca-a5cb-e926c7dd0fa1|d7209238-fa5c-40cf-ad57-595ef86d54e0",
-          ""
-        ],
-        [
-          "solder_mask_bridge|45631250|41931250|d7209238-fa5c-40cf-ad57-595ef86d54e0|1da52077-8f65-4367-b9fd-dd07a8ba7d5c",
-          ""
-        ],
-        [
-          "solder_mask_bridge|45868750|40371250|8db24a3f-e85b-46d2-9dfe-6eb79c5687f5|b7501e69-f14a-4fb5-af63-e50cbf8d4c29",
-          ""
-        ],
-        [
-          "solder_mask_bridge|46131250|41931250|1da52077-8f65-4367-b9fd-dd07a8ba7d5c|a2f0b7fb-c0c6-41cb-a80c-0cc1bd039cf3",
-          ""
-        ],
-        [
-          "solder_mask_bridge|46628750|40618750|6d1b7e25-653b-4ec1-a572-cdac09ff8fc5|e2afc6c9-078e-4f1a-b5bf-589535026cc1",
-          ""
-        ],
-        [
-          "solder_mask_bridge|46631250|41628750|a2f0b7fb-c0c6-41cb-a80c-0cc1bd039cf3|8a34e3f2-67f9-491f-8b20-d533b5bdc2bb",
-          ""
-        ],
-        [
-          "solder_mask_bridge|46931250|41118750|8a34e3f2-67f9-491f-8b20-d533b5bdc2bb|6d1b7e25-653b-4ec1-a572-cdac09ff8fc5",
           ""
         ]
       ],
@@ -321,7 +223,9 @@
           "td_width_to_size_filter_ratio": 0.9
         }
       ],
-      "track_widths": [],
+      "track_widths": [
+        0.0
+      ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
           "corner_radius_percentage": 80,
@@ -348,7 +252,12 @@
           "spacing": 0.6
         }
       },
-      "via_dimensions": [],
+      "via_dimensions": [
+        {
+          "diameter": 0.0,
+          "drill": 0.0
+        }
+      ],
       "zones_allow_external_fillets": false
     },
     "ipc2581": {

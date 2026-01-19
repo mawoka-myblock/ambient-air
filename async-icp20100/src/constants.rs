@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 pub const TRIM1_MSB: u8 = 0x05;
 pub const TRIM2_LSB: u8 = 0x06;
 pub const TRIM2_MSB: u8 = 0x07;

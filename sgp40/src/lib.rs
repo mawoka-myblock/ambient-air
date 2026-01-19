@@ -1,6 +1,6 @@
-#![cfg_attr(not(test), no_std)]
 #![allow(non_snake_case)]
 #![allow(dead_code)]
+#![no_std]
 
 use embedded_hal_async as hal;
 
@@ -9,11 +9,13 @@ use hal::i2c::I2c;
 
 use sensirion_i2c::{crc8, i2c_async};
 
-#[cfg(feature = "voc_index")]
-mod vocalg;
+use crate::algo::{AlgorithmType, GasIndexAlgorithm};
 
-#[cfg(feature = "voc_index")]
-use crate::vocalg::VocAlgorithm;
+// mod vocalg;
+
+mod algo;
+
+// use crate::vocalg::VocAlgorithm;
 
 /// Sgp40 errors
 #[derive(Debug)]
@@ -80,8 +82,8 @@ pub struct Sgp40<I2C, D> {
     address: u8,
     delay: D,
     temperature_offset: i16,
-    #[cfg(feature = "voc_index")]
-    voc: VocAlgorithm,
+    pub voc: GasIndexAlgorithm,
+    gas_index: i32,
 }
 
 impl<I2C, D, E> Sgp40<I2C, D>
@@ -96,8 +98,8 @@ where
             address,
             delay,
             temperature_offset: 0,
-            #[cfg(feature = "voc_index")]
-            voc: VocAlgorithm::new(),
+            voc: GasIndexAlgorithm::new(AlgorithmType::Voc),
+            gas_index: 0,
         }
     }
 
@@ -192,12 +194,11 @@ where
     /// Reads VOC index. Driver is using Sensirion proprietary algortihm and it takes minimum
     /// 45 reads to start working. These reads should be made with 1Hz interval to keep the
     /// algoritm working.
-    #[cfg(feature = "voc_index")]
     #[inline]
     pub async fn measure_voc_index(&mut self) -> Result<u16, Error<E>> {
         let raw = self.measure_raw_with_rht(50000, 25000).await?;
-
-        Ok(self.voc.process(raw as i32) as u16)
+        self.voc.process(raw as i32, &mut self.gas_index);
+        Ok(self.gas_index as u16)
     }
 
     /// Reads the voc index from the sensor with humidity and temperature compensation.
@@ -208,7 +209,6 @@ where
     /// Driver is using Sensirion proprietary algortihm and it takes minimum
     /// 45 reads to start working. These reads should be made with 1Hz interval to keep the
     /// algoritm working.
-    #[cfg(feature = "voc_index")]
     #[inline]
     pub async fn measure_voc_index_with_rht(
         &mut self,
@@ -217,7 +217,8 @@ where
     ) -> Result<u16, Error<E>> {
         let raw = self.measure_raw_with_rht(humidity, temperature).await?;
 
-        Ok(self.voc.process(raw as i32) as u16)
+        self.voc.process(raw as i32, &mut self.gas_index);
+        Ok(self.gas_index as u16)
     }
 
     /// Reads the raw signal from the sensor.

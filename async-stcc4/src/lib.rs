@@ -1,7 +1,5 @@
 #![no_std]
-use defmt::info;
 use embedded_hal_async::delay::DelayNs;
-use micromath::F32Ext;
 mod constants;
 pub struct Stcc4<I2c, DELAYNS> {
     addr: u8,
@@ -53,26 +51,48 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
         }
     }
 
-    async fn write_raw(&mut self, buf: &[u8]) -> Result<(), Error<I2C::Error>> {
-        self.i2c.write(self.addr, buf).await?;
-        Ok(())
-    }
-
     async fn read_raw(&mut self, buf: &mut [u8]) -> Result<(), Error<I2C::Error>> {
         self.i2c.read(self.addr, buf).await?;
         Ok(())
     }
 
     /// Write command (16-bit)
-    pub async fn write_command(&mut self, command: u16) -> Result<(), Error<I2C::Error>> {
+    async fn write_command(&mut self, command: u16) -> Result<(), Error<I2C::Error>> {
         self.buffer[0] = (command >> 8) as u8;
         self.buffer[1] = (command & 0xFF) as u8;
         self.i2c.write(self.addr, &self.buffer[..2]).await?;
         Ok(())
     }
 
+    async fn write_cmd_with_args(
+        &mut self,
+        command: u16,
+        args: &[u16],
+    ) -> Result<(), Error<I2C::Error>> {
+        let mut idx = 0;
+
+        // command
+        self.buffer[idx] = (command >> 8) as u8;
+        self.buffer[idx + 1] = command as u8;
+        idx += 2;
+
+        // arguments
+        for &arg in args {
+            let msb = (arg >> 8) as u8;
+            let lsb = arg as u8;
+
+            self.buffer[idx] = msb;
+            self.buffer[idx + 1] = lsb;
+            self.buffer[idx + 2] = Self::crc8(&[msb, lsb]);
+            idx += 3;
+        }
+
+        self.i2c.write(self.addr, &self.buffer[..idx]).await?;
+        Ok(())
+    }
+
     /// Send a 16-bit command with a 16-bit argument
-    pub async fn read_words(&mut self, _: u16, words: &mut [u16]) -> Result<(), Error<I2C::Error>> {
+    async fn read_words(&mut self, words: &mut [u16]) -> Result<(), Error<I2C::Error>> {
         // self.write_command(command)?;
         let num_bytes = words.len() * 3; // 2 data bytes + 1 CRC each
 
@@ -90,7 +110,7 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
             let data = &self.buffer[offset..offset + 2];
             let crc_received = self.buffer[offset + 2];
             self.check_crc(data, crc_received)?;
-            *word = ((data[0] as u16) << 8) | data[1] as u16;
+            *word = u16::from_be_bytes([data[0], data[1]]);
         }
 
         Ok(())
@@ -104,12 +124,10 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
         words: &mut [u16],
     ) -> Result<(), Error<I2C::Error>> {
         self.write_command(command).await?;
-        info!("Finished writing");
         if delay_us > 0 {
             self.delay.delay_us(delay_us).await;
         }
-        info!("Now reading");
-        self.read_words(command, words).await
+        self.read_words(words).await
     }
 
     pub async fn start_continuous(&mut self) -> Result<(), Error<I2C::Error>> {
@@ -126,8 +144,8 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
     }
     pub async fn read_measurement(&mut self) -> Result<(i16, f32, f32), Error<I2C::Error>> {
         let res = self.read_measurement_raw().await?;
-        let temperature_out = 175.0 * ((res.1 as f32) / ((2.0).powf(16.0) - 1.0)) - 45.0;
-        let rh_out = 125.0 * (res.2 as f32 / ((2.0).powf(16.0) - 1.0)) - 6.0;
+        let temperature_out = 175.0 * (res.1 as f32 / 65535_f32) - 45.0;
+        let rh_out = 125.0 * (res.2 as f32 / 65535_f32) - 6.0;
         Ok((res.0, temperature_out, rh_out))
     }
 
@@ -135,79 +153,93 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
         self.write_command(constants::STOP_CONTINUOUS).await
     }
 
-    pub async fn single_shot(&mut self) -> Result<(), Error<I2C::Error>> {
+    pub async fn single_shot(&mut self, wait: bool) -> Result<(), Error<I2C::Error>> {
         self.write_command(constants::SINGLE_SHOT).await?;
-        self.delay.delay_us(500_000).await;
+        if wait {
+            self.delay.delay_ms(500).await;
+        }
         Ok(())
     }
-    /*
-       pub async fn forced_recalibration(
-           &mut self,
-           target_ppm: i16,
-       ) -> Result<i16, Error<I2C::Error>> {
-           let arg = target_ppm as u16;
-           self.write_cmd_with_args(constants::FRC, &[arg])?;
-           self.delay.delay_us(90_000).await;
+    pub async fn forced_recalibration(
+        &mut self,
+        target_ppm: i16,
+        wait: bool,
+    ) -> Result<i16, Error<I2C::Error>> {
+        let arg = target_ppm as u16;
+        self.write_cmd_with_args(constants::FRC, &[arg]).await?;
+        if wait {
+            self.delay.delay_ms(90).await;
+        }
+        let mut words = [0u16; 6];
+        self.read_words(&mut words).await?;
+        Ok(words[0] as i16)
+    }
 
-           let words = self.read_words(1)?;
-           Ok(words[0] as i16)
-       }
+    pub async fn set_rht_compensation(
+        &mut self,
+        t: f32,
+        rh_pct: f32,
+    ) -> Result<(), Error<I2C::Error>> {
+        let t_raw = ((t + 45.0) * 65535.0) / 175.0;
+        let rh_raw = ((rh_pct + 6.0) * 65535.0) / 125.0;
+        self.write_cmd_with_args(constants::SET_RHT_COMP, &[t_raw as u16, rh_raw as u16])
+            .await
+    }
 
+    pub async fn set_pressure_compensation(
+        &mut self,
+        pressure_pa: i32,
+    ) -> Result<(), Error<I2C::Error>> {
+        let raw_pressure = pressure_pa / 2;
+        self.write_cmd_with_args(constants::SET_PRESS_COMP, &[raw_pressure as u16])
+            .await
+    }
 
+    pub async fn conditioning(&mut self) -> Result<(), Error<I2C::Error>> {
+        self.write_command(constants::CONDITIONING).await?;
+        self.delay.delay_us(22_000_000).await;
+        Ok(())
+    }
 
-       pub fn set_rht_compensation(
-           &mut self,
-           t_raw: u16,
-           rh_raw: u16,
-       ) -> Result<(), Error<I2C::Error>> {
-           self.write_cmd_with_args(constants::SET_RHT_COMP, &[t_raw, rh_raw])
-       }
+    pub async fn sleep(&mut self) -> Result<(), Error<I2C::Error>> {
+        self.write_command(constants::ENTER_SLEEP).await?;
+        self.delay.delay_us(2000).await;
+        Ok(())
+    }
 
-       pub fn set_pressure_compensation(
-           &mut self,
-           raw_pressure: u16,
-       ) -> Result<(), Error<I2C::Error>> {
-           self.write_cmd_with_args(constants::SET_PRESS_COMP, &[raw_pressure])
-       }
+    pub async fn wake(&mut self) -> Result<(), Error<I2C::Error>> {
+        self.write_command(constants::EXIT_SLEEP).await?;
+        self.delay.delay_us(5000).await;
+        Ok(())
+    }
 
-       pub async fn conditioning(&mut self) -> Result<(), Error<I2C::Error>> {
-           self.write_cmd(constants::CONDITIONING)?;
-           self.delay.delay_us(22_000_000).await;
-           Ok(())
-       }
+    pub async fn enable_testing(&mut self) -> Result<(), Error<I2C::Error>> {
+        self.write_command(constants::ENABLE_TESTING).await
+    }
 
-       pub async fn sleep(&mut self) -> Result<(), Error<I2C::Error>> {
-           self.write_cmd(constants::ENTER_SLEEP)?;
-           self.delay.delay_us(2000).await;
-           Ok(())
-       }
+    pub async fn disable_testing(&mut self) -> Result<(), Error<I2C::Error>> {
+        self.write_command(constants::DISABLE_TESTING).await
+    }
 
-       pub async fn wake(&mut self) -> Result<(), Error<I2C::Error>> {
-           self.write_raw(&[constants::EXIT_SLEEP])?;
-           self.delay.delay_us(5000).await;
-           Ok(())
-       }
+    pub async fn enter_sleep_mode(&mut self) -> Result<(), Error<I2C::Error>> {
+        self.write_command(constants::ENTER_SLEEP).await
+    }
+    pub async fn exit_sleep_mode(&mut self) -> Result<(), Error<I2C::Error>> {
+        self.write_command(constants::EXIT_SLEEP).await
+    }
 
-       pub fn enable_testing(&mut self) -> Result<(), Error<I2C::Error>> {
-           self.write_cmd(constants::ENABLE_TESTING)
-       }
-
-       pub fn disable_testing(&mut self) -> Result<(), Error<I2C::Error>> {
-           self.write_cmd(constants::DISABLE_TESTING)
-       }
-
-       pub async fn factory_reset(&mut self) -> Result<u16, Error<I2C::Error>> {
-           self.write_cmd(constants::FACTORY_RESET)?;
-           self.delay.delay_us(90_000).await;
-           let w = self.read_words(1)?;
-           Ok(w[0])
-       }
-    */
+    pub async fn factory_reset(&mut self) -> Result<u16, Error<I2C::Error>> {
+        self.write_command(constants::FACTORY_RESET).await?;
+        self.delay.delay_us(90_000).await;
+        let mut w = [0u16; 6];
+        self.read_words(&mut w).await?;
+        Ok(w[0])
+    }
     pub async fn product_id(&mut self) -> Result<(u32, u64), Error<I2C::Error>> {
         let mut words = [0u16; 6];
         self.delayed_read(constants::PRODUCT_ID, 1000, &mut words)
             .await?;
-
+        self.write_command(constants::PRODUCT_ID).await.unwrap();
         let id = ((words[0] as u32) << 16) | words[1] as u32;
 
         let serial_high = ((words[2] as u32) << 16) | words[3] as u32;

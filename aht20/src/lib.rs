@@ -337,7 +337,6 @@ where
             address,
             delay,
         };
-        sensor.delay.delay_ms(40).await;
 
         while !sensor.check_status().await?.is_calibrated() {
             sensor.send_initialize().await?;
@@ -365,7 +364,7 @@ where
     ///                 │
     ///                 ▼
     ///                Yes
-
+    ///
     /// check_Status reads a status byte from the AHT20 sensor to check its status.
     ///
     /// The sensor can be calibrated or not, also busy generating a sensor measurement or ready.

@@ -1,8 +1,7 @@
-cargo-features = ["edition2024"]
 [package]
 edition      = "2024"
 name         = "firmware"
-rust-version = "1.86"
+rust-version = "1.87"
 version      = "0.1.0"
 
 [[bin]]
@@ -14,6 +13,7 @@ async-icp20100 = {path= "../async-icp20100"}
 async-stcc4 = {path= "../async-stcc4"}
 sgp40 = {path = "../sgp40"}
 aht20 = {path="../aht20"}
+bq27441 = { path = "../bq27441" }
 
 embedded-hal-bus = {version = "*", features = ["async", "defmt-03"]}
 
@@ -55,9 +55,17 @@ esp-radio = { version = "0.17", features = [
   "esp32c3",
   "unstable"
 ]  }
-
+portable-atomic = { version = "1.11.1", default-features = false }
 tickv = { version = "2" }
-
+esp-storage = {version  = "*", features = ["esp32c3"]}
+anyhow = {version = "*", default-features = false}
+embedded-storage = {version = "*"}
+bytemuck = {version = "*", features = ["derive"]}
+async-button = {version = "0.2"}
+serde = {version = "1", default-features = false, features = ["derive"]}
+serde-json-core = {version = "0.6"}
+heapless = { version = "0.9", features = ["serde"] }
+jiff = { version = "0.2", default-features = false, features = ["serde", "alloc"] }
 
 [profile.dev]
 # Rust debug is too slow.
@@ -72,3 +80,6 @@ incremental      = false
 lto              = 'fat'
 opt-level        = 's'
 overflow-checks  = false
+
+# [package.metadata.espflash.idf]
+# partition_table = "./partition-table.bin"

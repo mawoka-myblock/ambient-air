@@ -1,4 +1,3 @@
-cargo-features = ["edition2024"]
 [package]
 name = "sgp40"
 version = "0.1.0"
@@ -8,7 +7,6 @@ edition = "2024"
 sensirion-i2c = {version = "0.4", features = ["embedded-hal-async"]}
 embedded-hal-async = { version = "1.0" }
 fixed = "1"
+micromath = "2"
 
 [features]
-default = ["voc_index"]
-voc_index = []
