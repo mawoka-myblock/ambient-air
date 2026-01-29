@@ -2,7 +2,7 @@
 
 - Every 2nd level headline is a service
 - Every 3rd level headline is a characteristic
-- Headline is as follows structured: `Name (UUID) (data type) access type
+- Headline is as follows structured: `Name (UUID) (rust data type) access type (R=Read, W=Write, N=Notify)
 
 ## BaseData (1aba5096-5be2-4768-aef0-51c8667e1aa8)
 No content, used to identify devices compatible with Mawoka App
