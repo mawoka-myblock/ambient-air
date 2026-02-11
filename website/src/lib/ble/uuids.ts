@@ -11,6 +11,7 @@ export const SERVICES = {
 
 export const CHARS = {
 	batteryLevel: '00002a19-0000-1000-8000-00805f9b34fb',
+	batteryPower: '408813df-5dd4-1f87-ec11-cdb001100000',
 	temperature: '561be71a-359d-4964-b64f-7b1c949b092e',
 	humidity: '13881d03-54b9-4b8c-be9f-8a0eeec6893b',
 	pressure: '7c4b9d53-cbce-409e-bb3d-06d7f9f263d8',

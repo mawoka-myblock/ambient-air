@@ -1,0 +1,90 @@
+use embassy_sync::blocking_mutex::raw::NoopRawMutex;
+use embassy_sync::channel::Channel;
+use esp_hal::{
+    gpio::interconnect::PeripheralOutput,
+    ledc::{
+        Ledc, LowSpeed,
+        channel::{self, Channel as LedcChannel, ChannelIFace as _},
+        timer::Timer,
+    },
+};
+
+pub struct Leds<'a> {
+    led_1: LedcChannel<'a, LowSpeed>,
+    led_2: LedcChannel<'a, LowSpeed>,
+}
+
+impl<'a> Leds<'a> {
+    pub fn new(
+        ledc: &'static mut Ledc<'a>,
+        tmr: &'a mut Timer<'a, LowSpeed>,
+        led_1: impl PeripheralOutput<'static>,
+        led_2: impl PeripheralOutput<'static>,
+    ) -> Self {
+        let mut channel0 = ledc.channel::<LowSpeed>(channel::Number::Channel0, led_1);
+        channel0
+            .configure(channel::config::Config {
+                timer: tmr,
+                duty_pct: 0,
+                drive_mode: esp_hal::gpio::DriveMode::PushPull,
+            })
+            .unwrap();
+        let mut channel1 = ledc.channel::<LowSpeed>(channel::Number::Channel2, led_2);
+        channel1
+            .configure(channel::config::Config {
+                timer: tmr,
+                duty_pct: 0,
+                drive_mode: esp_hal::gpio::DriveMode::PushPull,
+            })
+            .unwrap();
+        Self {
+            led_1: channel0,
+            led_2: channel1,
+        }
+    }
+
+    pub async fn set_single(&self, target: u8, level: u8) {
+        let t = match target {
+            1 => &self.led_1,
+            2 => &self.led_2,
+            _ => panic!("Undefined target!"),
+        };
+        t.set_duty(level).unwrap();
+    }
+
+    pub async fn fade_single(&self, fc: FadeConfig, target: u8) {
+        let t = match target {
+            1 => &self.led_1,
+            2 => &self.led_2,
+            _ => panic!("Undefined target!"),
+        };
+        t.start_duty_fade(fc.start_pct, fc.end_pct, fc.fade_dur)
+            .unwrap();
+    }
+}
+pub struct FadeConfig {
+    pub start_pct: u8,
+    pub end_pct: u8,
+    pub fade_dur: u16,
+}
+
+pub enum LedCommand {
+    SetAll(u8),
+    Set { led: u8, level: u8 },
+    AllOff,
+    Fade((FadeConfig, u8)),
+}
+
+pub type LedChannel = Channel<NoopRawMutex, LedCommand, 2>;
+
+#[embassy_executor::task]
+pub async fn led_task(comm: &'static LedChannel, leds: &'static mut Leds<'static>) {
+    loop {
+        match comm.receive().await {
+            LedCommand::SetAll(d) => todo!(),
+            LedCommand::AllOff => todo!(),
+            LedCommand::Fade(d) => leds.fade_single(d.0, d.1).await,
+            LedCommand::Set { led, level } => leds.set_single(led, level).await,
+        };
+    }
+}

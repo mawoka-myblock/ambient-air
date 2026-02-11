@@ -13,6 +13,7 @@
 	let voc = 0;
 	let battery = 0;
 	let voc_enabled = false;
+	let power_mw = 0;
 
 	async function startNotify(service: string, char: string, cb) {
 		const c = await getChar(service, char);
@@ -43,6 +44,11 @@
 		await startNotify(SERVICES.CO2, CHARS.co2, (v) => (co2 = v.getInt16(0, true)));
 		await startNotify(SERVICES.VOC, CHARS.vocIndex, (v) => (voc = v.getInt16(0, true)));
 		await startNotify(SERVICES.BATTERY, CHARS.batteryLevel, (v) => (battery = v.getUint8(0)));
+		await startNotify(
+			SERVICES.BATTERY,
+			CHARS.batteryPower,
+			(v) => (power_mw = v.getInt16(0, true))
+		);
 		const vocEnabledChar = await getChar(SERVICES.VOC, CHARS.vocEnabled);
 
 		const value = await vocEnabledChar.readValue();
@@ -76,6 +82,7 @@
 				<Card label="CO₂" value={`${co2} ppm`} />
 				<Card label="VOC Index" value={voc.toString()} />
 				<Card label="Battery" value={`${battery}%`} />
+				<Card label="Power" value={`${power_mw}mw`} />
 			</div>
 			<button onclick={toggle_voc}
 				>{#if voc_enabled}Disable{:else}Enable{/if} VOC</button

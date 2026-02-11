@@ -21,7 +21,6 @@ use crate::{
     data::{Devices, State},
     handle_service,
     measurements::sampling::from_nvs,
-    storage::Nvs,
 };
 
 impl MeasurementService {

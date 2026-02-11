@@ -32,6 +32,7 @@ use firmware::bluetooth::run;
 use firmware::button::button_task;
 use firmware::data::{Devices, State};
 use firmware::energy::set_sgp40;
+use firmware::leds::{FadeConfig, Leds, led_task};
 use firmware::measurements::lp::lp_measurement;
 use firmware::measurements::measure;
 use firmware::measurements::sampling::record_sample;
@@ -58,9 +59,12 @@ async fn main(spawner: Spawner) {
         esp_hal::interrupt::software::SoftwareInterruptControl::new(peripherals.SW_INTERRUPT);
     esp_rtos::start(timg0.timer0, sw_interrupt.software_interrupt0);
     let wakeup_cause_var = wakeup_cause();
-    if wakeup_cause_var as i8 != SleepSource::Timer as i8 {
-        // Just checking for Ext0 or Ext1 doesn't work, need to figure out which event is the gpio button, but cheking for not timer works fine
+    if wakeup_cause_var as i8 == SleepSource::Gpio as i8 {
         unsafe { firmware::POWER_STATE = PowerState::BluetoothMode as i8 }
+    }
+    if unsafe { firmware::STCC4_SAMPLE_RATE } < 5 {
+        // On error (should never be under 5)
+        unsafe { firmware::STCC4_SAMPLE_RATE = 600 } // set to 600 (10min) sleep time.
     }
 
     if unsafe { firmware::POWER_STATE == PowerState::SensorActiveSleep as i8 } {
@@ -71,7 +75,7 @@ async fn main(spawner: Spawner) {
             peripherals.LPWR,
         )
         .await;
-        unreachable!()
+        unreachable!();
     }
 
     // I2C Block
@@ -134,9 +138,12 @@ async fn main(spawner: Spawner) {
     set_sgp40(devices).await;
 
     // LEDC Block
-    let mut ledc = Ledc::new(peripherals.LEDC);
+    let ledc = firmware::mk_static!(Ledc<'static>, Ledc::new(peripherals.LEDC));
     ledc.set_global_slow_clock(esp_hal::ledc::LSGlobalClkSource::APBClk);
-    let mut lstimer0 = ledc.timer::<LowSpeed>(timer::Number::Timer2);
+    let lstimer0: &'static mut timer::Timer<'static, LowSpeed> = firmware::mk_static!(
+        timer::Timer<'static, LowSpeed>,
+        ledc.timer::<LowSpeed>(timer::Number::Timer2)
+    );
     lstimer0
         .configure(timer::config::Config {
             duty: timer::config::Duty::Duty10Bit,
@@ -144,22 +151,26 @@ async fn main(spawner: Spawner) {
             frequency: Rate::from_khz(24),
         })
         .unwrap();
-    let mut channel0 = ledc.channel::<LowSpeed>(channel::Number::Channel0, peripherals.GPIO5);
-    channel0
-        .configure(channel::config::Config {
-            timer: &lstimer0,
-            duty_pct: 0,
-            drive_mode: esp_hal::gpio::DriveMode::PushPull,
-        })
-        .unwrap();
-    let mut channel1 = ledc.channel::<LowSpeed>(channel::Number::Channel2, peripherals.GPIO10);
-    channel1
-        .configure(channel::config::Config {
-            timer: &lstimer0,
-            duty_pct: 0,
-            drive_mode: esp_hal::gpio::DriveMode::PushPull,
-        })
-        .unwrap();
+    let leds: &'static mut Leds<'static> = firmware::mk_static!(
+        Leds<'static>,
+        Leds::new(ledc, lstimer0, peripherals.GPIO5, peripherals.GPIO10)
+    );
+    let led_channel: &'static firmware::leds::LedChannel = firmware::mk_static!(
+        firmware::leds::LedChannel,
+        firmware::leds::LedChannel::new()
+    );
+    spawner.spawn(led_task(led_channel, leds)).unwrap();
+    // for _ in 0..wakeup_cause_var as u8 {
+    //     led_channel
+    //         .send(firmware::leds::LedCommand::Set { led: 1, level: 100 })
+    //         .await;
+    //     Timer::after_millis(500).await;
+    //     led_channel
+    //         .send(firmware::leds::LedCommand::Set { led: 1, level: 0 })
+    //         .await;
+    //     Timer::after_millis(500).await;
+    // }
+
     // END LEDC Block
 
     // let internal_temp_sensor =
@@ -186,9 +197,27 @@ async fn main(spawner: Spawner) {
 
     spawner.spawn(run(controller, state, devices)).unwrap();
     loop {
-        channel1.start_duty_fade(0, 15, 2000).unwrap();
+        led_channel
+            .send(firmware::leds::LedCommand::Fade((
+                FadeConfig {
+                    start_pct: 0,
+                    end_pct: 15,
+                    fade_dur: 2000,
+                },
+                2,
+            )))
+            .await;
         Timer::after_millis(2000).await;
-        channel1.start_duty_fade(15, 0, 2000).unwrap();
+        led_channel
+            .send(firmware::leds::LedCommand::Fade((
+                FadeConfig {
+                    start_pct: 15,
+                    end_pct: 0,
+                    fade_dur: 2000,
+                },
+                2,
+            )))
+            .await;
         Timer::after_millis(2000).await;
     }
 }

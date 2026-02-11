@@ -1,6 +1,7 @@
 pub mod lp;
 pub mod sampling;
 pub mod sensors;
+use defmt::{Debug2Format, info};
 use embassy_embedded_hal::shared_bus::I2cDeviceError;
 use embassy_time::{Duration, Instant, Timer};
 
@@ -17,7 +18,7 @@ pub async fn measure(state: &'static State, devices: &'static Devices<'static>) 
         };
         let beginning = Instant::now();
         let d = measure_once(devices).await;
-        // info!("Measurement data: {:?}", Debug2Format(&d));
+        info!("Measurement data: {:?}", Debug2Format(&d));
         {
             let mut s = state.temperature.lock().await;
             s.humidity = d.temperature.humidity;

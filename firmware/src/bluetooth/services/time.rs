@@ -1,7 +1,7 @@
 use esp_hal::{peripherals, rtc_cntl::Rtc};
 use trouble_host::{
     PacketPool,
-    gatt::{GattConnection, GattEvent, ReadEvent},
+    gatt::{GattEvent, ReadEvent},
 };
 
 use crate::{

@@ -2,7 +2,7 @@
 
 - Every 2nd level headline is a service
 - Every 3rd level headline is a characteristic
-- Headline is as follows structured: `Name (UUID) (rust data type) access type (R=Read, W=Write, N=Notify)
+- Headline is as follows structured: `Name (UUID) (rust data type) access type (R=Read, W=Write, N=Notify)`
 
 ## BaseData (1aba5096-5be2-4768-aef0-51c8667e1aa8)
 No content, used to identify devices compatible with Mawoka App
@@ -82,8 +82,8 @@ pub struct Measurement {
     pressure: u32, // 12345 -> 12.345 Pa
     temp_t: i32,   // 2623 -> 26.23°C
     humidity: u16, // 42 -> 42%
-    co2: i16,
-    voc: i32,
+    co2: i16, // in ppm
+    voc: i32, // VOC index according to Sensirion
 }
 assert_eq!(size_of::<Measurement>(), 22);
 ```

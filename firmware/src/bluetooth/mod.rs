@@ -54,7 +54,7 @@ pub async fn run(
                     // run until any task ends (usually because the connection has been closed),
                     // then return to advertising state.
                     select(a, b).await;
-                    go_sleep_without_devices(crate::energy::sleep::SleepState::Standby).await;
+                    // go_sleep_without_devices(crate::energy::sleep::SleepState::Standby).await;
                 }
                 Err(e) => {
                     let e = defmt::Debug2Format(&e);

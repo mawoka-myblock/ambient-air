@@ -8,6 +8,7 @@ pub mod bluetooth;
 pub mod button;
 pub mod data;
 pub mod energy;
+pub mod leds;
 pub mod measurements;
 pub mod storage;
 

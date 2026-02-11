@@ -67,20 +67,28 @@ impl Co2Service {
     pub async fn read_sampling_interval<P: PacketPool>(
         &self,
         _e: &ReadEvent<'_, '_, P>,
-        _server: &Server<'_>,
+        server: &Server<'_>,
         _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
-        todo!()
+        server
+            .co2
+            .sampling_interval
+            .set(server, &unsafe { crate::STCC4_SAMPLE_RATE })
+            .unwrap();
     }
 
     pub async fn write_sampling_interval<P: PacketPool>(
         &self,
-        _e: &GenericWrite<'_, i16>,
+        e: &GenericWrite<'_, i16>,
         _server: &Server<'_>,
         _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
-        todo!()
+        let data = match e {
+            GenericWrite::Long { data: _, handle: _ } => 600,
+            GenericWrite::Short(d) => *d,
+        };
+        unsafe { crate::STCC4_SAMPLE_RATE = data.max(5) }
     }
 }

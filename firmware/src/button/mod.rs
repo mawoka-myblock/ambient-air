@@ -20,6 +20,10 @@ pub async fn button_task(_state: &'static State) {
         unsafe { peripherals::GPIO3::steal() },
         InputConfig::default().with_pull(esp_hal::gpio::Pull::Up),
     );
+    Input::new(
+        unsafe { peripherals::GPIO4::steal() },
+        InputConfig::default().with_pull(esp_hal::gpio::Pull::Up),
+    );
 
     let mut btn = Button::new(input_btn, ButtonConfig::default());
     loop {
@@ -41,10 +45,16 @@ pub async fn button_task(_state: &'static State) {
     }
     Timer::after_millis(1000).await;
     let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
-    let mut pin = unsafe { peripherals::GPIO3::steal() };
-    let wakeup_pins: &mut [(&mut dyn gpio::RtcPinWithResistors, WakeupLevel)] =
-        &mut [(&mut pin, WakeupLevel::Low)];
+    let mut pin_1 = unsafe { peripherals::GPIO3::steal() };
+    let mut pin_2 = unsafe { peripherals::GPIO4::steal() };
+    let wakeup_pins: &mut [(&mut dyn gpio::RtcPinWithResistors, WakeupLevel)] = &mut [
+        (&mut pin_1, WakeupLevel::Low),
+        (&mut pin_2, WakeupLevel::Low),
+    ];
     let wakeup_gpio = RtcioWakeupSource::new(wakeup_pins);
+    let wakeup_timer = TimerWakeupSource::new(Duration::from_mins(1));
     Timer::after_millis(100).await;
-    rtc.sleep_deep(&[&wakeup_gpio]);
+    rtc.sleep_deep(&[&wakeup_gpio, &wakeup_timer]);
 }
+
+// 7
