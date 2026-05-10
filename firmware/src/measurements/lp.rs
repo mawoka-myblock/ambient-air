@@ -12,19 +12,21 @@ use embassy_time::Timer;
 use esp_hal::gpio;
 use esp_hal::i2c::master::{self as I2C, I2c};
 use esp_hal::peripherals::{GPIO20, GPIO21, I2C0, LPWR};
+use esp_hal::rom::software_reset;
 use esp_hal::rtc_cntl::Rtc;
 use esp_hal::rtc_cntl::sleep::{RtcioWakeupSource, TimerWakeupSource, WakeupLevel};
 use esp_hal::time::Rate;
 use esp_hal::{Async, peripherals};
 use sgp40::Sgp40;
 
-use crate::SGP40_READINGS;
+use crate::measurements::voc::{restore_voc_state, store_voc_state};
+
 pub async fn lp_measurement(
     i2c_peripheral: I2C0<'static>,
     gp20: GPIO20<'static>,
     gp21: GPIO21<'static>,
     rtc_peripheral: LPWR<'static>,
-) -> bool {
+) -> ! {
     let i2c_hal = I2c::new(
         i2c_peripheral,
         I2C::Config::default().with_frequency(Rate::from_khz(400)),
@@ -58,10 +60,14 @@ pub async fn lp_measurement(
         .await;
     let _ = stcc4.single_shot(false).await;
     let mut sleep_dur = Duration::from_secs((unsafe { crate::STCC4_SAMPLE_RATE } as u64).max(5));
-
     if unsafe { crate::SGP40_ENABLED == 1 } {
+        info!("SGP enabled");
         let i2c_dev4 = I2cDevice::new(i2c_bus);
         let mut sgp40 = Sgp40::new(i2c_dev4, 0x59, embassy_time::Delay);
+        let restored_voc_state = restore_voc_state();
+        if restored_voc_state.uptime > 0.0 {
+            sgp40.set_algorithm_state(&restored_voc_state);
+        }
         sgp40
             .measure_voc_index_with_rht(
                 (reading.humidity * 1000.0) as u16,
@@ -69,9 +75,11 @@ pub async fn lp_measurement(
             )
             .await
             .unwrap();
-        sleep_dur = Duration::from_secs(5);
-        unsafe { SGP40_READINGS += 1 };
+        store_voc_state(&sgp40.dump_algorithm_state());
+        unsafe { crate::SGP40_READINGS += 1 }
+        sleep_dur = Duration::from_secs(1);
     }
+
     let mut rtc = Rtc::new(rtc_peripheral);
     let timer = TimerWakeupSource::new(sleep_dur);
     let mut pin_1 = unsafe { peripherals::GPIO3::steal() };
@@ -82,4 +90,5 @@ pub async fn lp_measurement(
     ];
     let wakeup_gpio = RtcioWakeupSource::new(wakeup_pins);
     rtc.sleep_deep(&[&timer, &wakeup_gpio]);
+    // todo!("Sleep!");
 }

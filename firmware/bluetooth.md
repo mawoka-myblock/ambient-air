@@ -73,7 +73,7 @@ This JSON structure as UTF-8, finished with an `\0`
 ```
 Writing this immediately starts the sampling every x seconds and takes x samples.
 
-### Data (127ec103-86ea-4e75-9e35-2e0c772d6f85) (&[u8]) R
+### Data (127ec103-86ea-4e75-9e35-2e0c772d6f85) (&[u8]) N
 Reads sampling data as an array of C-like structs of following structure:
 ```rust
 #[repr(C, packed)]
@@ -88,6 +88,10 @@ pub struct Measurement {
 assert_eq!(size_of::<Measurement>(), 22);
 ```
 So each entry is 22 bytes for a max total of 3520 bytes/reading
+
+### Sample Count (d988b5cc-5154-45e2-9815-4d55261950ad) (i16) R
+Returns samples to be returned. Reading this characteristic sends the samples
+on the Data characteristic in bursts, so subscribe to that, then read this.
 
 ## Time Service (85083006-8da2-4d0b-9dca-fc3ccda46a3c)
 

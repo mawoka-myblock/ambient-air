@@ -148,6 +148,25 @@ pub struct GasIndexAlgorithm {
     adaptive_lowpass: AdaptiveLpf,
 }
 
+#[derive(Clone, Copy, Default, Debug, PartialEq)]
+pub struct VocAlgorithmState {
+    pub uptime: f32,
+    pub sraw: f32,
+    pub gas_index: f32,
+
+    pub mean: f32,
+    pub std: f32,
+    pub sraw_offset: f32,
+    pub uptime_gamma: f32,
+    pub uptime_gating: f32,
+    pub gating_duration_minutes: f32,
+
+    pub lp_initialized: bool,
+    pub lp_x1: f32,
+    pub lp_x2: f32,
+    pub lp_x3: f32,
+}
+
 impl GasIndexAlgorithm {
     pub fn with_sampling_interval(algorithm_type: AlgorithmType, sampling_interval: f32) -> Self {
         let mut res = Self {
@@ -272,6 +291,52 @@ impl GasIndexAlgorithm {
             }
         }
         *gas_index = (self.gas_index + 0.5) as i32;
+    }
+
+    pub fn save_state(&self) -> VocAlgorithmState {
+        let mve = &self.mean_variance_estimator;
+        let lpf = &self.adaptive_lowpass;
+
+        VocAlgorithmState {
+            uptime: self.uptime,
+            sraw: self.sraw,
+            gas_index: self.gas_index,
+
+            mean: mve.mean,
+            std: mve.std,
+            sraw_offset: mve.sraw_offset,
+            uptime_gamma: mve.uptime_gamma,
+            uptime_gating: mve.uptime_gating,
+            gating_duration_minutes: mve.gating_duration_minutes,
+
+            lp_initialized: lpf.initialized,
+            lp_x1: lpf.x1,
+            lp_x2: lpf.x2,
+            lp_x3: lpf.x3,
+        }
+    }
+
+    pub fn restore_state(&mut self, s: &VocAlgorithmState) {
+        self.uptime = s.uptime;
+        self.sraw = s.sraw;
+        self.gas_index = s.gas_index;
+
+        let mve = &mut self.mean_variance_estimator;
+        mve.initialized = true;
+        mve.mean = s.mean;
+        mve.std = s.std;
+        mve.sraw_offset = s.sraw_offset;
+        mve.uptime_gamma = s.uptime_gamma;
+        mve.uptime_gating = s.uptime_gating;
+        mve.gating_duration_minutes = s.gating_duration_minutes;
+
+        self.mox_model = MoxModel::new(mve.std, mve.mean);
+
+        let lpf = &mut self.adaptive_lowpass;
+        lpf.initialized = s.lp_initialized;
+        lpf.x1 = s.lp_x1;
+        lpf.x2 = s.lp_x2;
+        lpf.x3 = s.lp_x3;
     }
 }
 

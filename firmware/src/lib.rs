@@ -1,8 +1,10 @@
 #![no_std]
+#![feature(int_roundings)]
 
 use esp_hal::ram;
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-use crate::measurements::sampling::MEAS_SIZE;
+use crate::measurements::{sampling::MEAS_SIZE, voc::STATE_SIZE};
 extern crate alloc;
 pub mod bluetooth;
 pub mod button;
@@ -21,7 +23,8 @@ macro_rules! mk_static {
         x
     }};
 }
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, IntoPrimitive, TryFromPrimitive)]
+#[repr(i8)]
 pub enum PowerState {
     DeepSleep = 0,
     SensorActiveSleep = 1,
@@ -55,10 +58,25 @@ pub static mut SAMPLE_EVERY_SECONDS: i16 = 0;
 pub static mut SAMPLE_BUFFER: [u8; SAMPLES_PER_BUFFER * MEAS_SIZE] =
     [0u8; SAMPLES_PER_BUFFER * MEAS_SIZE]; // 160 samples in these 3520 bytes (22 bytes/sample)
 
+#[ram(unstable(rtc_fast, persistent))]
+pub static mut VOC_ALGO_STATE: [u8; STATE_SIZE] = [0u8; STATE_SIZE];
+
+#[ram(unstable(rtc_fast, persistent))]
+pub static mut LAST_CO2_SAMPLE: u64 = 0;
+
+#[ram(unstable(rtc_fast, persistent))]
+pub static mut SGP40_MEAN: f32 = 0.0;
+
+#[ram(unstable(rtc_fast, persistent))]
+pub static mut SGP40_STD: f32 = 0.0;
+
+#[ram(unstable(rtc_fast, persistent))]
+pub static mut NEEDS_SAMPLES_WRITTEN_TO_NVS: u8 = 0;
+
 pub const SAMPLES_PER_BUFFER: usize = 160;
 
-pub const NVS_OFFSET: usize = 0x9000;
-pub const NVS_SIZE: usize = 0x6000;
+pub const NVS_OFFSET: usize = 0x208000;
+pub const NVS_SIZE: usize = 0x20000;
 pub mod nvs_keys {
     pub const SGP40_ENABLED_KEY: &[u8] = b"SGP40_EN";
     pub const STCC4_SAMPLE_RATE_KEY: &[u8] = b"STCC4_SR";

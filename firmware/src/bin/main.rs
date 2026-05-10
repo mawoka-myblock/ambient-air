@@ -10,11 +10,13 @@ use aht20::AHT20;
 use async_icp20100::Icp20100;
 use async_stcc4::Stcc4;
 use bq27441::Bq27441;
+use defmt::{Debug2Format, Display2Format, info};
 use embassy_embedded_hal::shared_bus::asynch::i2c::I2cDevice;
 use embassy_executor::Spawner;
 use embassy_sync::blocking_mutex::raw::NoopRawMutex;
 use embassy_sync::mutex::Mutex;
 use embassy_time::Timer;
+use esp_bootloader_esp_idf::partitions::{PartitionType, read_partition_table};
 use esp_hal::Async;
 use esp_hal::clock::CpuClock;
 use esp_hal::i2c::master::{self as I2C, I2c};
@@ -35,10 +37,11 @@ use firmware::energy::set_sgp40;
 use firmware::leds::{FadeConfig, Leds, led_task};
 use firmware::measurements::lp::lp_measurement;
 use firmware::measurements::measure;
-use firmware::measurements::sampling::record_sample;
+use firmware::measurements::sampling::{move_to_nvs, record_sample};
+use firmware::measurements::voc::{restore_voc_state, store_voc_state};
 use firmware::storage::Nvs;
 use firmware::{PowerState, SGP40_READINGS};
-use sgp40::Sgp40;
+use sgp40::{Sgp40, VocAlgorithmState};
 use trouble_host::prelude::ExternalController;
 use {esp_backtrace as _, esp_println as _};
 
@@ -48,8 +51,21 @@ esp_bootloader_esp_idf::esp_app_desc!();
 #[esp_rtos::main]
 async fn main(spawner: Spawner) {
     let beginning = embassy_time::Instant::now();
+    let wakeup_cause_var = wakeup_cause();
+    if wakeup_cause_var as i8 == SleepSource::Gpio as i8 {
+        unsafe { firmware::POWER_STATE = PowerState::BluetoothMode as i8 }
+    }
 
-    let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
+    let config = esp_hal::Config::default().with_cpu_clock(
+        match PowerState::try_from(unsafe { firmware::POWER_STATE })
+            .unwrap_or(PowerState::SampleMode)
+        {
+            PowerState::DeepSleep => CpuClock::_80MHz,
+            PowerState::BluetoothMode => CpuClock::_160MHz,
+            PowerState::SampleMode => CpuClock::_80MHz,
+            PowerState::SensorActiveSleep => CpuClock::_80MHz,
+        },
+    );
     let peripherals = esp_hal::init(config);
 
     esp_alloc::heap_allocator!(size: 64 * 1024);
@@ -58,14 +74,6 @@ async fn main(spawner: Spawner) {
     let sw_interrupt =
         esp_hal::interrupt::software::SoftwareInterruptControl::new(peripherals.SW_INTERRUPT);
     esp_rtos::start(timg0.timer0, sw_interrupt.software_interrupt0);
-    let wakeup_cause_var = wakeup_cause();
-    if wakeup_cause_var as i8 == SleepSource::Gpio as i8 {
-        unsafe { firmware::POWER_STATE = PowerState::BluetoothMode as i8 }
-    }
-    if unsafe { firmware::STCC4_SAMPLE_RATE } < 5 {
-        // On error (should never be under 5)
-        unsafe { firmware::STCC4_SAMPLE_RATE = 600 } // set to 600 (10min) sleep time.
-    }
 
     if unsafe { firmware::POWER_STATE == PowerState::SensorActiveSleep as i8 } {
         lp_measurement(
@@ -75,7 +83,6 @@ async fn main(spawner: Spawner) {
             peripherals.LPWR,
         )
         .await;
-        unreachable!();
     }
 
     // I2C Block
@@ -111,11 +118,34 @@ async fn main(spawner: Spawner) {
     let i2c_dev3 = I2cDevice::new(i2c_bus);
     let sgp40 = Mutex::new(Sgp40::new(i2c_dev3, 0x59, embassy_time::Delay));
 
+    let restored_voc_state = restore_voc_state();
+    info!("Restored data: {}", Debug2Format(&restored_voc_state));
+    if restored_voc_state.uptime > 0.0 {
+        sgp40.lock().await.set_algorithm_state(&restored_voc_state);
+    }
+
     let i2c_dev5 = I2cDevice::new(i2c_bus);
     let bq27441 = Mutex::new(Bq27441::new(i2c_dev5, 0x55).await.unwrap());
+    // let mut flash = esp_storage::FlashStorage::new(peripherals.FLASH);
 
-    let nvs =
-        Mutex::new(Nvs::new(firmware::NVS_OFFSET, firmware::NVS_SIZE, peripherals.FLASH).unwrap());
+    // let mut buffer = [0u8; esp_bootloader_esp_idf::partitions::PARTITION_TABLE_MAX_LEN];
+    // let ptns = read_partition_table(&mut flash, &mut buffer).unwrap();
+    // for i in 0..ptns.len() {
+    //     let pt = ptns.get_partition(i).unwrap();
+    //     info!(
+    //         "{:?}, offset: 0x{:x} len: 0x{:x}",
+    //         pt,
+    //         pt.offset(),
+    //         pt.len()
+    //     );
+    // }
+    // return;
+
+    let raw_nvs = Nvs::new(firmware::NVS_OFFSET, firmware::NVS_SIZE, peripherals.FLASH).unwrap();
+
+    // firmware::measurements::sampling::move_to_nvs(&mut raw_nvs, 3).await;
+
+    let nvs = Mutex::new(raw_nvs);
 
     let devices: &'static Devices = firmware::mk_static!(
         Devices,
@@ -135,7 +165,15 @@ async fn main(spawner: Spawner) {
         record_sample(devices, beginning, &mut *devices.nvs.lock().await).await;
         unreachable!();
     }
+
     set_sgp40(devices).await;
+
+    if unsafe { firmware::NEEDS_SAMPLES_WRITTEN_TO_NVS == 1 } {
+        info!("Saving to NVS!");
+        let mut nvs_l = devices.nvs.lock().await;
+        move_to_nvs(&mut nvs_l).await;
+        unsafe { firmware::NEEDS_SAMPLES_WRITTEN_TO_NVS = 0 };
+    }
 
     // LEDC Block
     let ledc = firmware::mk_static!(Ledc<'static>, Ledc::new(peripherals.LEDC));

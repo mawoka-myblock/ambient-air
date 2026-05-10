@@ -1,19 +1,24 @@
 pub mod long_write;
 pub mod services;
 
-use defmt::{info, warn};
-use embassy_futures::select::select;
+use defmt::{Debug2Format, info, warn};
+use embassy_futures::select::select3;
+use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_sync::signal::Signal;
 use embassy_time::{Instant, Timer};
 use esp_radio::ble::controller::BleConnector;
 use trouble_host::prelude::*;
 
 use crate::bluetooth::long_write::{ConnectionContext, LongWriteAccumulator};
-use crate::bluetooth::services::Server;
+use crate::bluetooth::services::{MeasurementVec, Server};
 use crate::data::{Devices, State};
 use crate::energy::sleep::go_sleep_without_devices;
+use crate::measurements::sampling::from_nvs;
 use embassy_futures::join::join;
 /// Max number of connections
 const CONNECTIONS_MAX: usize = 1;
+
+pub static SAMPLE_PUBLISH_DATA: Signal<CriticalSectionRawMutex, u8> = Signal::new();
 
 /// Max number of L2CAP channels.
 const L2CAP_CHANNELS_MAX: usize = 2; // Signal + att
@@ -51,9 +56,10 @@ pub async fn run(
                     // set up tasks when the connection is established to a central, so they don't run when no one is connected.
                     let a = gatt_events_task(&server, &conn, state, devices);
                     let b = notify_task(&server, &conn, state, devices);
+                    let c = notify_sampling_data(&server, &conn, state, devices);
                     // run until any task ends (usually because the connection has been closed),
                     // then return to advertising state.
-                    select(a, b).await;
+                    select3(a, b, c).await;
                     // go_sleep_without_devices(crate::energy::sleep::SleepState::Standby).await;
                 }
                 Err(e) => {
@@ -179,14 +185,45 @@ async fn notify_task<P: PacketPool>(
     _devices: &'static Devices<'static>,
 ) -> Result<(), Error> {
     loop {
-        let start = Instant::now();
         server.battery.notify(conn, state).await?;
         server.co2.notify(conn, state).await?;
         server.pressure.notify(conn, state).await?;
         server.temperature.notify(conn, state).await?;
         server.voc.notify(conn, state).await?;
-        let time_taken = Instant::now() - start;
-        info!("Took: {}µs", time_taken.as_micros());
         Timer::after_secs(2).await;
+    }
+}
+
+async fn notify_sampling_data<P: PacketPool>(
+    server: &Server<'_>,
+    conn: &GattConnection<'_, '_, P>,
+    _state: &'static State,
+    devices: &'static Devices<'static>,
+) -> Result<(), Error> {
+    loop {
+        let _ = SAMPLE_PUBLISH_DATA.wait().await;
+        info!("Sending measurement data");
+        let nvs_chunks = unsafe { crate::MEASUREMENT_SAMPLES_REQUESTED }
+            .div_ceil(crate::SAMPLES_PER_BUFFER as i16);
+        info!("Got {} chunks", nvs_chunks);
+        for i in 0..nvs_chunks {
+            let data = {
+                let mut nvs = devices.nvs.lock().await;
+                from_nvs(&mut nvs, i as usize).await
+            };
+            let notifys_needed = data.len().div_ceil(10);
+            for n in 0..notifys_needed {
+                let start = n * 10;
+                let end = ((n + 1) * 10).min(data.len());
+                let d = MeasurementVec::from_slice(&data[start..end]).unwrap();
+                info!("{:?}, len: {}", Debug2Format(&d), d.0.len());
+                let r = server.measurement.data.notify(conn, &d).await;
+                match r {
+                    Ok(_) => (),
+                    Err(e) => info!("{:?}", e),
+                }
+                Timer::after_millis(30).await;
+            }
+        }
     }
 }

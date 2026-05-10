@@ -15,6 +15,17 @@
 	let voc_enabled = false;
 	let power_mw = 0;
 
+	let measurements: Measurement[] = [];
+
+	interface Measurement {
+		temp_p: number; // in hundredths of a degree C
+		pressure: number; // in tenths of a Pa
+		temp_t: number; // in hundredths of a degree C
+		humidity: number; // %
+		co2: number; // ppm
+		voc: number; // Sensirion index
+	}
+
 	async function startNotify(service: string, char: string, cb) {
 		const c = await getChar(service, char);
 		await c.startNotifications();
@@ -67,6 +78,52 @@
 
 		await c.writeValue(new TextEncoder().encode(payload));
 	}
+
+	async function readSamples() {
+		measurements = [];
+		let readingSamples = true;
+
+		const dataChar = await getChar(SERVICES.MEASUREMENT, CHARS.measureData);
+		const countChar = await getChar(SERVICES.MEASUREMENT, CHARS.measureSampleCount);
+
+		/* ---------- register the notification callback ---------- */
+		await dataChar.startNotifications();
+		const onData = (e: Event) => {
+			const value = (e.target as BluetoothRemoteGATTCharacteristic).value;
+			if (!value) return;
+			const buf = new Uint8Array(value.buffer);
+
+			/*  Each packet is 20 bytes (the Rust struct is marked as 22, but only 20 bytes are defined).
+          The device may send several packets in a single burst – we simply loop over all of them. */
+			for (let i = 0; i + 20 <= buf.length; i += 20) {
+				const view = new DataView(buf.buffer, buf.byteOffset + i, 20);
+				const m: Measurement = {
+					temp_p: view.getInt32(0, true),
+					pressure: view.getUint32(4, true),
+					temp_t: view.getInt32(8, true),
+					humidity: view.getUint16(12, true),
+					co2: view.getInt16(14, true),
+					voc: view.getInt32(16, true)
+				};
+				measurements = [...measurements, m];
+			}
+		};
+		dataChar.addEventListener('characteristicvaluechanged', onData);
+
+		/* ---------- trigger the data burst ---------- */
+		const countVal = await countChar.readValue();
+		const expected = countVal.getInt16(0, true);
+		console.log(`Reading ${expected} samples …`);
+		/* (The act of reading the *sampleCount* characteristic triggers the device to send the packets.) */
+
+		/* ---------- stop notifications after a while ---------- */
+		setTimeout(() => {
+			dataChar.removeEventListener('characteristicvaluechanged', onData);
+			readingSamples = false;
+
+			console.log(`${measurements}`);
+		}, 2000); // 2 s should be enough for all bursts – tweak if you need more
+	}
 </script>
 
 <div class="min-h-screen bg-slate-900 p-6 text-white">
@@ -87,6 +144,7 @@
 			<button onclick={toggle_voc}
 				>{#if voc_enabled}Disable{:else}Enable{/if} VOC</button
 			>
+			<button onclick={readSamples}>Read samples</button>
 
 			<!-- <button
 				class="rounded bg-emerald-600 px-4 py-2 hover:bg-emerald-500"
@@ -94,6 +152,12 @@
 			>
 				Start Measurement Program
 			</button> -->
+			{#if measurements.length !== 0}
+				<p>Read {measurements.length} samples</p>
+				{#each measurements as sample, i}
+					<p>Temp: {sample.temp_t}</p>
+				{/each}
+			{/if}
 		{:else}
 			<button class="rounded bg-blue-600 px-4 py-2 hover:bg-blue-500" onclick={connectDevice}>
 				Connect Device

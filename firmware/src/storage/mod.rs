@@ -6,15 +6,18 @@ use embassy_sync::{
     semaphore::{GreedySemaphore, Semaphore},
 };
 use embedded_storage::{ReadStorage, Storage};
+use esp_hal::rom::crc::crc32_be;
 use portable_atomic::AtomicU8;
 use tickv::{ErrorCode, FlashController};
 
-static mut NVS_READ_BUF: &mut [u8; 1024] = &mut [0; 1024];
+pub const MAX_NVS_VALUE: usize = 4096;
+
+static mut NVS_READ_BUF: &mut [u8; MAX_NVS_VALUE] = &mut [0; MAX_NVS_VALUE];
 static NVS_INSTANCES: AtomicU8 = AtomicU8::new(0);
 
 pub struct Nvs {
     flash_peripheral: esp_hal::peripherals::FLASH<'static>,
-    tickv: Rc<tickv::TicKV<'static, NvsFlash, 1024>>,
+    tickv: Rc<tickv::TicKV<'static, NvsFlash, MAX_NVS_VALUE>>,
     semaphore: Rc<GreedySemaphore<CriticalSectionRawMutex>>,
 
     offset: usize,
@@ -45,7 +48,7 @@ impl Nvs {
         flash_size: usize,
         flash: esp_hal::peripherals::FLASH<'static>,
     ) -> anyhow::Result<Self, ErrorCode> {
-        let nvs = tickv::TicKV::<NvsFlash, 1024>::new(
+        let nvs = tickv::TicKV::<NvsFlash, MAX_NVS_VALUE>::new(
             NvsFlash::new(flash_offset, unsafe { flash.clone_unchecked() }),
             unsafe { NVS_READ_BUF },
             flash_size,
@@ -62,11 +65,14 @@ impl Nvs {
         })
     }
 
-    pub async fn get_key(&self, key: &[u8]) -> anyhow::Result<[u8; 1024], ErrorCode> {
+    pub async fn get_key(
+        &self,
+        key: &[u8],
+    ) -> anyhow::Result<([u8; MAX_NVS_VALUE], usize), ErrorCode> {
         let _permit = self.semaphore.acquire(1).await.unwrap();
-        let mut buf = [0u8; 1024];
-        self.tickv.get_key(hash(key), &mut buf)?;
-        Ok(buf)
+        let mut buf = [0u8; MAX_NVS_VALUE];
+        let d = self.tickv.get_key(hash(key), &mut buf)?;
+        Ok((buf, d.1))
     }
 
     pub async fn append_key(&self, key: &[u8], buf: &[u8]) -> Result<(), ErrorCode> {
@@ -87,8 +93,8 @@ impl Nvs {
                 let mut written = 0;
 
                 while written < self.size {
-                    let chunk = [0; 1024];
-                    let chunk_size = (self.size - written).min(1024);
+                    let chunk = [0; MAX_NVS_VALUE];
+                    let chunk_size = (self.size - written).min(MAX_NVS_VALUE);
 
                     _ = flash.write((self.offset + written) as u32, &chunk[..chunk_size]);
                     written += chunk_size;
@@ -124,7 +130,7 @@ impl Nvs {
     /// # Safety
     ///
     /// This doesn't check for semaphore!
-    pub unsafe fn append_key_unckeched(
+    pub unsafe fn append_key_unchecked(
         &self,
         key: &[u8],
         buf: &[u8],
@@ -142,8 +148,8 @@ impl Nvs {
                 let mut written = 0;
 
                 while written < self.size {
-                    let chunk = [0; 1024];
-                    let chunk_size = (self.size - written).min(1024);
+                    let chunk = [0; MAX_NVS_VALUE];
+                    let chunk_size = (self.size - written).min(MAX_NVS_VALUE);
 
                     _ = flash.write((self.offset + written) as u32, &chunk[..chunk_size]);
                     written += chunk_size;
@@ -200,14 +206,14 @@ impl NvsFlash {
     }
 }
 
-impl FlashController<1024> for NvsFlash {
+impl FlashController<MAX_NVS_VALUE> for NvsFlash {
     fn read_region(
         &self,
         region_number: usize,
-        buf: &mut [u8; 1024],
+        buf: &mut [u8; MAX_NVS_VALUE],
     ) -> Result<(), tickv::ErrorCode> {
         if let Ok(mut flash) = self.flash.try_lock() {
-            let offset = region_number * 1024;
+            let offset = region_number * MAX_NVS_VALUE;
             flash
                 .read(self.flash_offset + offset as u32, buf)
                 .map_err(|_| tickv::ErrorCode::ReadFail)
@@ -230,8 +236,8 @@ impl FlashController<1024> for NvsFlash {
         if let Ok(mut flash) = self.flash.try_lock() {
             flash
                 .write(
-                    self.flash_offset + (region_number as u32 * 1024),
-                    &[0xFF; 1024],
+                    self.flash_offset + (region_number * MAX_NVS_VALUE) as u32,
+                    &[0xFF; MAX_NVS_VALUE],
                 )
                 .map_err(|_| tickv::ErrorCode::EraseFail)
         } else {
@@ -241,11 +247,5 @@ impl FlashController<1024> for NvsFlash {
 }
 
 pub fn hash(buf: &[u8]) -> u64 {
-    let mut tmp = 0;
-    for b in buf {
-        tmp ^= *b as u64;
-        tmp <<= 1;
-    }
-
-    tmp
+    crc32_be(!0xffffffff, buf) as u64
 }

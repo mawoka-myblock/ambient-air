@@ -1,8 +1,10 @@
 use core::time::Duration;
 
 use defmt::info;
+use embassy_time::Timer;
 use esp_hal::{
     peripherals,
+    rom::software_reset,
     rtc_cntl::{Rtc, sleep::TimerWakeupSource},
 };
 use serde::{Deserialize, Serialize};
@@ -15,12 +17,12 @@ use trouble_host::{
 use crate::{
     PowerState,
     bluetooth::{
+        SAMPLE_PUBLISH_DATA,
         long_write::GenericWrite,
-        services::{CommandBuf, MeasurementService, MeasurementVec, Server},
+        services::{CommandBuf, MeasurementService, Server},
     },
     data::{Devices, State},
     handle_service,
-    measurements::sampling::from_nvs,
 };
 
 impl MeasurementService {
@@ -34,7 +36,7 @@ impl MeasurementService {
     ) {
         handle_service!(self, server, event, state, devices, long_write, {
             command => (read_command, write_command),
-            data    => (read_data, write_data),
+            sample_count    => (read_sample_count, write_sample_count),
         });
     }
     pub async fn read_command<P: PacketPool>(
@@ -46,22 +48,20 @@ impl MeasurementService {
     ) {
         unreachable!()
     }
-    pub async fn read_data<P: PacketPool>(
+    pub async fn read_sample_count<P: PacketPool>(
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
         _state: &'static State,
-        devices: &'static Devices<'static>,
+        _devices: &'static Devices<'static>,
     ) {
-        let data = {
-            let mut nvs = devices.nvs.lock().await;
-            from_nvs(&mut nvs, 0).await
-        };
         server
             .measurement
-            .data
-            .set(server, &MeasurementVec(data))
+            .sample_count
+            .set(server, &unsafe { crate::MEASUREMENT_SAMPLES_REQUESTED })
             .unwrap();
+        Timer::after_millis(100).await;
+        SAMPLE_PUBLISH_DATA.signal(0x00);
     }
 
     pub async fn write_command<P: PacketPool>(
@@ -71,7 +71,6 @@ impl MeasurementService {
         _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
-        info!("Writing command");
         let val = match e {
             GenericWrite::Long { data, .. } => &CommandBuf::from_gatt(data).unwrap(),
             GenericWrite::Short(d) => d,
@@ -87,15 +86,17 @@ impl MeasurementService {
             crate::SAMPLE_EVERY_SECONDS = d.every_x_seconds;
             crate::POWER_STATE = PowerState::SampleMode as i8;
         }
+        info!("Resetting...");
+        software_reset();
         let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
         rtc.sleep_deep(&[&TimerWakeupSource::new(Duration::from_millis(20))]);
 
         // info!("Value: {}", str_data)
     }
 
-    pub async fn write_data<P: PacketPool>(
+    pub async fn write_sample_count<P: PacketPool>(
         &self,
-        _e: &GenericWrite<'_, MeasurementVec>,
+        _e: &GenericWrite<'_, i16>,
         _server: &Server<'_>,
         _state: &'static State,
         _devices: &'static Devices<'static>,

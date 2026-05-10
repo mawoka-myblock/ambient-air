@@ -41,14 +41,14 @@ pub async fn go_sleep(state: SleepState, devices: Option<&mut Devices<'_>>) {
     })
     .unwrap();
     let stcc4_sampling_rate: i16 = match nvs.get_key(STCC4_SAMPLE_RATE_KEY).await {
-        Ok(bytes) => i16::from_le_bytes([bytes[0], bytes[1]]),
+        Ok(bytes) => i16::from_le_bytes([bytes.0[0], bytes.0[1]]),
         Err(_) => 600,
     };
     let sgp40_enabled = nvs
         .get_key(SGP40_ENABLED_KEY)
         .await
         .ok()
-        .and_then(|d| d.first().copied())
+        .and_then(|d| d.0.first().copied())
         .map(|v| v != 0)
         .unwrap_or(false);
     unsafe {

@@ -9,6 +9,7 @@ use hal::i2c::I2c;
 
 use sensirion_i2c::{crc8, i2c_async};
 
+pub use crate::algo::VocAlgorithmState;
 use crate::algo::{AlgorithmType, GasIndexAlgorithm};
 
 // mod vocalg;
@@ -193,12 +194,20 @@ where
     ///
     /// Reads VOC index. Driver is using Sensirion proprietary algortihm and it takes minimum
     /// 45 reads to start working. These reads should be made with 1Hz interval to keep the
-    /// algoritm working.
+    /// algorithm working.
     #[inline]
     pub async fn measure_voc_index(&mut self) -> Result<u16, Error<E>> {
         let raw = self.measure_raw_with_rht(50000, 25000).await?;
         self.voc.process(raw as i32, &mut self.gas_index);
         Ok(self.gas_index as u16)
+    }
+
+    pub fn set_algorithm_state(&mut self, state: &VocAlgorithmState) {
+        self.voc.restore_state(state);
+    }
+
+    pub fn dump_algorithm_state(&mut self) -> VocAlgorithmState {
+        self.voc.save_state()
     }
 
     /// Reads the voc index from the sensor with humidity and temperature compensation.

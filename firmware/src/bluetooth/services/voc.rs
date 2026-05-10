@@ -84,7 +84,7 @@ impl VocService {
             nvs.get_key(crate::nvs_keys::SGP40_ENABLED_KEY)
                 .await
                 .ok()
-                .and_then(|d| d.first().copied())
+                .and_then(|d| d.0.first().copied())
                 .map(|v| v != 0)
                 .unwrap_or(false)
         };

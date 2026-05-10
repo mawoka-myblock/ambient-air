@@ -5,8 +5,8 @@ pub mod pressure;
 pub mod temperature;
 pub mod time;
 pub mod voc;
-use defmt::error;
-use heapless::Vec;
+use defmt::{error, info};
+use heapless::{CapacityError, Vec};
 use trouble_host::{prelude::*, types::gatt_traits::FromGattError};
 
 use crate::measurements::sampling::{MEAS_SIZE, Measurement};
@@ -177,14 +177,25 @@ pub struct VocService {
 pub struct MeasurementService {
     #[characteristic(uuid = "84b0a39c-c55f-41f3-8797-de87992adc55", write)]
     pub command: CommandBuf,
-    #[characteristic(uuid = "127ec103-86ea-4e75-9e35-2e0c772d6f85", read)]
+    #[characteristic(uuid = "d988b5cc-5154-45e2-9815-4d55261950ad", read)]
+    pub sample_count: i16,
+    #[characteristic(uuid = "127ec103-86ea-4e75-9e35-2e0c772d6f85", notify)]
     pub data: MeasurementVec,
 }
 #[derive(Debug, Default)]
-pub struct MeasurementVec(Vec<Measurement, { crate::SAMPLES_PER_BUFFER }>);
+pub struct MeasurementVec(pub Vec<Measurement, 10>);
+
+impl MeasurementVec {
+    pub fn from_slice(d: &[Measurement]) -> Result<Self, CapacityError> {
+        let mut data: Vec<Measurement, 10> = Vec::new();
+        info!("Src len: {}, dst len: {}", d.len(), data.len());
+        data.extend_from_slice(d)?;
+        Ok(MeasurementVec(data))
+    }
+}
 
 impl AsGatt for MeasurementVec {
-    const MAX_SIZE: usize = 1024;
+    const MAX_SIZE: usize = 304;
     const MIN_SIZE: usize = 0;
     fn as_gatt(&self) -> &[u8] {
         bytemuck::cast_slice(self.0.as_slice())
