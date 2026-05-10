@@ -206,18 +206,26 @@ async fn notify_sampling_data<P: PacketPool>(
         let nvs_chunks = unsafe { crate::MEASUREMENT_SAMPLES_REQUESTED }
             .div_ceil(crate::SAMPLES_PER_BUFFER as i16);
         info!("Got {} chunks", nvs_chunks);
-        for i in 0..nvs_chunks {
+        let notifys_needed = unsafe { crate::MEASUREMENT_SAMPLES_REQUESTED }.div_ceil(10) as usize;
+        let mut notify_done = 0;
+        info!("Notifys needed: {}", notifys_needed);
+
+        'publish: for i in 0..nvs_chunks {
             let data = {
                 let mut nvs = devices.nvs.lock().await;
                 from_nvs(&mut nvs, i as usize).await
             };
-            let notifys_needed = data.len().div_ceil(10);
+
             for n in 0..notifys_needed {
+                if notify_done >= notifys_needed {
+                    break 'publish;
+                }
                 let start = n * 10;
                 let end = ((n + 1) * 10).min(data.len());
                 let d = MeasurementVec::from_slice(&data[start..end]).unwrap();
                 info!("{:?}, len: {}", Debug2Format(&d), d.0.len());
                 let r = server.measurement.data.notify(conn, &d).await;
+                notify_done += 1;
                 match r {
                     Ok(_) => (),
                     Err(e) => info!("{:?}", e),
