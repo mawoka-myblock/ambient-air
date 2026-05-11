@@ -12,10 +12,10 @@ use esp_hal::{
     },
 };
 
-use crate::{POWER_STATE, PowerState, data::State};
+use crate::{POWER_STATE, PowerState};
 
 #[embassy_executor::task]
-pub async fn button_task(_state: &'static State) {
+pub async fn button_task() {
     let input_btn = Input::new(
         unsafe { peripherals::GPIO3::steal() },
         InputConfig::default().with_pull(esp_hal::gpio::Pull::Up),

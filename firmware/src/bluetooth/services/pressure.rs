@@ -4,11 +4,12 @@ use trouble_host::{
 };
 
 use crate::{
+    MEASUREMENT_SIGNAL,
     bluetooth::{
         long_write::GenericWrite,
         services::{PressureService, Server},
     },
-    data::{Devices, State},
+    data::{Devices, PressureData},
     handle_service,
 };
 
@@ -16,24 +17,19 @@ impl PressureService {
     pub async fn notify<P: PacketPool>(
         &self,
         conn: &GattConnection<'_, '_, P>,
-        state: &State,
+        m: &PressureData,
     ) -> Result<(), trouble_host::Error> {
-        let (temp, pres) = {
-            let s = state.pressure.lock().await;
-            (s.temperature, s.pressure)
-        };
-        self.temperature.notify(conn, &temp).await?;
-        self.pressure.notify(conn, &pres).await?;
+        self.temperature.notify(conn, &m.temperature).await?;
+        self.pressure.notify(conn, &m.pressure).await?;
         Ok(())
     }
     pub async fn handle<P: PacketPool>(
         &self,
         event: &GattEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         devices: &'static Devices<'static>,
     ) {
-        handle_service!(self, server, event, state, devices, None, {
+        handle_service!(self, server, event, devices, None, {
             pressure => (read_pressure, write_pressure),
             temperature    => (read_temperature, write_temperature),
         });
@@ -42,32 +38,40 @@ impl PressureService {
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         server
             .pressure
             .pressure
-            .set(server, &{
-                let s = state.pressure.lock().await;
-                s.pressure
-            })
+            .set(
+                server,
+                &MEASUREMENT_SIGNAL
+                    .anon_receiver()
+                    .try_get()
+                    .unwrap()
+                    .pressure
+                    .pressure,
+            )
             .unwrap();
     }
     pub async fn read_temperature<P: PacketPool>(
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         server
             .pressure
             .temperature
-            .set(server, &{
-                let s = state.pressure.lock().await;
-                s.temperature
-            })
+            .set(
+                server,
+                &MEASUREMENT_SIGNAL
+                    .anon_receiver()
+                    .try_get()
+                    .unwrap()
+                    .pressure
+                    .temperature,
+            )
             .unwrap();
     }
 
@@ -75,7 +79,6 @@ impl PressureService {
         &self,
         _e: &GenericWrite<'_, f32>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         unreachable!()
@@ -85,7 +88,6 @@ impl PressureService {
         &self,
         _e: &GenericWrite<'_, f32>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         unreachable!()

@@ -75,7 +75,7 @@ pub struct State {
     pub config: Mutex<NoopRawMutex, Config>,
 }
 
-#[derive(Debug, Format)]
+#[derive(Debug, Format, Clone, Copy)]
 pub struct Config {
     pub update_interval: i32,
 }

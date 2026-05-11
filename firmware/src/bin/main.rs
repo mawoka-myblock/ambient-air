@@ -25,11 +25,11 @@ use esp_hal::system::SleepSource;
 use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
 // use esp_hal::tsens::{self, TemperatureSensor};
-use esp_radio::Controller;
 use esp_radio::ble::controller::BleConnector;
+use firmware::PowerState;
 use firmware::bluetooth::run;
 use firmware::button::button_task;
-use firmware::data::{Devices, State};
+use firmware::data::Devices;
 use firmware::energy::set_sgp40;
 use firmware::leds::{FadeConfig, Leds, led_task};
 use firmware::measurements::lp::lp_measurement;
@@ -37,7 +37,6 @@ use firmware::measurements::measure;
 use firmware::measurements::sampling::{move_to_nvs, record_sample};
 use firmware::measurements::voc::restore_voc_state;
 use firmware::storage::Nvs;
-use firmware::{PowerState, SGP40_READINGS};
 use sgp40::Sgp40;
 use trouble_host::prelude::ExternalController;
 use {esp_backtrace as _, esp_println as _};
@@ -198,38 +197,19 @@ async fn main(spawner: Spawner) {
     );
 
     // -----------------
-    // Init state
-    // -----------------
-    let state: &'static State = &*firmware::mk_static!(State, State::default());
-
-    // -----------------
-    // Set readings until stable for SGP40
-    // -----------------
-    {
-        let mut mut_voc = state.voc.lock().await;
-        mut_voc.readings_until_warmup_complete = mut_voc
-            .readings_until_warmup_complete
-            .saturating_sub(unsafe { SGP40_READINGS } as i32)
-            .clamp(0, 50);
-    }
-
-    // -----------------
     // Spawn main tasks
     // -----------------
-    spawner.spawn(led_task(led_channel, leds)).unwrap();
-    spawner.spawn(measure(state, devices)).unwrap();
-    spawner.spawn(button_task(state)).unwrap();
+    spawner.spawn(led_task(led_channel, leds).unwrap());
+    spawner.spawn(measure(devices).unwrap());
+    spawner.spawn(button_task().unwrap());
 
     // -----------------
     // Init Bluetooth
     // -----------------
-    let radio: &'static Controller<'_> =
-        &*firmware::mk_static!(Controller, esp_radio::init().unwrap());
-    let bluetooth = peripherals.BT;
-    let connector = BleConnector::new(radio, bluetooth, Default::default()).unwrap();
+    let connector = BleConnector::new(peripherals.BT, Default::default()).unwrap();
     let controller: ExternalController<_, 20> = ExternalController::new(connector);
 
-    spawner.spawn(run(controller, state, devices)).unwrap();
+    spawner.spawn(run(controller, devices).unwrap());
 
     // -----------------
     // Main loop breathing led

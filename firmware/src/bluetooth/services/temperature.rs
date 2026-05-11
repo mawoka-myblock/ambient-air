@@ -4,11 +4,12 @@ use trouble_host::{
 };
 
 use crate::{
+    MEASUREMENT_SIGNAL,
     bluetooth::{
         long_write::GenericWrite,
         services::{Server, TemperatureService},
     },
-    data::{Devices, State},
+    data::{Devices, TemperatureData},
     handle_service,
 };
 
@@ -16,14 +17,10 @@ impl TemperatureService {
     pub async fn notify<P: PacketPool>(
         &self,
         conn: &GattConnection<'_, '_, P>,
-        state: &State,
+        m: &TemperatureData,
     ) -> Result<(), trouble_host::Error> {
-        let (temp, hum) = {
-            let s = state.temperature.lock().await;
-            (s.temperature, s.humidity)
-        };
-        self.temperature.notify(conn, &temp).await?;
-        self.humidity.notify(conn, &hum).await?;
+        self.temperature.notify(conn, &m.temperature).await?;
+        self.humidity.notify(conn, &m.humidity).await?;
         Ok(())
     }
 
@@ -31,10 +28,9 @@ impl TemperatureService {
         &self,
         event: &GattEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         devices: &'static Devices<'static>,
     ) {
-        handle_service!(self, server, event, state, devices, None, {
+        handle_service!(self, server, event, devices, None, {
             temperature => (read_temperature, write_temperature),
             humidity    => (read_humidity, write_humidity),
         });
@@ -43,32 +39,40 @@ impl TemperatureService {
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         server
             .temperature
             .temperature
-            .set(server, &{
-                let s = state.temperature.lock().await;
-                s.temperature
-            })
+            .set(
+                server,
+                &MEASUREMENT_SIGNAL
+                    .anon_receiver()
+                    .try_get()
+                    .unwrap()
+                    .temperature
+                    .temperature,
+            )
             .unwrap();
     }
     pub async fn read_humidity<P: PacketPool>(
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         server
             .temperature
             .humidity
-            .set(server, &{
-                let s = state.temperature.lock().await;
-                s.humidity
-            })
+            .set(
+                server,
+                &MEASUREMENT_SIGNAL
+                    .anon_receiver()
+                    .try_get()
+                    .unwrap()
+                    .temperature
+                    .humidity,
+            )
             .unwrap();
     }
 
@@ -76,7 +80,6 @@ impl TemperatureService {
         &self,
         _e: &GenericWrite<'_, f32>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         unreachable!()
@@ -86,7 +89,6 @@ impl TemperatureService {
         &self,
         _e: &GenericWrite<'_, f32>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         unreachable!()

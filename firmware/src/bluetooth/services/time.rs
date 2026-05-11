@@ -9,7 +9,7 @@ use crate::{
         long_write::GenericWrite,
         services::{Server, TimeService},
     },
-    data::{Devices, State},
+    data::Devices,
     handle_service,
 };
 
@@ -18,10 +18,9 @@ impl TimeService {
         &self,
         event: &GattEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         devices: &'static Devices<'static>,
     ) {
-        handle_service!(self, server, event, state, devices, None, {
+        handle_service!(self, server, event, devices, None, {
             time => (read_time, write_time),
         });
     }
@@ -29,7 +28,6 @@ impl TimeService {
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         let rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
@@ -44,7 +42,6 @@ impl TimeService {
         &self,
         e: &GenericWrite<'_, u64>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         let data = match e {

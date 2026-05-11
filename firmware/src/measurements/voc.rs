@@ -1,3 +1,4 @@
+#![allow(unused_assignments)] // needed for the macros mutating i
 use defmt::{Debug2Format, info};
 use sgp40::VocAlgorithmState;
 

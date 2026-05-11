@@ -9,10 +9,12 @@ use embassy_time::Timer;
 use esp_radio::ble::controller::BleConnector;
 use trouble_host::prelude::*;
 
+use crate::MEASUREMENT_SIGNAL;
 use crate::bluetooth::long_write::{ConnectionContext, LongWriteAccumulator};
 use crate::bluetooth::services::{MeasurementVec, Server};
-use crate::data::{Devices, State};
+use crate::data::Devices;
 use crate::measurements::sampling::from_nvs;
+use defmt::unwrap;
 use embassy_futures::join::join;
 /// Max number of connections
 const CONNECTIONS_MAX: usize = 1;
@@ -24,7 +26,6 @@ const L2CAP_CHANNELS_MAX: usize = 2; // Signal + att
 #[embassy_executor::task]
 pub async fn run(
     controller: ExternalController<BleConnector<'static>, 20>,
-    state: &'static State,
     devices: &'static Devices<'static>,
 ) {
     // Using a fixed "random" address can be useful for testing. In real scenarios, one would
@@ -53,9 +54,9 @@ pub async fn run(
             match advertise("AmbientAir", &mut peripheral, &server).await {
                 Ok(conn) => {
                     // set up tasks when the connection is established to a central, so they don't run when no one is connected.
-                    let a = gatt_events_task(&server, &conn, state, devices);
-                    let b = notify_task(&server, &conn, state, devices);
-                    let c = notify_sampling_data(&server, &conn, state, devices);
+                    let a = gatt_events_task(&server, &conn, devices);
+                    let b = notify_task(&server, &conn, devices);
+                    let c = notify_sampling_data(&server, &conn, devices);
                     // run until any task ends (usually because the connection has been closed),
                     // then return to advertising state.
                     select3(a, b, c).await;
@@ -83,7 +84,6 @@ async fn ble_task<C: Controller, P: PacketPool>(mut runner: Runner<'_, C, P>) {
 async fn gatt_events_task<P: PacketPool>(
     server: &Server<'_>,
     conn: &GattConnection<'_, '_, P>,
-    state: &'static State,
     devices: &'static Devices<'static>,
 ) -> Result<(), Error> {
     let mut ctx = ConnectionContext {
@@ -117,19 +117,16 @@ async fn gatt_events_task<P: PacketPool>(
                     }
                     _ => None,
                 };
-                server
-                    .temperature
-                    .handle(&event, server, state, devices)
-                    .await;
-                server.pressure.handle(&event, server, state, devices).await;
-                server.co2.handle(&event, server, state, devices).await;
-                server.voc.handle(&event, server, state, devices).await;
+                server.temperature.handle(&event, server, devices).await;
+                server.pressure.handle(&event, server, devices).await;
+                server.co2.handle(&event, server, devices).await;
+                server.voc.handle(&event, server, devices).await;
                 server
                     .measurement
-                    .handle(&event, server, state, devices, long_write)
+                    .handle(&event, server, devices, long_write)
                     .await;
-                server.battery.handle(&event, server, state, devices).await;
-                server.time.handle(&event, server, state, devices).await;
+                server.battery.handle(&event, server, devices).await;
+                server.time.handle(&event, server, devices).await;
                 // This step is also performed at drop(), but writing it explicitly is necessary
                 // in order to ensure reply is sent.
                 if long_write.is_some() {
@@ -157,7 +154,7 @@ async fn advertise<'values, 'server, C: Controller>(
     let len = AdStructure::encode_slice(
         &[
             AdStructure::Flags(LE_GENERAL_DISCOVERABLE | BR_EDR_NOT_SUPPORTED),
-            AdStructure::ServiceUuids16(&[[0x0f, 0x18]]),
+            AdStructure::CompleteServiceUuids16(&[[0x0f, 0x18]]),
             AdStructure::CompleteLocalName(name.as_bytes()),
         ],
         &mut advertiser_data[..],
@@ -180,23 +177,23 @@ async fn advertise<'values, 'server, C: Controller>(
 async fn notify_task<P: PacketPool>(
     server: &Server<'_>,
     conn: &GattConnection<'_, '_, P>,
-    state: &'static State,
     _devices: &'static Devices<'static>,
 ) -> Result<(), Error> {
+    let mut recv = unwrap!(MEASUREMENT_SIGNAL.receiver());
+
     loop {
-        server.battery.notify(conn, state).await?;
-        server.co2.notify(conn, state).await?;
-        server.pressure.notify(conn, state).await?;
-        server.temperature.notify(conn, state).await?;
-        server.voc.notify(conn, state).await?;
-        Timer::after_secs(2).await;
+        let msg = recv.changed().await;
+        server.battery.notify(conn, &msg.battery).await?;
+        server.co2.notify(conn, &msg.co2).await?;
+        server.pressure.notify(conn, &msg.pressure).await?;
+        server.temperature.notify(conn, &msg.temperature).await?;
+        server.voc.notify(conn, &msg.voc).await?;
     }
 }
 
 async fn notify_sampling_data<P: PacketPool>(
     server: &Server<'_>,
     conn: &GattConnection<'_, '_, P>,
-    _state: &'static State,
     devices: &'static Devices<'static>,
 ) -> Result<(), Error> {
     loop {

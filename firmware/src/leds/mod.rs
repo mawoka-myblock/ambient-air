@@ -81,7 +81,7 @@ pub type LedChannel = Channel<NoopRawMutex, LedCommand, 2>;
 pub async fn led_task(comm: &'static LedChannel, leds: &'static mut Leds<'static>) {
     loop {
         match comm.receive().await {
-            LedCommand::SetAll(d) => todo!(),
+            LedCommand::SetAll(_d) => todo!(),
             LedCommand::AllOff => todo!(),
             LedCommand::Fade(d) => leds.fade_single(d.0, d.1).await,
             LedCommand::Set { led, level } => leds.set_single(led, level).await,

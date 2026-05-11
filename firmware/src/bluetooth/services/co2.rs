@@ -4,11 +4,12 @@ use trouble_host::{
 };
 
 use crate::{
+    MEASUREMENT_SIGNAL,
     bluetooth::{
         long_write::GenericWrite,
         services::{Co2Service, Server},
     },
-    data::{Devices, State},
+    data::{Co2Data, Devices},
     handle_service,
 };
 
@@ -16,13 +17,9 @@ impl Co2Service {
     pub async fn notify<P: PacketPool>(
         &self,
         conn: &GattConnection<'_, '_, P>,
-        state: &State,
+        m: &Co2Data,
     ) -> Result<(), trouble_host::Error> {
-        let co2 = {
-            let s = state.co2.lock().await;
-            s.co2
-        };
-        self.co2.notify(conn, &co2).await?;
+        self.co2.notify(conn, &m.co2).await?;
         Ok(())
     }
 
@@ -30,10 +27,9 @@ impl Co2Service {
         &self,
         event: &GattEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         devices: &'static Devices<'static>,
     ) {
-        handle_service!(self, server, event, state, devices, None, {
+        handle_service!(self, server, event, devices, None, {
             co2 => (read_co2, write_co2),
             sampling_interval => (read_sampling_interval, write_sampling_interval),
         });
@@ -42,16 +38,20 @@ impl Co2Service {
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         server
             .co2
             .co2
-            .set(server, &{
-                let s = state.co2.lock().await;
-                s.co2
-            })
+            .set(
+                server,
+                &MEASUREMENT_SIGNAL
+                    .anon_receiver()
+                    .try_get()
+                    .unwrap()
+                    .co2
+                    .co2,
+            )
             .unwrap();
     }
 
@@ -59,7 +59,6 @@ impl Co2Service {
         &self,
         _e: &GenericWrite<'_, i16>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         unreachable!()
@@ -68,7 +67,6 @@ impl Co2Service {
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         server
@@ -82,7 +80,6 @@ impl Co2Service {
         &self,
         e: &GenericWrite<'_, i16>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         let data = match e {

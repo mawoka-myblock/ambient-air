@@ -4,11 +4,12 @@ use trouble_host::{
 };
 
 use crate::{
+    MEASUREMENT_SIGNAL,
     bluetooth::{
         long_write::GenericWrite,
         services::{BatteryService, Server},
     },
-    data::{Devices, State},
+    data::{Battery, Devices},
     handle_service,
 };
 
@@ -16,14 +17,10 @@ impl BatteryService {
     pub async fn notify<P: PacketPool>(
         &self,
         conn: &GattConnection<'_, '_, P>,
-        state: &State,
+        m: &Battery,
     ) -> Result<(), trouble_host::Error> {
-        let (power, level) = {
-            let s = state.battery.lock().await;
-            (s.power, s.percentage)
-        };
-        self.level.notify(conn, &(level as u8)).await?;
-        self.power.notify(conn, &power).await?;
+        self.level.notify(conn, &(m.percentage as u8)).await?;
+        self.power.notify(conn, &m.power).await?;
         Ok(())
     }
 
@@ -31,10 +28,9 @@ impl BatteryService {
         &self,
         event: &GattEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         devices: &'static Devices<'static>,
     ) {
-        handle_service!(self, server, event, state, devices, None, {
+        handle_service!(self, server, event, devices, None, {
             level => (read_level, write_level),
             power    => (read_power, write_power),
             capacity => (read_capacity, write_capacity)
@@ -44,15 +40,18 @@ impl BatteryService {
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         server
             .battery
             .level
             .set(server, &{
-                let s = state.battery.lock().await;
-                s.percentage as u8
+                MEASUREMENT_SIGNAL
+                    .anon_receiver()
+                    .try_get()
+                    .unwrap()
+                    .battery
+                    .percentage as u8
             })
             .unwrap();
     }
@@ -60,15 +59,18 @@ impl BatteryService {
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         server
             .battery
             .power
             .set(server, &{
-                let s = state.battery.lock().await;
-                s.power
+                MEASUREMENT_SIGNAL
+                    .anon_receiver()
+                    .try_get()
+                    .unwrap()
+                    .battery
+                    .power
             })
             .unwrap();
     }
@@ -76,7 +78,6 @@ impl BatteryService {
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        _state: &'static State,
         devices: &'static Devices<'static>,
     ) {
         server
@@ -93,7 +94,6 @@ impl BatteryService {
         &self,
         _e: &GenericWrite<'_, u8>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         unreachable!()
@@ -103,7 +103,6 @@ impl BatteryService {
         &self,
         _e: &GenericWrite<'_, i16>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         unreachable!()
@@ -113,7 +112,6 @@ impl BatteryService {
         &self,
         e: &GenericWrite<'_, i16>,
         _server: &Server<'_>,
-        _state: &'static State,
         devices: &'static Devices<'static>,
     ) {
         let data = match e {

@@ -1,7 +1,10 @@
 #![no_std]
 #![feature(int_roundings)]
 
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, watch::Watch};
+use defmt::Format;
+use embassy_sync::{
+    blocking_mutex::raw::CriticalSectionRawMutex, pubsub::PubSubChannel, watch::Watch,
+};
 use esp_hal::ram;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
@@ -14,6 +17,7 @@ pub mod energy;
 pub mod leds;
 pub mod measurements;
 pub mod storage;
+pub mod tasks;
 
 #[macro_export]
 macro_rules! mk_static {
@@ -84,3 +88,20 @@ pub mod nvs_keys {
 }
 
 pub static MEASUREMENT_SIGNAL: Watch<CriticalSectionRawMutex, MeasurementResult, 1> = Watch::new();
+
+#[derive(Debug, Format, Clone, Copy)]
+pub enum Commands {
+    Reconfigure(data::Config),
+    Sleep(SleepOptions),
+}
+
+#[derive(Debug, Format, Clone, Copy)]
+pub struct SleepOptions {
+    allow_buttons: bool,
+    wake_in_ms: Option<u32>,
+}
+
+pub static COMMAND_CHANNEL: PubSubChannel<CriticalSectionRawMutex, Commands, 3, 1, 1> =
+    PubSubChannel::new();
+
+pub static CONFIG_SIGNAL: Watch<CriticalSectionRawMutex, data::Config, 1> = Watch::new();

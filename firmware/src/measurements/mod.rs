@@ -7,56 +7,40 @@ use embassy_embedded_hal::shared_bus::I2cDeviceError;
 use embassy_time::{Duration, Instant, Timer};
 
 use crate::{
-    MEASUREMENT_SIGNAL,
-    data::{Battery, Co2Data, Devices, PressureData, State, TemperatureData, VocData},
+    CONFIG_SIGNAL, MEASUREMENT_SIGNAL, SGP40_READINGS,
+    data::{Battery, Co2Data, Devices, PressureData, TemperatureData, VocData},
     measurements::voc::store_voc_state,
 };
 
 pub type I2cDevError = I2cDeviceError<esp_hal::i2c::master::Error>;
 
 #[embassy_executor::task]
-pub async fn measure(state: &'static State, devices: &'static Devices<'static>) {
+pub async fn measure(devices: &'static Devices<'static>) {
     let mut last_co2_sample = Instant::now();
-    let mut mm_signal = MEASUREMENT_SIGNAL.sender();
+    let mm_signal = MEASUREMENT_SIGNAL.sender();
+    let mut first_run = true;
     loop {
-        let refresh_secs = {
-            let s = state.config.lock().await;
-            s.update_interval
+        let refresh_secs = match CONFIG_SIGNAL.anon_receiver().try_get() {
+            Some(d) => d.update_interval,
+            None => 1,
         };
         let beginning = Instant::now();
         let include_co2_sampling = beginning - last_co2_sample >= Duration::from_secs(5);
         if include_co2_sampling {
             last_co2_sample = beginning;
         }
-        let d = measure_once(devices, include_co2_sampling).await;
+        let mut d = measure_once(devices, include_co2_sampling).await;
+
+        if first_run {
+            d.voc.readings_until_warmup_complete = d
+                .voc
+                .readings_until_warmup_complete
+                .saturating_sub(unsafe { SGP40_READINGS } as i32)
+                .clamp(0, 50);
+        }
+        first_run = false;
+
         mm_signal.send(d);
-        {
-            let mut s = state.temperature.lock().await;
-            s.humidity = d.temperature.humidity;
-            s.temperature = d.temperature.temperature;
-        }
-        {
-            let mut s = state.pressure.lock().await;
-            s.pressure = d.pressure.pressure;
-            s.temperature = d.pressure.temperature;
-        }
-        if include_co2_sampling {
-            let mut s = state.co2.lock().await;
-            s.co2 = d.co2.co2;
-        }
-        {
-            let mut s = state.voc.lock().await;
-            s.value = d.voc.value;
-            if s.readings_until_warmup_complete > 0 {
-                s.readings_until_warmup_complete -= 1
-            }
-        }
-        {
-            let mut s = state.battery.lock().await;
-            s.percentage = d.battery.percentage;
-            s.power = d.battery.power;
-            s.voltage = d.battery.voltage;
-        }
         let time_passed = Instant::now() - beginning;
         let refresh_frequency_wanted = Duration::from_millis((refresh_secs * 1000) as u64);
         let sleep_time = if refresh_frequency_wanted > time_passed {

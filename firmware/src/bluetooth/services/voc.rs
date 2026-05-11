@@ -4,11 +4,12 @@ use trouble_host::{
 };
 
 use crate::{
+    MEASUREMENT_SIGNAL,
     bluetooth::{
         long_write::GenericWrite,
         services::{Server, VocService},
     },
-    data::{Devices, State},
+    data::{Devices, VocData},
     handle_service,
 };
 
@@ -16,14 +17,12 @@ impl VocService {
     pub async fn notify<P: PacketPool>(
         &self,
         conn: &GattConnection<'_, '_, P>,
-        state: &State,
+        m: &VocData,
     ) -> Result<(), trouble_host::Error> {
-        let (index, count) = {
-            let s = state.voc.lock().await;
-            (s.value, s.readings_until_warmup_complete)
-        };
-        self.index.notify(conn, &(index as i16)).await?;
-        self.count.notify(conn, &(count as i16)).await?;
+        self.index.notify(conn, &(m.value as i16)).await?;
+        self.count
+            .notify(conn, &(m.readings_until_warmup_complete as i16))
+            .await?;
         Ok(())
     }
 
@@ -31,10 +30,9 @@ impl VocService {
         &self,
         event: &GattEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         devices: &'static Devices<'static>,
     ) {
-        handle_service!(self, server, event, state, devices, None, {
+        handle_service!(self, server, event, devices, None, {
             index => (read_voc, write_voc),
             count    => (read_count, write_count),
             enabled => (read_enabled, write_enabled)
@@ -44,39 +42,46 @@ impl VocService {
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         server
             .voc
             .index
-            .set(server, &{
-                let s = state.voc.lock().await;
-                s.value as i16
-            })
+            .set(
+                server,
+                &(MEASUREMENT_SIGNAL
+                    .anon_receiver()
+                    .try_get()
+                    .unwrap()
+                    .voc
+                    .value as i16),
+            )
             .unwrap();
     }
     pub async fn read_count<P: PacketPool>(
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         server
             .voc
             .count
-            .set(server, &{
-                let s = state.voc.lock().await;
-                s.readings_until_warmup_complete as i16
-            })
+            .set(
+                server,
+                &(MEASUREMENT_SIGNAL
+                    .anon_receiver()
+                    .try_get()
+                    .unwrap()
+                    .voc
+                    .readings_until_warmup_complete as i16),
+            )
             .unwrap();
     }
     pub async fn read_enabled<P: PacketPool>(
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        _state: &'static State,
         devices: &'static Devices<'static>,
     ) {
         let sgp40_enabled = {
@@ -95,7 +100,6 @@ impl VocService {
         &self,
         _e: &GenericWrite<'_, i16>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         unreachable!()
@@ -105,7 +109,6 @@ impl VocService {
         &self,
         _e: &GenericWrite<'_, i16>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         unreachable!()
@@ -114,7 +117,6 @@ impl VocService {
         &self,
         e: &GenericWrite<'_, bool>,
         _server: &Server<'_>,
-        _state: &'static State,
         devices: &'static Devices<'static>,
     ) {
         let data = match e {

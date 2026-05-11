@@ -1,10 +1,8 @@
 use core::time::Duration;
 
-use defmt::info;
 use embassy_time::Timer;
 use esp_hal::{
     peripherals,
-    rom::software_reset,
     rtc_cntl::{Rtc, sleep::TimerWakeupSource},
 };
 use serde::{Deserialize, Serialize};
@@ -21,7 +19,7 @@ use crate::{
         long_write::GenericWrite,
         services::{CommandBuf, MeasurementService, Server},
     },
-    data::{Devices, State},
+    data::Devices,
     handle_service,
 };
 
@@ -30,11 +28,10 @@ impl MeasurementService {
         &self,
         event: &GattEvent<'_, '_, P>,
         server: &Server<'_>,
-        state: &'static State,
         devices: &'static Devices<'static>,
         long_write: Option<(&[u8], u16)>,
     ) {
-        handle_service!(self, server, event, state, devices, long_write, {
+        handle_service!(self, server, event, devices, long_write, {
             command => (read_command, write_command),
             sample_count    => (read_sample_count, write_sample_count),
         });
@@ -43,7 +40,6 @@ impl MeasurementService {
         &self,
         _e: &ReadEvent<'_, '_, P>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         unreachable!()
@@ -52,7 +48,6 @@ impl MeasurementService {
         &self,
         _e: &ReadEvent<'_, '_, P>,
         server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         server
@@ -68,7 +63,6 @@ impl MeasurementService {
         &self,
         e: &GenericWrite<'_, CommandBuf>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         let val = match e {
@@ -98,7 +92,6 @@ impl MeasurementService {
         &self,
         _e: &GenericWrite<'_, i16>,
         _server: &Server<'_>,
-        _state: &'static State,
         _devices: &'static Devices<'static>,
     ) {
         unreachable!()

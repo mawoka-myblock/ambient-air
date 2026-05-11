@@ -49,7 +49,6 @@ macro_rules! handle_service {
         $svc:expr,
         $server:expr,
         $event:expr,
-        $state_var:expr,
         $devices_var:expr,
         $generic_write:expr,
         {
@@ -61,7 +60,7 @@ macro_rules! handle_service {
                 match e.handle() {
                     $(
                         h if h == $svc.$field.handle => {
-                            $svc.$read_fn(e, $server, $state_var, $devices_var).await;
+                            $svc.$read_fn(e, $server, $devices_var).await;
                         }
                     )*
                     _ => {}
@@ -74,7 +73,7 @@ macro_rules! handle_service {
                     $(
                         h if h == $svc.$field.handle => {
                             let gw = GenericWrite::Short(e.value(&$svc.$field).unwrap());
-                            $svc.$write_fn::<P>(&gw, $server, $state_var, $devices_var).await;
+                            $svc.$write_fn::<P>(&gw, $server, $devices_var).await;
                         }
                     )*
                     _ => {}
@@ -90,7 +89,7 @@ macro_rules! handle_service {
                 $(
                     h if h == $svc.$field.handle => {
                         let gw = GenericWrite::Long { data, handle };
-                        $svc.$write_fn::<P>(&gw, $server, $state_var, $devices_var).await;
+                        $svc.$write_fn::<P>(&gw, $server, $devices_var).await;
                     }
                 )*
                 _ => {}
@@ -117,7 +116,7 @@ pub struct BaseData {}
 #[gatt_service(uuid = service::BATTERY)]
 pub struct BatteryService {
     #[descriptor(uuid = descriptors::VALID_RANGE, read, value = [0,100])]
-    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "hello", read, value = "Battery Level")]
+    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "hello", read, value = "Battery Level", type = &'static str)]
     #[characteristic(uuid = characteristic::BATTERY_LEVEL, read, notify, value = 10)]
     pub level: u8,
     #[characteristic(uuid = "408813df-5dd4-1f87-ec11-cdb001100000", read, notify)]
@@ -134,27 +133,27 @@ pub struct TimeService {
 
 #[gatt_service(uuid = "125ef8ff-f538-468f-9f40-2380a102895b")]
 pub struct TemperatureService {
-    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "Temperature")]
+    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "Temperature", type = &'static str)]
     #[characteristic(uuid = "561be71a-359d-4964-b64f-7b1c949b092e", read, notify)]
     pub temperature: f32,
-    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "Humidity")]
+    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "Humidity", type = &'static str)]
     #[characteristic(uuid = "13881d03-54b9-4b8c-be9f-8a0eeec6893b", read, notify)]
     pub humidity: f32,
 }
 
 #[gatt_service(uuid = "5f78b426-c2dd-4c3f-864f-1b2ccdf1e63e")]
 pub struct PressureService {
-    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "Pressure")]
+    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "Pressure", type = &'static str)]
     #[characteristic(uuid = "7c4b9d53-cbce-409e-bb3d-06d7f9f263d8", read, notify)]
     pub pressure: f32,
-    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "Temperature")]
+    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "Temperature", type = &'static str)]
     #[characteristic(uuid = "a3f6145d-d2eb-46a6-aa41-9644a44bb18e", read, notify)]
     pub temperature: f32,
 }
 
 #[gatt_service(uuid = "a6689992-6e99-4903-85ce-5750b7c4d995")]
 pub struct Co2Service {
-    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "CO2")]
+    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "CO2", type = &'static str)]
     #[characteristic(uuid = "cfb04cf1-8d5b-4223-9ae5-c9e32b2940ab", read, notify)]
     pub co2: i16,
     #[characteristic(uuid = "22b0808a-3a60-45ed-9c54-57f1f16079e6", read, write)]
@@ -163,10 +162,10 @@ pub struct Co2Service {
 
 #[gatt_service(uuid = "9fdbefc6-0e57-469c-b006-8c38f517805a")]
 pub struct VocService {
-    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "VOC")]
+    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "VOC", type = &'static str)]
     #[characteristic(uuid = "55697045-6e90-4940-b055-a03f9ae10122", read, notify)]
     pub index: i16,
-    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "Reading Count")]
+    #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, name = "name", read, value = "Reading Count", type = &'static str)]
     #[characteristic(uuid = "93c32824-5d3b-4343-a5e9-5699d165bc47", read, notify)]
     pub count: i16,
     #[characteristic(uuid = "a1666baa-2fd2-456b-ab68-8e83395f9f79", read, write)]

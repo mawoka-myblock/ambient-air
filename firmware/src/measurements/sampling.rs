@@ -3,10 +3,9 @@ use core::time::Duration;
 use alloc::format;
 use bytemuck::{AnyBitPattern, NoUninit};
 use defmt::{Debug2Format, error, info};
-use embassy_time::{Instant, Timer};
+use embassy_time::Instant;
 use esp_hal::{
     gpio, peripherals,
-    rom::software_reset,
     rtc_cntl::{
         Rtc,
         sleep::{RtcioWakeupSource, TimerWakeupSource, WakeupLevel},
