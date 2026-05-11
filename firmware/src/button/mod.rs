@@ -52,7 +52,7 @@ pub async fn button_task() {
         (&mut pin_2, WakeupLevel::Low),
     ];
     let wakeup_gpio = RtcioWakeupSource::new(wakeup_pins);
-    let wakeup_timer = TimerWakeupSource::new(Duration::from_mins(1));
+    let wakeup_timer = TimerWakeupSource::new(Duration::from_secs(60));
     Timer::after_millis(100).await;
     rtc.sleep_deep(&[&wakeup_gpio, &wakeup_timer]);
 }

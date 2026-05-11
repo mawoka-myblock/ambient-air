@@ -1,3 +1,5 @@
+#![allow(clippy::needless_borrows_for_generic_args)]
+#![allow(clippy::needless_update)] // somehow needed for this: #[gatt_service(uuid = service::BATTERY)]
 pub mod battery;
 pub mod co2;
 pub mod measurement;
@@ -204,7 +206,7 @@ impl AsGatt for MeasurementVec {
 impl FromGatt for MeasurementVec {
     fn from_gatt(data: &[u8]) -> Result<Self, FromGattError> {
         // Byte length must be a multiple of Measurement
-        if data.len() % MEAS_SIZE != 0 {
+        if !data.len().is_multiple_of(MEAS_SIZE) {
             return Err(FromGattError::InvalidLength);
         }
 
