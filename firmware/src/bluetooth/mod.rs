@@ -5,14 +5,13 @@ use defmt::{Debug2Format, info, warn};
 use embassy_futures::select::select3;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::signal::Signal;
-use embassy_time::{Instant, Timer};
+use embassy_time::Timer;
 use esp_radio::ble::controller::BleConnector;
 use trouble_host::prelude::*;
 
 use crate::bluetooth::long_write::{ConnectionContext, LongWriteAccumulator};
 use crate::bluetooth::services::{MeasurementVec, Server};
 use crate::data::{Devices, State};
-use crate::energy::sleep::go_sleep_without_devices;
 use crate::measurements::sampling::from_nvs;
 use embassy_futures::join::join;
 /// Max number of connections

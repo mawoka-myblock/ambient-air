@@ -8,11 +8,9 @@ use embassy_embedded_hal::shared_bus::asynch::i2c::I2cDevice;
 use embassy_futures::join::join;
 use embassy_sync::blocking_mutex::raw::NoopRawMutex;
 use embassy_sync::mutex::Mutex;
-use embassy_time::Timer;
 use esp_hal::gpio;
 use esp_hal::i2c::master::{self as I2C, I2c};
 use esp_hal::peripherals::{GPIO20, GPIO21, I2C0, LPWR};
-use esp_hal::rom::software_reset;
 use esp_hal::rtc_cntl::Rtc;
 use esp_hal::rtc_cntl::sleep::{RtcioWakeupSource, TimerWakeupSource, WakeupLevel};
 use esp_hal::time::Rate;
@@ -20,7 +18,15 @@ use esp_hal::{Async, peripherals};
 use sgp40::Sgp40;
 
 use crate::measurements::voc::{restore_voc_state, store_voc_state};
-
+/// This fn polls:
+/// - the AHT20 for temperature
+/// - the ICP20100 for pressure
+/// - the STCC4 for Co2 with the given data to keep the algorithm healthy
+/// - if enabled, the SGP40 for VOC
+///
+/// Goes to sleep afterwards, wakes up from:
+/// - timer for next lp measurement cycle
+/// - both buttons
 pub async fn lp_measurement(
     i2c_peripheral: I2C0<'static>,
     gp20: GPIO20<'static>,

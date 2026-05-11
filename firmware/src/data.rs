@@ -12,7 +12,7 @@ use sgp40::Sgp40;
 
 use crate::storage::Nvs;
 
-#[derive(Debug, Format)]
+#[derive(Debug, Format, Clone, Copy)]
 pub struct VocData {
     /// VOC index
     pub value: i32,
@@ -29,7 +29,7 @@ impl Default for VocData {
         }
     }
 }
-#[derive(Debug, Default, Format)]
+#[derive(Debug, Default, Format, Clone, Copy)]
 pub struct PressureData {
     /// Temperature in °C
     pub temperature: f32,
@@ -38,7 +38,7 @@ pub struct PressureData {
     pub error: bool,
 }
 
-#[derive(Debug, Default, Format)]
+#[derive(Debug, Default, Format, Clone, Copy)]
 pub struct TemperatureData {
     /// Temperature in °C
     pub temperature: f32,
@@ -47,14 +47,14 @@ pub struct TemperatureData {
     pub error: bool,
 }
 
-#[derive(Debug, Default, Format)]
+#[derive(Debug, Default, Format, Clone, Copy)]
 pub struct Co2Data {
     /// CO2 concentration in ppm
     pub co2: i16,
     pub error: bool,
 }
 
-#[derive(Debug, Default, Format)]
+#[derive(Debug, Default, Format, Clone, Copy)]
 pub struct Battery {
     /// Battery voltage in mV
     pub voltage: u16,

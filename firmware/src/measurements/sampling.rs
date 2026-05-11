@@ -48,8 +48,16 @@ impl Measurement {
         }
     }
 }
-
-pub async fn record_sample(devices: &'static Devices<'static>, beginning: Instant, nvs: &mut Nvs) {
+/// Record sample in sampling mode
+/// Saves samples first to rtc memory, then to nvs
+/// Goes to sleep later and wakes up when:
+/// - timer expires (new sample)
+/// - a button is pressed (stops measurement cycle)
+pub async fn record_sample(
+    devices: &'static Devices<'static>,
+    beginning: Instant,
+    nvs: &mut Nvs,
+) -> ! {
     let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
 
     // Ensure the CO2 doesn't get sampled more than every 5 secs to keep the algorithm working (specified by datasheet)
@@ -90,10 +98,10 @@ pub async fn record_sample(devices: &'static Devices<'static>, beginning: Instan
                 .unwrap_or(Duration::from_millis(10));
             TimerWakeupSource::new(rmng)
         };
-    info!("Sleeping...");
-    Timer::after_millis(rmng.as_millis() as u64).await;
-    info!("Resetting...");
-    software_reset();
+    // info!("Sleeping...");
+    // Timer::after_millis(rmng.as_millis() as u64).await;
+    // info!("Resetting...");
+    // software_reset();
     rtc.sleep_deep(&[&wakeup_gpio, &timer]);
 }
 

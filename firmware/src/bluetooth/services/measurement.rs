@@ -86,8 +86,8 @@ impl MeasurementService {
             crate::SAMPLE_EVERY_SECONDS = d.every_x_seconds;
             crate::POWER_STATE = PowerState::SampleMode as i8;
         }
-        info!("Resetting...");
-        software_reset();
+        // info!("Resetting...");
+        // software_reset();
         let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
         rtc.sleep_deep(&[&TimerWakeupSource::new(Duration::from_millis(20))]);
 

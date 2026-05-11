@@ -4,6 +4,7 @@ use crate::data::Devices;
 
 pub mod sleep;
 
+/// Either enables or disables SGP40 based on NVS data
 pub async fn set_sgp40(devices: &Devices<'static>) {
     let sgp40_enabled = devices
         .nvs

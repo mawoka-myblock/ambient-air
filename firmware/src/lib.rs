@@ -1,10 +1,11 @@
 #![no_std]
 #![feature(int_roundings)]
 
+use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, watch::Watch};
 use esp_hal::ram;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-use crate::measurements::{sampling::MEAS_SIZE, voc::STATE_SIZE};
+use crate::measurements::{MeasurementResult, sampling::MEAS_SIZE, voc::STATE_SIZE};
 extern crate alloc;
 pub mod bluetooth;
 pub mod button;
@@ -81,3 +82,5 @@ pub mod nvs_keys {
     pub const SGP40_ENABLED_KEY: &[u8] = b"SGP40_EN";
     pub const STCC4_SAMPLE_RATE_KEY: &[u8] = b"STCC4_SR";
 }
+
+pub static MEASUREMENT_SIGNAL: Watch<CriticalSectionRawMutex, MeasurementResult, 1> = Watch::new();

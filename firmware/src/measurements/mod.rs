@@ -2,11 +2,12 @@ pub mod lp;
 pub mod sampling;
 pub mod sensors;
 pub mod voc;
-use defmt::{Debug2Format, info};
+use defmt::Format;
 use embassy_embedded_hal::shared_bus::I2cDeviceError;
 use embassy_time::{Duration, Instant, Timer};
 
 use crate::{
+    MEASUREMENT_SIGNAL,
     data::{Battery, Co2Data, Devices, PressureData, State, TemperatureData, VocData},
     measurements::voc::store_voc_state,
 };
@@ -16,6 +17,7 @@ pub type I2cDevError = I2cDeviceError<esp_hal::i2c::master::Error>;
 #[embassy_executor::task]
 pub async fn measure(state: &'static State, devices: &'static Devices<'static>) {
     let mut last_co2_sample = Instant::now();
+    let mut mm_signal = MEASUREMENT_SIGNAL.sender();
     loop {
         let refresh_secs = {
             let s = state.config.lock().await;
@@ -26,10 +28,8 @@ pub async fn measure(state: &'static State, devices: &'static Devices<'static>) 
         if include_co2_sampling {
             last_co2_sample = beginning;
         }
-        // info!("Include CO2: {}", include_co2_sampling);
         let d = measure_once(devices, include_co2_sampling).await;
-
-        // info!("Measurement data: {:?}", Debug2Format(&d));
+        mm_signal.send(d);
         {
             let mut s = state.temperature.lock().await;
             s.humidity = d.temperature.humidity;
@@ -67,7 +67,7 @@ pub async fn measure(state: &'static State, devices: &'static Devices<'static>) 
         Timer::after(sleep_time).await;
     }
 }
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, Format)]
 pub struct MeasurementResult {
     pub pressure: PressureData,
     pub temperature: TemperatureData,
@@ -75,7 +75,8 @@ pub struct MeasurementResult {
     pub co2: Co2Data,
     pub battery: Battery,
 }
-
+/// Get single MeasurementResult
+/// Needs `include_co2` to be set so it doesn't sample more than every 5 secs
 pub async fn measure_once(
     devices: &'static Devices<'static>,
     include_co2: bool,
