@@ -4,22 +4,17 @@ use alloc::format;
 use bytemuck::{AnyBitPattern, NoUninit};
 use defmt::{Debug2Format, error, info};
 use embassy_time::Instant;
-use esp_hal::{
-    gpio, peripherals,
-    rtc_cntl::{
-        Rtc,
-        sleep::{RtcioWakeupSource, TimerWakeupSource, WakeupLevel},
-    },
-};
+use esp_hal::{peripherals, rtc_cntl::Rtc};
 use heapless::Vec;
 use jiff::Timestamp;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    PowerState, SAMPLE_BUFFER, SAMPLES_PER_BUFFER,
+    PowerState, SAMPLE_BUFFER, SAMPLES_PER_BUFFER, SleepOptions,
     data::Devices,
     measurements::{MeasurementResult, measure_once},
     storage::{MAX_NVS_VALUE, Nvs},
+    tasks::sleep::deep_sleep_basic_with_cfg,
 };
 
 #[repr(C, packed)]
@@ -76,32 +71,28 @@ pub async fn record_sample(
     let reading = measure_once(devices, measure_co2).await;
     let measurement = Measurement::from_reading(reading);
     save(measurement, nvs).await;
-
-    let mut pin = unsafe { peripherals::GPIO3::steal() };
-    let wakeup_pins: &mut [(&mut dyn gpio::RtcPinWithResistors, WakeupLevel)] =
-        &mut [(&mut pin, WakeupLevel::Low)];
-    let wakeup_gpio = RtcioWakeupSource::new(wakeup_pins);
     let elapsed = embassy_time::Instant::now() - beginning;
-    let rmng;
-    let timer =
+
+    let wakeup_in_ms: u64 =
         if unsafe { crate::MEASUREMENT_SAMPLES_TAKEN >= crate::MEASUREMENT_SAMPLES_REQUESTED } {
             unsafe { crate::POWER_STATE = PowerState::BluetoothMode as i8 };
             unsafe { crate::NEEDS_SAMPLES_WRITTEN_TO_NVS = 1 };
-            rmng = Duration::from_millis(20);
-            TimerWakeupSource::new(rmng)
+            20
         } else {
             let interval = Duration::from_secs(unsafe { crate::SAMPLE_EVERY_SECONDS } as u64);
             let elapsed_dur = Duration::from_millis(elapsed.as_millis());
-            rmng = interval
+            (interval
                 .checked_sub(elapsed_dur)
-                .unwrap_or(Duration::from_millis(10));
-            TimerWakeupSource::new(rmng)
+                .unwrap_or(Duration::from_millis(10)))
+            .as_millis() as u64
         };
-    // info!("Sleeping...");
-    // Timer::after_millis(rmng.as_millis() as u64).await;
-    // info!("Resetting...");
-    // software_reset();
-    rtc.sleep_deep(&[&wakeup_gpio, &timer]);
+    deep_sleep_basic_with_cfg(
+        &mut rtc,
+        &SleepOptions {
+            allow_buttons: true,
+            wake_in_ms: Some(wakeup_in_ms),
+        },
+    );
 }
 
 async fn save(mm: Measurement, nvs: &mut Nvs) {

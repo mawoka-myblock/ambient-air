@@ -1,10 +1,4 @@
-use core::time::Duration;
-
 use embassy_time::Timer;
-use esp_hal::{
-    peripherals,
-    rtc_cntl::{Rtc, sleep::TimerWakeupSource},
-};
 use serde::{Deserialize, Serialize};
 use trouble_host::{
     PacketPool,
@@ -13,7 +7,7 @@ use trouble_host::{
 };
 
 use crate::{
-    PowerState,
+    COMMAND_CHANNEL, Commands, PowerState, SleepOptions,
     bluetooth::{
         SAMPLE_PUBLISH_DATA,
         long_write::GenericWrite,
@@ -80,12 +74,12 @@ impl MeasurementService {
             crate::SAMPLE_EVERY_SECONDS = d.every_x_seconds;
             crate::POWER_STATE = PowerState::SampleMode as i8;
         }
-        // info!("Resetting...");
-        // software_reset();
-        let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
-        rtc.sleep_deep(&[&TimerWakeupSource::new(Duration::from_millis(20))]);
-
-        // info!("Value: {}", str_data)
+        COMMAND_CHANNEL
+            .immediate_publisher()
+            .publish_immediate(Commands::Sleep(SleepOptions {
+                wake_in_ms: Some(20),
+                allow_buttons: true,
+            }));
     }
 
     pub async fn write_sample_count<P: PacketPool>(

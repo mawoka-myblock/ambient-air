@@ -1,5 +1,7 @@
+use defmt::Format;
 use embassy_sync::blocking_mutex::raw::NoopRawMutex;
 use embassy_sync::channel::Channel;
+use embassy_time::Timer as EmbassyTimer;
 use esp_hal::{
     gpio::interconnect::PeripheralOutput,
     ledc::{
@@ -8,6 +10,8 @@ use esp_hal::{
         timer::Timer,
     },
 };
+
+use crate::{COMMAND_CHANNEL, Commands};
 
 pub struct Leds<'a> {
     led_1: LedcChannel<'a, LowSpeed>,
@@ -62,29 +66,46 @@ impl<'a> Leds<'a> {
             .unwrap();
     }
 }
+#[derive(Debug, Format, Clone, Copy)]
 pub struct FadeConfig {
     pub start_pct: u8,
     pub end_pct: u8,
     pub fade_dur: u16,
 }
 
+#[derive(Debug, Format, Clone, Copy)]
 pub enum LedCommand {
     SetAll(u8),
     Set { led: u8, level: u8 },
-    AllOff,
     Fade((FadeConfig, u8)),
 }
 
-pub type LedChannel = Channel<NoopRawMutex, LedCommand, 2>;
-
 #[embassy_executor::task]
-pub async fn led_task(comm: &'static LedChannel, leds: &'static mut Leds<'static>) {
+pub async fn led_task(leds: &'static mut Leds<'static>) {
+    let mut cmd_recv = COMMAND_CHANNEL.subscriber().unwrap();
     loop {
-        match comm.receive().await {
-            LedCommand::SetAll(_d) => todo!(),
-            LedCommand::AllOff => todo!(),
-            LedCommand::Fade(d) => leds.fade_single(d.0, d.1).await,
-            LedCommand::Set { led, level } => leds.set_single(led, level).await,
-        };
+        if let Commands::Led(led_command) = cmd_recv.next_message_pure().await {
+            match led_command {
+                LedCommand::SetAll(d) => {
+                    leds.set_single(1, d).await;
+                    leds.set_single(2, d).await;
+                }
+                LedCommand::Fade(d) => leds.fade_single(d.0, d.1).await,
+                LedCommand::Set { led, level } => leds.set_single(led, level).await,
+            };
+        }
+    }
+}
+
+pub async fn blink_n(led: u8, n: u8, on_ms: u64, off_ms: u64) {
+    let publisher = COMMAND_CHANNEL.immediate_publisher();
+
+    for i in 0..n {
+        publisher.publish_immediate(Commands::Led(LedCommand::Set { led, level: 100 }));
+        EmbassyTimer::after_millis(on_ms).await;
+        publisher.publish_immediate(Commands::Led(LedCommand::Set { led, level: 0 }));
+        if i < n - 1 {
+            EmbassyTimer::after_millis(off_ms).await;
+        }
     }
 }

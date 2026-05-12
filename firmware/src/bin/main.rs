@@ -37,6 +37,7 @@ use firmware::measurements::measure;
 use firmware::measurements::sampling::{move_to_nvs, record_sample};
 use firmware::measurements::voc::restore_voc_state;
 use firmware::storage::Nvs;
+use firmware::tasks::{settings, sleep};
 use sgp40::Sgp40;
 use trouble_host::prelude::ExternalController;
 use {esp_backtrace as _, esp_println as _};
@@ -191,17 +192,14 @@ async fn main(spawner: Spawner) {
         Leds<'static>,
         Leds::new(ledc, lstimer0, peripherals.GPIO5, peripherals.GPIO10)
     );
-    let led_channel: &'static firmware::leds::LedChannel = firmware::mk_static!(
-        firmware::leds::LedChannel,
-        firmware::leds::LedChannel::new()
-    );
-
     // -----------------
     // Spawn main tasks
     // -----------------
-    spawner.spawn(led_task(led_channel, leds).unwrap());
+    spawner.spawn(led_task(leds).unwrap());
     spawner.spawn(measure(devices).unwrap());
-    spawner.spawn(button_task().unwrap());
+    spawner.spawn(button_task(peripherals.GPIO3, peripherals.GPIO4).unwrap());
+    spawner.spawn(sleep::sleep_task(devices, peripherals.LPWR).unwrap());
+    spawner.spawn(settings::settings_task().unwrap());
 
     // -----------------
     // Init Bluetooth
@@ -214,28 +212,9 @@ async fn main(spawner: Spawner) {
     // -----------------
     // Main loop breathing led
     // -----------------
+    firmware::tasks::battery::show_battery_percentage().await;
+
     loop {
-        led_channel
-            .send(firmware::leds::LedCommand::Fade((
-                FadeConfig {
-                    start_pct: 0,
-                    end_pct: 15,
-                    fade_dur: 2000,
-                },
-                2,
-            )))
-            .await;
-        Timer::after_millis(2000).await;
-        led_channel
-            .send(firmware::leds::LedCommand::Fade((
-                FadeConfig {
-                    start_pct: 15,
-                    end_pct: 0,
-                    fade_dur: 2000,
-                },
-                2,
-            )))
-            .await;
-        Timer::after_millis(2000).await;
+        Timer::after_millis(500).await;
     }
 }

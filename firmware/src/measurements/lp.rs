@@ -8,16 +8,17 @@ use embassy_embedded_hal::shared_bus::asynch::i2c::I2cDevice;
 use embassy_futures::join::join;
 use embassy_sync::blocking_mutex::raw::NoopRawMutex;
 use embassy_sync::mutex::Mutex;
-use esp_hal::gpio;
+use esp_hal::Async;
 use esp_hal::i2c::master::{self as I2C, I2c};
 use esp_hal::peripherals::{GPIO20, GPIO21, I2C0, LPWR};
 use esp_hal::rtc_cntl::Rtc;
-use esp_hal::rtc_cntl::sleep::{RtcioWakeupSource, TimerWakeupSource, WakeupLevel};
 use esp_hal::time::Rate;
-use esp_hal::{Async, peripherals};
 use sgp40::Sgp40;
 
+use crate::SleepOptions;
 use crate::measurements::voc::{restore_voc_state, store_voc_state};
+use crate::tasks::sleep::deep_sleep_basic_with_cfg;
+
 /// This fn polls:
 /// - the AHT20 for temperature
 /// - the ICP20100 for pressure
@@ -85,16 +86,12 @@ pub async fn lp_measurement(
         unsafe { crate::SGP40_READINGS += 1 }
         sleep_dur = Duration::from_secs(1);
     }
-
-    let mut rtc = Rtc::new(rtc_peripheral);
-    let timer = TimerWakeupSource::new(sleep_dur);
-    let mut pin_1 = unsafe { peripherals::GPIO3::steal() };
-    let mut pin_2 = unsafe { peripherals::GPIO4::steal() };
-    let wakeup_pins: &mut [(&mut dyn gpio::RtcPinWithResistors, WakeupLevel)] = &mut [
-        (&mut pin_1, WakeupLevel::Low),
-        (&mut pin_2, WakeupLevel::Low),
-    ];
-    let wakeup_gpio = RtcioWakeupSource::new(wakeup_pins);
-    rtc.sleep_deep(&[&timer, &wakeup_gpio]);
+    deep_sleep_basic_with_cfg(
+        &mut Rtc::new(rtc_peripheral),
+        &SleepOptions {
+            allow_buttons: true,
+            wake_in_ms: Some(sleep_dur.as_millis() as u64),
+        },
+    );
     // todo!("Sleep!");
 }

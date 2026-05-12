@@ -8,7 +8,10 @@ use embassy_sync::{
 use esp_hal::ram;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-use crate::measurements::{MeasurementResult, sampling::MEAS_SIZE, voc::STATE_SIZE};
+use crate::{
+    leds::LedCommand,
+    measurements::{MeasurementResult, sampling::MEAS_SIZE, voc::STATE_SIZE},
+};
 extern crate alloc;
 pub mod bluetooth;
 pub mod button;
@@ -93,15 +96,16 @@ pub static MEASUREMENT_SIGNAL: Watch<CriticalSectionRawMutex, MeasurementResult,
 pub enum Commands {
     Reconfigure(data::Config),
     Sleep(SleepOptions),
+    Led(LedCommand),
 }
 
 #[derive(Debug, Format, Clone, Copy)]
 pub struct SleepOptions {
     allow_buttons: bool,
-    wake_in_ms: Option<u32>,
+    wake_in_ms: Option<u64>,
 }
 
-pub static COMMAND_CHANNEL: PubSubChannel<CriticalSectionRawMutex, Commands, 3, 1, 1> =
+pub static COMMAND_CHANNEL: PubSubChannel<CriticalSectionRawMutex, Commands, 2, 3, 1> =
     PubSubChannel::new();
 
 pub static CONFIG_SIGNAL: Watch<CriticalSectionRawMutex, data::Config, 1> = Watch::new();

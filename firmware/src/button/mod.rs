@@ -5,23 +5,23 @@ use defmt::info;
 use embassy_time::Timer;
 use esp_hal::{
     gpio::{self, Input, InputConfig},
-    peripherals,
+    peripherals::{self, GPIO3},
     rtc_cntl::{
         Rtc,
         sleep::{RtcioWakeupSource, TimerWakeupSource, WakeupLevel},
     },
 };
 
-use crate::{POWER_STATE, PowerState};
+use crate::{COMMAND_CHANNEL, Commands, POWER_STATE, PowerState, SleepOptions};
 
 #[embassy_executor::task]
-pub async fn button_task() {
+pub async fn button_task(p1: peripherals::GPIO3<'static>, p2: peripherals::GPIO4<'static>) {
     let input_btn = Input::new(
-        unsafe { peripherals::GPIO3::steal() },
+        p1,
         InputConfig::default().with_pull(esp_hal::gpio::Pull::Up),
     );
     Input::new(
-        unsafe { peripherals::GPIO4::steal() },
+        p2,
         InputConfig::default().with_pull(esp_hal::gpio::Pull::Up),
     );
 
@@ -37,24 +37,23 @@ pub async fn button_task() {
                     unsafe {
                         POWER_STATE = PowerState::SensorActiveSleep as i8;
                     }
-                    let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
-                    rtc.sleep_deep(&[&TimerWakeupSource::new(Duration::from_millis(20))]);
+                    COMMAND_CHANNEL
+                        .immediate_publisher()
+                        .publish_immediate(Commands::Sleep(SleepOptions {
+                            wake_in_ms: Some(20),
+                            allow_buttons: true,
+                        }));
                 }
             }
         }
     }
     Timer::after_millis(1000).await;
-    let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
-    let mut pin_1 = unsafe { peripherals::GPIO3::steal() };
-    let mut pin_2 = unsafe { peripherals::GPIO4::steal() };
-    let wakeup_pins: &mut [(&mut dyn gpio::RtcPinWithResistors, WakeupLevel)] = &mut [
-        (&mut pin_1, WakeupLevel::Low),
-        (&mut pin_2, WakeupLevel::Low),
-    ];
-    let wakeup_gpio = RtcioWakeupSource::new(wakeup_pins);
-    let wakeup_timer = TimerWakeupSource::new(Duration::from_secs(60));
-    Timer::after_millis(100).await;
-    rtc.sleep_deep(&[&wakeup_gpio, &wakeup_timer]);
+    COMMAND_CHANNEL
+        .immediate_publisher()
+        .publish_immediate(Commands::Sleep(SleepOptions {
+            wake_in_ms: Some(60 * 1000),
+            allow_buttons: true,
+        }));
 }
 
 // 7
