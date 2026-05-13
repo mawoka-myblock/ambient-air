@@ -1,3 +1,4 @@
+use defmt::info;
 use trouble_host::{
     PacketPool,
     gatt::{GattConnection, GattEvent, ReadEvent},
@@ -19,6 +20,9 @@ impl Co2Service {
         conn: &GattConnection<'_, '_, P>,
         m: &Co2Data,
     ) -> Result<(), trouble_host::Error> {
+        if m.co2 == 0 {
+            return Ok(());
+        }
         self.co2.notify(conn, &m.co2).await?;
         Ok(())
     }

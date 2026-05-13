@@ -1,7 +1,7 @@
 use core::time::Duration;
 
 use crate::{COMMAND_CHANNEL, Commands, SleepOptions, data::Devices};
-use defmt::unwrap;
+use defmt::{info, unwrap};
 use esp_hal::{
     gpio,
     peripherals::{self, LPWR},
@@ -17,6 +17,7 @@ pub async fn sleep_task(devices: &'static Devices<'static>, rtc_peri: LPWR<'stat
     let mut rtc = Rtc::new(rtc_peri);
     loop {
         if let Commands::Sleep(d) = cmd_listener.next_message_pure().await {
+            info!("{:?}", &d);
             deep_sleep_basic_with_cfg(&mut rtc, &d);
         }
     }

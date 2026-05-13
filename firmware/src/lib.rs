@@ -64,7 +64,7 @@ pub static mut SAMPLE_EVERY_SECONDS: i16 = 0;
 
 #[ram(unstable(rtc_fast, persistent))]
 pub static mut SAMPLE_BUFFER: [u8; SAMPLES_PER_BUFFER * MEAS_SIZE] =
-    [0u8; SAMPLES_PER_BUFFER * MEAS_SIZE]; // 160 samples in these 3520 bytes (22 bytes/sample)
+    [0u8; SAMPLES_PER_BUFFER * MEAS_SIZE]; // 20 samples in these 3520 bytes (22 bytes/sample)
 
 #[ram(unstable(rtc_fast, persistent))]
 pub static mut VOC_ALGO_STATE: [u8; STATE_SIZE] = [0u8; STATE_SIZE];
@@ -81,7 +81,7 @@ pub static mut SGP40_STD: f32 = 0.0;
 #[ram(unstable(rtc_fast, persistent))]
 pub static mut NEEDS_SAMPLES_WRITTEN_TO_NVS: u8 = 0;
 
-pub const SAMPLES_PER_BUFFER: usize = 160;
+pub const SAMPLES_PER_BUFFER: usize = 20;
 
 pub const NVS_OFFSET: usize = 0x208000;
 pub const NVS_SIZE: usize = 0x20000;

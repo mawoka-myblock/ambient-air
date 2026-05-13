@@ -30,6 +30,7 @@ impl AsGatt for CommandBuf {
 }
 impl FromGatt for CommandBuf {
     fn from_gatt(data: &[u8]) -> Result<Self, FromGattError> {
+        info!("recvd CommandBuf");
         if data.len() > Self::MAX_SIZE {
             error!("Invalid length");
             return Err(FromGattError::InvalidLength);

@@ -10,7 +10,7 @@ use esp_hal::rom::crc::crc32_be;
 use portable_atomic::AtomicU8;
 use tickv::{ErrorCode, FlashController};
 
-pub const MAX_NVS_VALUE: usize = 4096;
+pub const MAX_NVS_VALUE: usize = 512;
 
 static mut NVS_READ_BUF: &mut [u8; MAX_NVS_VALUE] = &mut [0; MAX_NVS_VALUE];
 static NVS_INSTANCES: AtomicU8 = AtomicU8::new(0);

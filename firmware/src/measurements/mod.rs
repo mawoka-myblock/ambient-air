@@ -2,7 +2,7 @@ pub mod lp;
 pub mod sampling;
 pub mod sensors;
 pub mod voc;
-use defmt::Format;
+use defmt::{Debug2Format, Format, error};
 use embassy_embedded_hal::shared_bus::I2cDeviceError;
 use embassy_time::{Duration, Instant, Timer};
 
@@ -141,9 +141,12 @@ pub async fn measure_once(
             Ok::<_, async_stcc4::Error<I2cDevError>>(Co2Data { co2, error: false })
         }
         .await
-        .unwrap_or_else(|_| Co2Data {
-            error: true,
-            ..Co2Data::default()
+        .unwrap_or_else(|e| {
+            error!("{:?}", Debug2Format(&e));
+            Co2Data {
+                error: true,
+                ..Co2Data::default()
+            }
         }),
     };
     let battery = async {
