@@ -1,3 +1,4 @@
+use defmt::info;
 use esp_hal::{peripherals, rtc_cntl::Rtc};
 use trouble_host::{
     PacketPool,
@@ -48,6 +49,7 @@ impl TimeService {
             GenericWrite::Long { data: _, handle: _ } => 0,
             GenericWrite::Short(d) => *d,
         };
+        info!("Got new time!");
         let rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
         rtc.set_current_time_us(data);
     }

@@ -2,6 +2,7 @@ use core::time::Duration;
 
 use crate::{COMMAND_CHANNEL, Commands, SleepOptions, data::Devices};
 use defmt::{info, unwrap};
+// use embassy_time::{Duration as EmbassyDur, Timer, block_for};
 use esp_hal::{
     gpio,
     peripherals::{self, LPWR},
@@ -30,6 +31,9 @@ pub fn deep_sleep_basic_with_cfg<'a>(rtc: &'a mut Rtc<'a>, d: &SleepOptions) -> 
     let timer_ws;
     let gpio_ws;
     let mut wake_sources: heapless::Vec<&dyn WakeSource, 2> = heapless::Vec::new();
+
+    // block_for(EmbassyDur::from_millis(d.wake_in_ms.unwrap()));
+    // software_reset();
 
     if d.allow_buttons {
         pin_1 = unsafe { peripherals::GPIO3::steal() };

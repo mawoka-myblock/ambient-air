@@ -1,15 +1,9 @@
-use core::time::Duration;
-
 use async_button::{Button, ButtonConfig, ButtonEvent};
 use defmt::info;
 use embassy_time::Timer;
 use esp_hal::{
-    gpio::{self, Input, InputConfig},
-    peripherals::{self, GPIO3},
-    rtc_cntl::{
-        Rtc,
-        sleep::{RtcioWakeupSource, TimerWakeupSource, WakeupLevel},
-    },
+    gpio::{Input, InputConfig},
+    peripherals::{self},
 };
 
 use crate::{COMMAND_CHANNEL, Commands, POWER_STATE, PowerState, SleepOptions};

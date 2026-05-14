@@ -79,6 +79,9 @@ pub static mut SGP40_MEAN: f32 = 0.0;
 pub static mut SGP40_STD: f32 = 0.0;
 
 #[ram(unstable(rtc_fast, persistent))]
+pub static mut FIRST_MEASUREMENT_TS: u64 = 0;
+
+#[ram(unstable(rtc_fast, persistent))]
 pub static mut NEEDS_SAMPLES_WRITTEN_TO_NVS: u8 = 0;
 
 pub const SAMPLES_PER_BUFFER: usize = 20;

@@ -1,6 +1,6 @@
 use core::time::Duration;
 
-use alloc::format;
+use alloc::{format, string::ToString};
 use bytemuck::{AnyBitPattern, NoUninit};
 use defmt::{Debug2Format, error, info};
 use embassy_time::Instant;
@@ -26,12 +26,14 @@ pub struct Measurement {
     humidity: u16, // 42 -> 42%
     co2: i16,
     voc: i32,
+    ms_offset: u32, // ms since first measurement
 }
 
 pub const MEAS_SIZE: usize = size_of::<Measurement>();
+const _: () = assert!(MEAS_SIZE == 24, "MEAS_SIZE is wrong!");
 
 impl Measurement {
-    fn from_reading(reading: MeasurementResult) -> Self {
+    fn from_reading(reading: MeasurementResult, ms_offset: u32) -> Self {
         Self {
             temp_p: (reading.temperature.temperature * 100.0) as i32,
             pressure: (reading.pressure.pressure * 1000.0) as u32,
@@ -39,6 +41,7 @@ impl Measurement {
             humidity: reading.temperature.humidity as u16,
             co2: reading.co2.co2,
             voc: reading.voc.value,
+            ms_offset,
         }
     }
 }
@@ -55,21 +58,29 @@ pub async fn record_sample(
     let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
 
     // Ensure the CO2 doesn't get sampled more than every 5 secs to keep the algorithm working (specified by datasheet)
-    let now = Timestamp::from_microsecond(rtc.current_time_us() as i64).unwrap();
-    let parsed_ts = Timestamp::from_microsecond(unsafe { crate::LAST_CO2_SAMPLE } as i64).unwrap();
-    let mut measure_co2 = false;
-    if unsafe { crate::LAST_CO2_SAMPLE } == 0 {
-        measure_co2 = true;
-    } else {
-        let elapsed_secs = now.duration_since(parsed_ts).as_secs();
-        if elapsed_secs >= 5 {
-            measure_co2 = true;
-            unsafe { crate::LAST_CO2_SAMPLE = now.as_microsecond() as u64 };
+    let now = Timestamp::from_microsecond(rtc.current_time_us() as i64).expect("RTC time invalid");
+    info!("Time since boot: {}", rtc.time_since_power_up().as_millis());
+    info!("Time now: {}", now.to_string().as_str());
+    let last_raw = unsafe { crate::LAST_CO2_SAMPLE };
+    let measure_co2 = match Timestamp::from_microsecond(last_raw as i64) {
+        Ok(last_ts) if last_raw != 0 => now.duration_since(last_ts).as_secs() >= 5,
+        _ => true, // uninitialized or garbage
+    };
+    if measure_co2 {
+        unsafe {
+            crate::LAST_CO2_SAMPLE = now.as_microsecond() as u64;
         }
     }
+    if (unsafe { crate::MEASUREMENT_SAMPLES_TAKEN } == 0) {
+        unsafe { crate::FIRST_MEASUREMENT_TS = now.as_millisecond() as u64 }
+    }
+    let time_offset = (now.as_millisecond() as u64 - unsafe { crate::FIRST_MEASUREMENT_TS }) as u32;
+    info!("First TS: {}", unsafe { crate::FIRST_MEASUREMENT_TS });
+    info!("offset: {}", time_offset);
+    info!("Now: {}", now.as_millisecond());
 
     let reading = measure_once(devices, measure_co2).await;
-    let measurement = Measurement::from_reading(reading);
+    let measurement = Measurement::from_reading(reading, time_offset);
     save(measurement, nvs).await;
     let elapsed = embassy_time::Instant::now() - beginning;
 

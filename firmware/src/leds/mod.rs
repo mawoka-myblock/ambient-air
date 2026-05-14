@@ -1,6 +1,4 @@
 use defmt::Format;
-use embassy_sync::blocking_mutex::raw::NoopRawMutex;
-use embassy_sync::channel::Channel;
 use embassy_time::Timer as EmbassyTimer;
 use esp_hal::{
     gpio::interconnect::PeripheralOutput,

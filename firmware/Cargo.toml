@@ -43,7 +43,8 @@ esp-backtrace = { version = "0.19", features = [
 esp-rtos = { version = "0.3", features = ["defmt", "esp32c3", "embassy", "esp-radio", "esp-alloc"] }
 esp-println = { version = "0.17", features = ["defmt-espflash", "esp32c3"] }
 static_cell = "2.1.1"
-trouble-host = { git = "https://github.com/embassy-rs/trouble.git", rev = "4bf65472d2606d3af43f9c4e18bc7ef9a46c5b14", features = ["gatt", "derive", "defmt"] }
+trouble-host = { git = "https://github.com/embassy-rs/trouble.git", rev = "4bf65472d2606d3af43f9c4e18bc7ef9a46c5b14", features = ["gatt", "derive", "defmt", "att-queued-writes"] }
+
 
 embassy-sync = { version = "0.8" }
 embassy-embedded-hal = { version = "0.6" }

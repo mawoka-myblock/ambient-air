@@ -1,4 +1,4 @@
-use defmt::{Debug2Format, Display2Format, info};
+use defmt::info;
 use embassy_time::Timer;
 use serde::{Deserialize, Serialize};
 use trouble_host::{
@@ -26,9 +26,6 @@ impl MeasurementService {
         devices: &'static Devices<'static>,
         long_write: Option<(&[u8], u16)>,
     ) {
-        if let GattEvent::Write(d) = event {
-            info!("{:?}", d.handle());
-        }
         handle_service!(self, server, event, devices, long_write, {
             command => (read_command, write_command),
             sample_count    => (read_sample_count, write_sample_count),
@@ -48,7 +45,6 @@ impl MeasurementService {
         server: &Server<'_>,
         _devices: &'static Devices<'static>,
     ) {
-        info!("recvd sample count");
         server
             .measurement
             .sample_count
@@ -86,7 +82,6 @@ impl MeasurementService {
                 wake_in_ms: Some(20),
                 allow_buttons: true,
             }));
-        info!("Sending sleep command");
     }
 
     pub async fn write_sample_count<P: PacketPool>(

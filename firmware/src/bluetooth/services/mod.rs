@@ -194,10 +194,14 @@ impl MeasurementVec {
         data.extend_from_slice(d)?;
         Ok(MeasurementVec(data))
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 impl AsGatt for MeasurementVec {
-    const MAX_SIZE: usize = 304;
+    const MAX_SIZE: usize = MEAS_SIZE * 10;
     const MIN_SIZE: usize = 0;
     fn as_gatt(&self) -> &[u8] {
         bytemuck::cast_slice(self.0.as_slice())

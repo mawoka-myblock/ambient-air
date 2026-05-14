@@ -26,18 +26,18 @@ use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
 // use esp_hal::tsens::{self, TemperatureSensor};
 use esp_radio::ble::controller::BleConnector;
-use firmware::PowerState;
 use firmware::bluetooth::run;
 use firmware::button::button_task;
 use firmware::data::Devices;
 use firmware::energy::set_sgp40;
-use firmware::leds::{FadeConfig, Leds, led_task};
+use firmware::leds::{Leds, led_task};
 use firmware::measurements::lp::lp_measurement;
 use firmware::measurements::measure;
 use firmware::measurements::sampling::{move_to_nvs, record_sample};
 use firmware::measurements::voc::restore_voc_state;
 use firmware::storage::Nvs;
 use firmware::tasks::{settings, sleep};
+use firmware::{COMMAND_CHANNEL, Commands, PowerState};
 use sgp40::Sgp40;
 use trouble_host::prelude::ExternalController;
 use {esp_backtrace as _, esp_println as _};
@@ -47,7 +47,6 @@ esp_bootloader_esp_idf::esp_app_desc!();
 
 #[esp_rtos::main]
 async fn main(spawner: Spawner) {
-    let beginning = embassy_time::Instant::now();
     let wakeup_cause_var = wakeup_cause();
     if wakeup_cause_var as i8 == SleepSource::Gpio as i8 {
         unsafe { firmware::POWER_STATE = PowerState::BluetoothMode as i8 }
@@ -74,6 +73,7 @@ async fn main(spawner: Spawner) {
     let sw_interrupt =
         esp_hal::interrupt::software::SoftwareInterruptControl::new(peripherals.SW_INTERRUPT);
     esp_rtos::start(timg0.timer0, sw_interrupt.software_interrupt0);
+    let beginning = embassy_time::Instant::now();
 
     // -----------------
     // Run LP measurement
@@ -215,6 +215,19 @@ async fn main(spawner: Spawner) {
     firmware::tasks::battery::show_battery_percentage().await;
 
     loop {
-        Timer::after_millis(500).await;
+        Timer::after_millis(1500).await;
+        COMMAND_CHANNEL
+            .immediate_publisher()
+            .publish_immediate(Commands::Led(firmware::leds::LedCommand::Set {
+                led: 1,
+                level: 100,
+            }));
+        Timer::after_millis(20).await;
+        COMMAND_CHANNEL
+            .immediate_publisher()
+            .publish_immediate(Commands::Led(firmware::leds::LedCommand::Set {
+                led: 1,
+                level: 0,
+            }));
     }
 }

@@ -9,11 +9,11 @@ use embassy_time::Timer;
 use esp_radio::ble::controller::BleConnector;
 use trouble_host::prelude::*;
 
-use crate::MEASUREMENT_SIGNAL;
 use crate::bluetooth::long_write::{ConnectionContext, LongWriteAccumulator};
 use crate::bluetooth::services::{MeasurementVec, Server};
 use crate::data::Devices;
 use crate::measurements::sampling::from_nvs;
+use crate::{MEASUREMENT_SIGNAL, SAMPLES_PER_BUFFER};
 use defmt::unwrap;
 use embassy_futures::join::join;
 /// Max number of connections
@@ -204,7 +204,6 @@ async fn notify_sampling_data<P: PacketPool>(
         info!("Got {} chunks", nvs_chunks);
         let notifys_needed = unsafe { crate::MEASUREMENT_SAMPLES_REQUESTED }.div_ceil(10) as usize;
         let mut notify_done = 0;
-        info!("Notifys needed: {}", notifys_needed);
 
         'publish: for i in 0..nvs_chunks {
             let data = {
@@ -212,14 +211,23 @@ async fn notify_sampling_data<P: PacketPool>(
                 from_nvs(&mut nvs, i as usize).await
             };
 
-            for n in 0..notifys_needed {
+            for n in 0..(SAMPLES_PER_BUFFER.div_ceil(10)) {
                 if notify_done >= notifys_needed {
                     break 'publish;
                 }
                 let start = n * 10;
-                let end = ((n + 1) * 10).min(data.len());
-                let d = MeasurementVec::from_slice(&data[start..end]).unwrap();
-                info!("{:?}, len: {}", Debug2Format(&d), d.0.len());
+                let end = (n + 1) * 10;
+                let d = match MeasurementVec::from_slice(&data[start..end]) {
+                    Ok(d) => d,
+                    Err(_) => {
+                        warn!("MeasurementVec init failed");
+                        continue;
+                    }
+                };
+                info!("MMVec: {:?}", Debug2Format(&d));
+                if d.is_empty() {
+                    continue;
+                }
                 let r = server.measurement.data.notify(conn, &d).await;
                 notify_done += 1;
                 match r {

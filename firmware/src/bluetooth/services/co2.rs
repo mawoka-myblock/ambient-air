@@ -1,4 +1,3 @@
-use defmt::info;
 use trouble_host::{
     PacketPool,
     gatt::{GattConnection, GattEvent, ReadEvent},
