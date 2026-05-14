@@ -21,5 +21,6 @@ export const CHARS = {
 	vocEnabled: 'a1666baa-2fd2-456b-ab68-8e83395f9f79',
 	measureCommand: '84b0a39c-c55f-41f3-8797-de87992adc55',
 	measureData: '127ec103-86ea-4e75-9e35-2e0c772d6f85',
-	measureSampleCount: 'd988b5cc-5154-45e2-9815-4d55261950ad'
+	measureSampleCount: 'd988b5cc-5154-45e2-9815-4d55261950ad',
+	time: '9525ce8e-3d50-4975-a8e5-64ddea6dfe10'
 };

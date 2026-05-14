@@ -24,6 +24,7 @@
 		humidity: number; // %
 		co2: number; // ppm
 		voc: number; // Sensirion index
+		ms_offset: number; // Offset since start
 	}
 
 	async function startNotify(service: string, char: string, cb) {
@@ -32,6 +33,15 @@
 		c.addEventListener('characteristicvaluechanged', (e) => {
 			cb(e.target.value);
 		});
+	}
+
+	async function set_current_time() {
+		const c = await getChar(SERVICES.TIME, CHARS.time);
+		const now_us = BigInt(Date.now()) * 1000n;
+		const buf = new ArrayBuffer(8);
+		const view = new DataView(buf);
+		view.setBigUint64(0, now_us, true); // little-endian to match Rust
+		await c.writeValue(buf);
 	}
 
 	async function toggle_voc() {
@@ -65,6 +75,8 @@
 		const value = await vocEnabledChar.readValue();
 		voc_enabled = value.getUint8(0) === 1;
 
+		await set_current_time();
+
 		connected = true;
 	}
 
@@ -92,18 +104,26 @@
 			const value = (e.target as BluetoothRemoteGATTCharacteristic).value;
 			if (!value) return;
 			const buf = new Uint8Array(value.buffer);
-
+			console.log(
+				'buf.length:',
+				buf.length,
+				'remainder:',
+				buf.length % 22,
+				'vs 20:',
+				buf.length % 20
+			);
 			/*  Each packet is 20 bytes (the Rust struct is marked as 22, but only 20 bytes are defined).
           The device may send several packets in a single burst – we simply loop over all of them. */
-			for (let i = 0; i + 20 <= buf.length; i += 20) {
-				const view = new DataView(buf.buffer, buf.byteOffset + i, 20);
+			for (let i = 0; i + 24 <= buf.length; i += 24) {
+				const view = new DataView(buf.buffer, buf.byteOffset + i, 24);
 				const m: Measurement = {
 					temp_p: view.getInt32(0, true),
 					pressure: view.getUint32(4, true),
 					temp_t: view.getInt32(8, true),
 					humidity: view.getUint16(12, true),
 					co2: view.getInt16(14, true),
-					voc: view.getInt32(16, true)
+					voc: view.getInt32(16, true),
+					ms_offset: view.getUint32(20, true)
 				};
 				measurements = [...measurements, m];
 			}
@@ -154,8 +174,8 @@
 			</button> -->
 			{#if measurements.length !== 0}
 				<p>Read {measurements.length} samples</p>
-				{#each measurements as sample, i}
-					<p>Temp: {sample.temp_t}</p>
+				{#each measurements as sample (sample)}
+					<p>Temp: {sample.temp_t}, Time: {sample.ms_offset}</p>
 				{/each}
 			{/if}
 		{:else}
