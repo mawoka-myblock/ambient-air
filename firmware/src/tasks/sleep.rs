@@ -8,7 +8,10 @@ use esp_hal::{
     peripherals::{self, LPWR},
     rtc_cntl::{
         Rtc,
-        sleep::{RtcioWakeupSource, TimerWakeupSource, WakeSource, WakeupLevel},
+        sleep::{
+            RtcConfig, RtcSleepConfig, RtcioWakeupSource, TimerWakeupSource, WakeSource,
+            WakeupLevel,
+        },
     },
 };
 
@@ -49,5 +52,8 @@ pub fn deep_sleep_basic_with_cfg<'a>(rtc: &'a mut Rtc<'a>, d: &SleepOptions) -> 
         timer_ws = Some(TimerWakeupSource::new(Duration::from_millis(sleep_dur_ms)));
         let _ = wake_sources.push(timer_ws.as_ref().unwrap());
     }
-    rtc.sleep_deep(wake_sources.as_slice())
+    let mut rtc_cfg = RtcSleepConfig::deep();
+    rtc_cfg.set_rtc_peri_pd_en(false);
+    rtc.sleep(&rtc_cfg, &wake_sources);
+    unreachable!();
 }

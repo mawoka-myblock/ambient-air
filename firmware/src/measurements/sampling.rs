@@ -152,7 +152,10 @@ pub async fn move_to_nvs(nvs: &mut Nvs) {
     let mut buffer: [u8; MAX_NVS_VALUE] = [0; MAX_NVS_VALUE];
     let nvs_key = format!("sample_{}", batch_index);
     let bytes_nvs_key = nvs_key.as_bytes();
-    let _ = nvs.invalidate_key(bytes_nvs_key).await;
+    match nvs.invalidate_key(bytes_nvs_key).await {
+        Ok(_) => (),
+        Err(e) => defmt::error!("{:?}", Debug2Format(&e)),
+    };
     info!("Len: {}", measurements.len());
     buffer[0..2].copy_from_slice(&(measurements.len() as u16).to_le_bytes());
     info!(
@@ -161,12 +164,16 @@ pub async fn move_to_nvs(nvs: &mut Nvs) {
     );
     buffer[2..total_len].copy_from_slice(meas_bytes);
 
-    nvs.append_key(
-        bytes_nvs_key, // b"sample_0",
-        &buffer[..total_len],
-    )
-    .await
-    .unwrap();
+    match nvs
+        .append_key(
+            bytes_nvs_key, // b"sample_0",
+            &buffer[..total_len],
+        )
+        .await
+    {
+        Ok(_) => (),
+        Err(e) => defmt::error!("{:?}", Debug2Format(&e)),
+    };
     let _ = match nvs.get_key(bytes_nvs_key).await {
         Ok(d) => d,
         Err(e) => {

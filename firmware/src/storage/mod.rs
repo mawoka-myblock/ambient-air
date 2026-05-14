@@ -10,7 +10,7 @@ use esp_hal::rom::crc::crc32_be;
 use portable_atomic::AtomicU8;
 use tickv::{ErrorCode, FlashController};
 
-pub const MAX_NVS_VALUE: usize = 512;
+pub const MAX_NVS_VALUE: usize = 520;
 
 static mut NVS_READ_BUF: &mut [u8; MAX_NVS_VALUE] = &mut [0; MAX_NVS_VALUE];
 static NVS_INSTANCES: AtomicU8 = AtomicU8::new(0);
@@ -112,6 +112,13 @@ impl Nvs {
     pub async fn invalidate_key(&self, key: &[u8]) -> anyhow::Result<(), ErrorCode> {
         let _drop = self.semaphore.acquire(1).await.unwrap();
         self.tickv.invalidate_key(hash(key))?;
+        self.tickv.garbage_collect()?;
+        Ok(())
+    }
+
+    pub async fn gc(&self) -> anyhow::Result<(), ErrorCode> {
+        let _drop = self.semaphore.acquire(1).await.unwrap();
+        self.tickv.garbage_collect()?;
         Ok(())
     }
 

@@ -59,7 +59,7 @@ async fn main(spawner: Spawner) {
         {
             PowerState::DeepSleep => CpuClock::_80MHz,
             PowerState::BluetoothMode => CpuClock::_160MHz,
-            PowerState::SampleMode => CpuClock::_80MHz,
+            PowerState::SampleMode => CpuClock::_80MHz, // _80MHz
             PowerState::SensorActiveSleep => CpuClock::_80MHz,
         },
     );

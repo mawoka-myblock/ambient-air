@@ -203,6 +203,11 @@ async fn notify_sampling_data<P: PacketPool>(
             .div_ceil(crate::SAMPLES_PER_BUFFER as i16);
         info!("Got {} chunks", nvs_chunks);
         let notifys_needed = unsafe { crate::MEASUREMENT_SAMPLES_REQUESTED }.div_ceil(10) as usize;
+        info!(
+            "Notifys needed: {}, samples requested: {}",
+            notifys_needed,
+            unsafe { crate::MEASUREMENT_SAMPLES_REQUESTED }
+        );
         let mut notify_done = 0;
 
         'publish: for i in 0..nvs_chunks {
@@ -217,7 +222,20 @@ async fn notify_sampling_data<P: PacketPool>(
                 }
                 let start = n * 10;
                 let end = (n + 1) * 10;
-                let d = match MeasurementVec::from_slice(&data[start..end]) {
+                info!("Start: {}, End: {}", start, end);
+                let slice = match data.get(start..end) {
+                    Some(s) => s,
+                    None => {
+                        warn!(
+                            "Slice out of bounds: {}..{} in len {}",
+                            start,
+                            end,
+                            data.len()
+                        );
+                        continue;
+                    }
+                };
+                let d = match MeasurementVec::from_slice(slice) {
                     Ok(d) => d,
                     Err(_) => {
                         warn!("MeasurementVec init failed");
