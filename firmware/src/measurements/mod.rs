@@ -2,7 +2,7 @@ pub mod lp;
 pub mod sampling;
 pub mod sensors;
 pub mod voc;
-use defmt::{Debug2Format, Format, error};
+use defmt::{Debug2Format, Format, error, info};
 use embassy_embedded_hal::shared_bus::I2cDeviceError;
 use embassy_time::{Duration, Instant, Timer};
 use esp_hal::{peripherals, rtc_cntl::Rtc, time::Duration as HalDuration};
@@ -150,6 +150,7 @@ pub async fn measure_once(
                 Stcc4State::NeedsContinousStop => stcc4.stop_continuous().await?,
                 Stcc4State::Normal => stcc4.single_shot(true).await?,
             };
+            info!("STCC4 State: {}", stcc4_state);
             let (co2, _, _) = stcc4.read_measurement().await?;
             Ok::<_, async_stcc4::Error<I2cDevError>>(Co2Data { co2, error: false })
         }

@@ -1,4 +1,5 @@
 #![no_std]
+use defmt::Format;
 use embedded_hal_async::delay::DelayNs;
 mod constants;
 pub struct Stcc4<I2c, DELAYNS> {
@@ -7,7 +8,7 @@ pub struct Stcc4<I2c, DELAYNS> {
     delay: DELAYNS,
     buffer: [u8; 18],
 }
-#[derive(Debug)]
+#[derive(Debug, Format)]
 pub enum Error<E> {
     /// I²C bus error
     I2C(E),
@@ -195,9 +196,11 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
             .await
     }
 
-    pub async fn conditioning(&mut self) -> Result<(), Error<I2C::Error>> {
+    pub async fn conditioning(&mut self, wait: bool) -> Result<(), Error<I2C::Error>> {
         self.write_command(constants::CONDITIONING).await?;
-        self.delay.delay_us(22_000_000).await;
+        if wait {
+            self.delay.delay_ms(22_000).await;
+        }
         Ok(())
     }
 
@@ -231,7 +234,7 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
     pub async fn factory_reset(&mut self) -> Result<u16, Error<I2C::Error>> {
         self.write_command(constants::FACTORY_RESET).await?;
         self.delay.delay_us(90_000).await;
-        let mut w = [0u16; 6];
+        let mut w = [0u16; 1];
         self.read_words(&mut w).await?;
         Ok(w[0])
     }
@@ -239,7 +242,7 @@ impl<I2C: embedded_hal_async::i2c::I2c, Delay: DelayNs> Stcc4<I2C, Delay> {
         let mut words = [0u16; 6];
         self.delayed_read(constants::PRODUCT_ID, 1000, &mut words)
             .await?;
-        self.write_command(constants::PRODUCT_ID).await.unwrap();
+        // self.write_command(constants::PRODUCT_ID).await.unwrap();
         let id = ((words[0] as u32) << 16) | words[1] as u32;
 
         let serial_high = ((words[2] as u32) << 16) | words[3] as u32;

@@ -14,7 +14,7 @@
 	let battery = $state(0);
 	let voc_enabled = $state(false);
 	let power_mw = $state(0);
-	let current_time = $state('');
+	let ms_since_boot = $state(0);
 
 	let sampling_data = $state({
 		count: 10,
@@ -62,7 +62,7 @@
 		aa.subscribe('battery_power', (v) => (power_mw = v));
 
 		// await aa.send('current_time', new Date());
-		current_time = (await aa.read('current_time')).toString();
+		ms_since_boot = await aa.read('ms_since_boot');
 	});
 </script>
 
@@ -76,7 +76,7 @@
 		<Card label="VOC Index" value={voc.toString()} />
 		<Card label="Battery" value={`${battery}%`} />
 		<Card label="Power" value={`${power_mw}mw`} />
-		<Card label="Time" value={current_time} />
+		<Card label="Time" value={(ms_since_boot / 1000).toString()} />
 	</div>
 	<button onclick={toggle_voc}
 		>{#if voc_enabled}Disable{:else}Enable{/if} VOC</button

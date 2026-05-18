@@ -1,4 +1,5 @@
-use defmt::unwrap;
+use defmt::{Debug2Format, Format, info, unwrap};
+use embassy_time::Timer;
 use esp_hal::{peripherals, rtc_cntl::Rtc, time::Duration};
 
 use crate::{COMMAND_CHANNEL, Commands, bluetooth::services::Co2Command, data::Devices};
@@ -17,18 +18,36 @@ pub async fn stcc4_task(devices: &'static Devices<'static>) {
         let mut stcc4 = devices.stcc4.lock().await;
         match c {
             Co2Command::FactoryReset => {
+                info!("Factory-resetting stcc4");
                 unsafe { crate::STTCC4_CONT_UNTIL_S = current_ts as u32 + 60 * 60 * 12 }; // continous mode needed for 12h
-                stcc4.factory_reset().await.unwrap();
+                match stcc4.factory_reset().await {
+                    Ok(_) => (),
+                    Err(e) => defmt::error!("{:?}", Debug2Format(&e)),
+                };
             }
             Co2Command::PerformConditioning => {
+                info!("Preconditioning stcc4");
                 unsafe { crate::STTCC4_CONT_UNTIL_S = current_ts as u32 + 60 * 60 }; // continous mode needed for 1h
-                stcc4.conditioning().await.unwrap();
+
+                match stcc4.conditioning(true).await {
+                    Ok(_) => (),
+                    Err(e) => defmt::error!("{:?}", Debug2Format(&e)),
+                };
+                Timer::after_millis(300).await;
+                info!("Precon done");
             }
         }
-        stcc4.start_continuous().await.unwrap();
+        info!("crate::STTCC4_CONT_UNTIL_S: {:?}", unsafe {
+            crate::STTCC4_CONT_UNTIL_S
+        });
+        match stcc4.start_continuous().await {
+            Ok(_) => (),
+            Err(e) => defmt::error!("{:?}", Debug2Format(&e)),
+        };
     }
 }
 
+#[derive(Debug, Format, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Stcc4State {
     InContinous,
     Normal,
@@ -40,6 +59,7 @@ pub enum Stcc4State {
 pub fn get_stcc4_state(now_ts: &Duration) -> Stcc4State {
     let ts = unsafe { crate::STTCC4_CONT_UNTIL_S };
     let now_s = now_ts.as_secs() as u32;
+    info!("TS: {}, Now: {}", ts, now_s);
 
     if ts == 0 {
         Stcc4State::Normal

@@ -113,7 +113,7 @@ pub struct SleepOptions {
     wake_in_ms: Option<u64>,
 }
 
-pub static COMMAND_CHANNEL: PubSubChannel<CriticalSectionRawMutex, Commands, 3, 3, 1> =
+pub static COMMAND_CHANNEL: PubSubChannel<CriticalSectionRawMutex, Commands, 2, 4, 1> =
     PubSubChannel::new();
 
 pub static CONFIG_SIGNAL: Watch<CriticalSectionRawMutex, data::Config, 1> = Watch::new();

@@ -118,17 +118,12 @@ export const CHAR_DEFS = {
 		char: '84b0a39c-c55f-41f3-8797-de87992adc55',
 		encode: (v) => new TextEncoder().encode((v as string) + '\0')
 	},
-	current_time: {
+	ms_since_boot: {
 		service: SERVICES.TIME,
 		char: '9525ce8e-3d50-4975-a8e5-64ddea6dfe10',
-		encode: (now): BufferSource => {
-			const buf = new ArrayBuffer(8);
-			new DataView(buf).setBigUint64(0, BigInt((now as Date).getTime()) * 1000n, true);
-			return buf;
-		},
-		decode: (v): Date => new Date(Number(v.getBigUint64(0, true) / 1000n))
-	} satisfies CharDef<Date>
-} satisfies Record<string, CharDef<any>>;
+		decode: (v): number => Number(v.getBigUint64(0, true) / 1000n)
+	}
+} satisfies Record<string, CharDef<unknown>>;
 
 type CharKey = keyof typeof CHAR_DEFS;
 type CharValue<K extends CharKey> = (typeof CHAR_DEFS)[K] extends {

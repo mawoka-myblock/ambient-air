@@ -68,6 +68,7 @@ impl<'a> Leds<'a> {
 pub struct FadeConfig {
     pub start_pct: u8,
     pub end_pct: u8,
+    /// in ms
     pub fade_dur: u16,
 }
 
@@ -107,3 +108,77 @@ pub async fn blink_n(led: u8, n: u8, on_ms: u64, off_ms: u64) {
         }
     }
 }
+/*
+// New function to execute unique LED patterns for state transitions
+pub async fn indicate_state_change(system_mode: SystemMode) {
+    let ad = embassy_time::Duration::from_millis(200);
+    let pa = embassy_time::Duration::from_millis(500);
+
+    match system_mode {
+        SystemMode::Initializing => {
+            // Fast, single pulse
+            COMMAND_CHANNEL
+                .immediate_publisher()
+                .publish_immediate(Commands::Led(LedCommand::Set { led: 1, level: 255 }));
+            EmbassyTimer::after(ad).await;
+            COMMAND_CHANNEL
+                .immediate_publisher()
+                .publish_immediate(Commands::Led(LedCommand::Set { led: 2, level: 255 }));
+            EmbassyTimer::after(ad).await;
+        }
+        SystemMode::ActiveMeasurement => {
+            // Fast, alternating flashes
+            loop {
+                COMMAND_CHANNEL
+                    .immediate_publisher()
+                    .publish_immediate(Commands::Led(LedCommand::Set { led: 1, level: 255 }));
+                EmbassyTimer::after(ad).await;
+                COMMAND_CHANNEL
+                    .immediate_publisher()
+                    .publish_immediate(Commands::Led(LedCommand::Set { led: 2, level: 255 }));
+                EmbassyTimer::after(ad).await;
+                break;
+            }
+        }
+        SystemMode::BluetoothConnected => {
+            // Slow, steady breathing effect (simulated by gentle fading)
+            COMMAND_CHANNEL
+                .immediate_publisher()
+                .publish_immediate(Commands::Led(LedCommand::Fade((
+                    FadeConfig {
+                        start_pct: 0,
+                        end_pct: 100,
+                        fade_dur: 500,
+                    },
+                    1,
+                ))));
+            EmbassyTimer::after_millis(1500).await;
+            COMMAND_CHANNEL
+                .immediate_publisher()
+                .publish_immediate(Commands::Led(LedCommand::Fade((
+                    FadeConfig {
+                        start_pct: 0,
+                        end_pct: 100,
+                        fade_dur: 500,
+                    },
+                    2,
+                ))));
+            EmbassyTimer::after_millis(1500).await;
+        }
+        SystemMode::MonitoringSleep => {
+            // Slow, gentle pulse
+            COMMAND_CHANNEL
+                .immediate_publisher()
+                .publish_immediate(Commands::Led(LedCommand::Set { led: 1, level: 50 }));
+            EmbassyTimer::after_millis(1000).await;
+            COMMAND_CHANNEL
+                .immediate_publisher()
+                .publish_immediate(Commands::Led(LedCommand::Set { led: 1, level: 0 }));
+            EmbassyTimer::after_millis(1000).await;
+        }
+        SystemMode::DeepSleep => {
+            // All off
+        }
+    }
+}
+ */

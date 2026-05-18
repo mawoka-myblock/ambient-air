@@ -161,7 +161,7 @@ pub struct Co2Service {
     pub co2: i16,
     #[characteristic(uuid = "22b0808a-3a60-45ed-9c54-57f1f16079e6", read, write)]
     pub sampling_interval: i16,
-    #[characteristic(uuid = "2f03ecce-edca-49f1-a814-ce8158c2ada9", read)]
+    #[characteristic(uuid = "2f03ecce-edca-49f1-a814-ce8158c2ada9", write)]
     pub command: Co2Command,
 }
 
