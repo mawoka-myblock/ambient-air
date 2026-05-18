@@ -1,0 +1,6 @@
+- [ ] Make sampling not stop on wake from gpio
+- [ ] better communication to user regarding data (eg. high co2 -> fas blinking leds, etc)
+- [ ] better button interaction
+- [ ] Auto-sleep
+- [ ] Error handling instead of unwrap
+- [ ] Battery handling (when nearly empty, warn and deep sleep until charging)
