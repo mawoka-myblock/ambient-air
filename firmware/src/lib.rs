@@ -9,6 +9,7 @@ use esp_hal::ram;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 use crate::{
+    bluetooth::services::Co2Command,
     leds::LedCommand,
     measurements::{MeasurementResult, sampling::MEAS_SIZE, voc::STATE_SIZE},
 };
@@ -84,6 +85,9 @@ pub static mut FIRST_MEASUREMENT_TS: u64 = 0;
 #[ram(unstable(rtc_fast, persistent))]
 pub static mut NEEDS_SAMPLES_WRITTEN_TO_NVS: u8 = 0;
 
+#[ram(unstable(rtc_fast, persistent))]
+pub static mut STTCC4_CONT_UNTIL_S: u32 = 0;
+
 pub const SAMPLES_PER_BUFFER: usize = 20;
 
 pub const NVS_OFFSET: usize = 0x208000;
@@ -100,6 +104,7 @@ pub enum Commands {
     Reconfigure(data::Config),
     Sleep(SleepOptions),
     Led(LedCommand),
+    Stcc4(Co2Command),
 }
 
 #[derive(Debug, Format, Clone, Copy)]
@@ -108,7 +113,7 @@ pub struct SleepOptions {
     wake_in_ms: Option<u64>,
 }
 
-pub static COMMAND_CHANNEL: PubSubChannel<CriticalSectionRawMutex, Commands, 2, 3, 1> =
+pub static COMMAND_CHANNEL: PubSubChannel<CriticalSectionRawMutex, Commands, 3, 3, 1> =
     PubSubChannel::new();
 
 pub static CONFIG_SIGNAL: Watch<CriticalSectionRawMutex, data::Config, 1> = Watch::new();

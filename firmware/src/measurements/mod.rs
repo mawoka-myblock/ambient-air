@@ -5,11 +5,13 @@ pub mod voc;
 use defmt::{Debug2Format, Format, error};
 use embassy_embedded_hal::shared_bus::I2cDeviceError;
 use embassy_time::{Duration, Instant, Timer};
+use esp_hal::{peripherals, rtc_cntl::Rtc, time::Duration as HalDuration};
 
 use crate::{
     CONFIG_SIGNAL, MEASUREMENT_SIGNAL, SGP40_READINGS,
     data::{Battery, Co2Data, Devices, PressureData, TemperatureData, VocData},
     measurements::voc::store_voc_state,
+    tasks::stcc4::{Stcc4State, get_stcc4_state},
 };
 
 pub type I2cDevError = I2cDeviceError<esp_hal::i2c::master::Error>;
@@ -29,7 +31,12 @@ pub async fn measure(devices: &'static Devices<'static>) {
         if include_co2_sampling {
             last_co2_sample = beginning;
         }
-        let mut d = measure_once(devices, include_co2_sampling).await;
+        let mut d = measure_once(
+            devices,
+            include_co2_sampling,
+            &Rtc::new(unsafe { peripherals::LPWR::steal() }).time_since_power_up(),
+        )
+        .await;
 
         if first_run {
             d.voc.readings_until_warmup_complete = d
@@ -64,6 +71,7 @@ pub struct MeasurementResult {
 pub async fn measure_once(
     devices: &'static Devices<'static>,
     include_co2: bool,
+    dur_since_boot: &HalDuration,
 ) -> MeasurementResult {
     let pressure = async {
         let reading: (f32, f32) = devices
@@ -129,6 +137,7 @@ pub async fn measure_once(
     let co2 = match include_co2 {
         false => Co2Data::default(),
         true => async {
+            let stcc4_state = get_stcc4_state(dur_since_boot);
             let mut stcc4 = devices.stcc4.lock().await;
             stcc4
                 .set_rht_compensation(temperature.temperature, temperature.humidity)
@@ -136,7 +145,11 @@ pub async fn measure_once(
             stcc4
                 .set_pressure_compensation((pressure.pressure * 1000.0) as i32)
                 .await?;
-            stcc4.single_shot(true).await?;
+            match stcc4_state {
+                Stcc4State::InContinous => (),
+                Stcc4State::NeedsContinousStop => stcc4.stop_continuous().await?,
+                Stcc4State::Normal => stcc4.single_shot(true).await?,
+            };
             let (co2, _, _) = stcc4.read_measurement().await?;
             Ok::<_, async_stcc4::Error<I2cDevError>>(Co2Data { co2, error: false })
         }

@@ -1,13 +1,14 @@
 use trouble_host::{
     PacketPool,
     gatt::{GattConnection, GattEvent, ReadEvent},
+    prelude::FromGatt,
 };
 
 use crate::{
-    MEASUREMENT_SIGNAL,
+    COMMAND_CHANNEL, Commands, MEASUREMENT_SIGNAL,
     bluetooth::{
         long_write::GenericWrite,
-        services::{Co2Service, Server},
+        services::{Co2Command, Co2Service, Server},
     },
     data::{Co2Data, Devices},
     handle_service,
@@ -35,6 +36,7 @@ impl Co2Service {
         handle_service!(self, server, event, devices, None, {
             co2 => (read_co2, write_co2),
             sampling_interval => (read_sampling_interval, write_sampling_interval),
+            command => (read_command, write_command)
         });
     }
     pub async fn read_co2<P: PacketPool>(
@@ -90,5 +92,29 @@ impl Co2Service {
             GenericWrite::Short(d) => *d,
         };
         unsafe { crate::STCC4_SAMPLE_RATE = data.max(5) }
+    }
+
+    pub async fn read_command<P: PacketPool>(
+        &self,
+        _e: &ReadEvent<'_, '_, P>,
+        _server: &Server<'_>,
+        _devices: &'static Devices<'static>,
+    ) {
+        unreachable!()
+    }
+
+    pub async fn write_command<P: PacketPool>(
+        &self,
+        e: &GenericWrite<'_, Co2Command>,
+        _server: &Server<'_>,
+        _devices: &'static Devices<'static>,
+    ) {
+        let data = match e {
+            GenericWrite::Long { data, handle: _ } => &Co2Command::from_gatt(*data).unwrap(),
+            GenericWrite::Short(d) => d,
+        };
+        COMMAND_CHANNEL
+            .immediate_publisher()
+            .publish_immediate(Commands::Stcc4(*data));
     }
 }

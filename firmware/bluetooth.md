@@ -95,5 +95,5 @@ on the Data characteristic in bursts, so subscribe to that, then read this.
 
 ## Time Service (85083006-8da2-4d0b-9dca-fc3ccda46a3c)
 
-### Time (u64) R W
-The current time in **µs**
+### Time (9525ce8e-3d50-4975-a8e5-64ddea6dfe10) (u64) R
+The time since boot in ms

@@ -8,15 +8,12 @@ use esp_hal::{
     peripherals::{self, LPWR},
     rtc_cntl::{
         Rtc,
-        sleep::{
-            RtcConfig, RtcSleepConfig, RtcioWakeupSource, TimerWakeupSource, WakeSource,
-            WakeupLevel,
-        },
+        sleep::{RtcSleepConfig, RtcioWakeupSource, TimerWakeupSource, WakeSource, WakeupLevel},
     },
 };
 
 #[embassy_executor::task]
-pub async fn sleep_task(devices: &'static Devices<'static>, rtc_peri: LPWR<'static>) {
+pub async fn sleep_task(_devices: &'static Devices<'static>, rtc_peri: LPWR<'static>) {
     let mut cmd_listener = unwrap!(COMMAND_CHANNEL.subscriber());
     let mut rtc = Rtc::new(rtc_peri);
     loop {

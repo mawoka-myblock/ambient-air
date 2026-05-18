@@ -4,6 +4,7 @@ use async_stcc4::Stcc4;
 use bq27441::Bq27441;
 use defmt::Format;
 use embassy_embedded_hal::shared_bus::asynch::i2c::I2cDevice;
+use embassy_futures::join::join3;
 use embassy_sync::blocking_mutex::raw::NoopRawMutex;
 use embassy_sync::mutex::Mutex;
 use esp_hal::Async;
@@ -92,4 +93,39 @@ pub struct Devices<'a> {
     pub aht20: Mutex<NoopRawMutex, AHT20<ShortI2cDevice<'a>, embassy_time::Delay>>,
     pub bq27441: Mutex<NoopRawMutex, Bq27441<ShortI2cDevice<'a>>>,
     pub nvs: Mutex<NoopRawMutex, Nvs>,
+}
+
+impl Devices<'_> {
+    pub async fn init(
+        i2c_bus: &'static Mutex<NoopRawMutex, I2c<'static, Async>>,
+        nvs: Mutex<NoopRawMutex, Nvs>,
+    ) -> Devices<'static> {
+        let i2c_dev_icp = I2cDevice::new(i2c_bus);
+        let i2c_dev_aht = I2cDevice::new(i2c_bus);
+        let i2c_dev_sgp = I2cDevice::new(i2c_bus);
+        let i2c_dev_bq27 = I2cDevice::new(i2c_bus);
+        let i2c_dev_stcc = I2cDevice::new(i2c_bus);
+
+        let sgp40 = Mutex::new(Sgp40::new(i2c_dev_sgp, 0x59, embassy_time::Delay));
+        let stcc4 = Mutex::new(Stcc4::new(0x65, i2c_dev_stcc, embassy_time::Delay));
+
+        let sensors = join3(
+            Bq27441::new(i2c_dev_bq27, 0x55),
+            AHT20::new(i2c_dev_aht, 0x38, embassy_time::Delay),
+            Icp20100::new(0x63, i2c_dev_icp, embassy_time::Delay),
+        )
+        .await;
+        let bq27441 = Mutex::new(sensors.0.unwrap());
+        let aht20 = Mutex::new(sensors.1.unwrap());
+        let icp = Mutex::new(sensors.2.unwrap());
+
+        Devices {
+            aht20,
+            bq27441,
+            icp,
+            nvs,
+            sgp40,
+            stcc4,
+        }
+    }
 }

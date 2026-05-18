@@ -7,7 +7,7 @@ pub mod pressure;
 pub mod temperature;
 pub mod time;
 pub mod voc;
-use defmt::{error, info};
+use defmt::{Format, error, info};
 use heapless::{CapacityError, Vec};
 use trouble_host::{prelude::*, types::gatt_traits::FromGattError};
 
@@ -130,8 +130,8 @@ pub struct BatteryService {
 
 #[gatt_service(uuid = "85083006-8da2-4d0b-9dca-fc3ccda46a3c")]
 pub struct TimeService {
-    #[characteristic(uuid = "9525ce8e-3d50-4975-a8e5-64ddea6dfe10", read, write)]
-    pub time: u64, // in µs
+    #[characteristic(uuid = "9525ce8e-3d50-4975-a8e5-64ddea6dfe10", read)]
+    pub ms_since_boot: u64, // in ms
 }
 
 #[gatt_service(uuid = "125ef8ff-f538-468f-9f40-2380a102895b")]
@@ -161,6 +161,8 @@ pub struct Co2Service {
     pub co2: i16,
     #[characteristic(uuid = "22b0808a-3a60-45ed-9c54-57f1f16079e6", read, write)]
     pub sampling_interval: i16,
+    #[characteristic(uuid = "2f03ecce-edca-49f1-a814-ce8158c2ada9", read)]
+    pub command: Co2Command,
 }
 
 #[gatt_service(uuid = "9fdbefc6-0e57-469c-b006-8c38f517805a")]
@@ -186,6 +188,43 @@ pub struct MeasurementService {
 }
 #[derive(Debug, Default)]
 pub struct MeasurementVec(pub Vec<Measurement, 10>);
+
+#[non_exhaustive]
+#[derive(Debug, Format, Clone, Copy)]
+pub enum Co2Command {
+    FactoryReset,
+    PerformConditioning,
+}
+
+impl Default for Co2Command {
+    fn default() -> Self {
+        Co2Command::FactoryReset
+    }
+}
+
+impl FromGatt for Co2Command {
+    fn from_gatt(data: &[u8]) -> Result<Self, FromGattError> {
+        if data.len() != 1 {
+            return Err(FromGattError::InvalidLength);
+        }
+        match data[0] {
+            0x01 => Ok(Self::FactoryReset),
+            0x02 => Ok(Self::PerformConditioning),
+            _ => Err(FromGattError::InvalidCharacter),
+        }
+    }
+}
+
+impl AsGatt for Co2Command {
+    const MAX_SIZE: usize = 1;
+    const MIN_SIZE: usize = 1;
+    fn as_gatt(&self) -> &[u8] {
+        match self {
+            Self::FactoryReset => &[0x01],
+            Self::PerformConditioning => &[0x02],
+        }
+    }
+}
 
 impl MeasurementVec {
     pub fn from_slice(d: &[Measurement]) -> Result<Self, CapacityError> {

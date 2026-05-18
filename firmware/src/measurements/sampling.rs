@@ -1,12 +1,11 @@
 use core::time::Duration;
 
-use alloc::{format, string::ToString};
+use alloc::format;
 use bytemuck::{AnyBitPattern, NoUninit};
 use defmt::{Debug2Format, error, info};
 use embassy_time::Instant;
 use esp_hal::{peripherals, rtc_cntl::Rtc};
 use heapless::Vec;
-use jiff::Timestamp;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -50,38 +49,32 @@ impl Measurement {
 /// Goes to sleep later and wakes up when:
 /// - timer expires (new sample)
 /// - a button is pressed (stops measurement cycle)
-pub async fn record_sample(
-    devices: &'static Devices<'static>,
-    beginning: Instant,
-    nvs: &mut Nvs,
-) -> ! {
+pub async fn record_sample(devices: &'static Devices<'static>, beginning: Instant) -> ! {
     let mut rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
 
     // Ensure the CO2 doesn't get sampled more than every 5 secs to keep the algorithm working (specified by datasheet)
-    let now = Timestamp::from_microsecond(rtc.current_time_us() as i64).expect("RTC time invalid");
-    info!("Time since boot: {}", rtc.time_since_power_up().as_millis());
-    info!("Time now: {}", now.to_string().as_str());
+    let dur_since_pwrup = rtc.time_since_power_up();
+    let now = dur_since_pwrup.as_millis();
+    info!("Time since boot: {}", now);
     let last_raw = unsafe { crate::LAST_CO2_SAMPLE };
-    let measure_co2 = match Timestamp::from_microsecond(last_raw as i64) {
-        Ok(last_ts) if last_raw != 0 => now.duration_since(last_ts).as_secs() >= 5,
-        _ => true, // uninitialized or garbage
+    let measure_co2 = if last_raw != 0 {
+        now.saturating_sub(last_raw) >= 5000
+    } else {
+        true // uninitialized
     };
     if measure_co2 {
         unsafe {
-            crate::LAST_CO2_SAMPLE = now.as_microsecond() as u64;
+            crate::LAST_CO2_SAMPLE = now;
         }
     }
     if (unsafe { crate::MEASUREMENT_SAMPLES_TAKEN } == 0) {
-        unsafe { crate::FIRST_MEASUREMENT_TS = now.as_millisecond() as u64 }
+        unsafe { crate::FIRST_MEASUREMENT_TS = now }
     }
-    let time_offset = (now.as_millisecond() as u64 - unsafe { crate::FIRST_MEASUREMENT_TS }) as u32;
-    info!("First TS: {}", unsafe { crate::FIRST_MEASUREMENT_TS });
-    info!("offset: {}", time_offset);
-    info!("Now: {}", now.as_millisecond());
+    let time_offset = (now - unsafe { crate::FIRST_MEASUREMENT_TS }) as u32;
 
-    let reading = measure_once(devices, measure_co2).await;
+    let reading = measure_once(devices, measure_co2, &dur_since_pwrup).await;
     let measurement = Measurement::from_reading(reading, time_offset);
-    save(measurement, nvs).await;
+    save(measurement, &mut *devices.nvs.lock().await).await;
     let elapsed = embassy_time::Instant::now() - beginning;
 
     let wakeup_in_ms: u64 =

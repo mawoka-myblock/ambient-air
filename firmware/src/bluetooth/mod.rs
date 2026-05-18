@@ -24,7 +24,7 @@ pub static SAMPLE_PUBLISH_DATA: Signal<CriticalSectionRawMutex, u8> = Signal::ne
 /// Max number of L2CAP channels.
 const L2CAP_CHANNELS_MAX: usize = 2; // Signal + att
 #[embassy_executor::task]
-pub async fn run(
+pub async fn run_bt(
     controller: ExternalController<BleConnector<'static>, 20>,
     devices: &'static Devices<'static>,
 ) {

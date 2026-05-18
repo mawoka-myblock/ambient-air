@@ -1,4 +1,3 @@
-use defmt::info;
 use esp_hal::{peripherals, rtc_cntl::Rtc};
 use trouble_host::{
     PacketPool,
@@ -22,7 +21,7 @@ impl TimeService {
         devices: &'static Devices<'static>,
     ) {
         handle_service!(self, server, event, devices, None, {
-            time => (read_time, write_time),
+            ms_since_boot => (read_time, write_time),
         });
     }
     pub async fn read_time<P: PacketPool>(
@@ -34,23 +33,17 @@ impl TimeService {
         let rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
         server
             .time
-            .time
-            .set(server, &rtc.current_time_us())
+            .ms_since_boot
+            .set(server, &rtc.time_since_power_up().as_millis())
             .unwrap();
     }
 
     pub async fn write_time<P: PacketPool>(
         &self,
-        e: &GenericWrite<'_, u64>,
+        _e: &GenericWrite<'_, u64>,
         _server: &Server<'_>,
         _devices: &'static Devices<'static>,
     ) {
-        let data = match e {
-            GenericWrite::Long { data: _, handle: _ } => 0,
-            GenericWrite::Short(d) => *d,
-        };
-        info!("Got new time!");
-        let rtc = Rtc::new(unsafe { peripherals::LPWR::steal() });
-        rtc.set_current_time_us(data);
+        unreachable!()
     }
 }
