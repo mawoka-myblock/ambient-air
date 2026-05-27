@@ -16,14 +16,15 @@
 
 <div class="min-h-screen bg-slate-900 p-6 text-white">
 	<div class="mx-auto max-w-xl space-y-6">
-		<h1 class="text-3xl font-bold">🌫 Ambient-Air Monitor</h1>
+		<h1 class="text-3xl font-bold">Ambient-Air Monitor</h1>
 
-		{#if connected}
-			<App {aa} />
-		{:else}
+		{#if !connected}
 			<button class="rounded bg-blue-600 px-4 py-2 hover:bg-blue-500" onclick={connectDevice}>
 				Connect Device
 			</button>
 		{/if}
 	</div>
+	{#if connected}
+		<App {aa} />
+	{/if}
 </div>

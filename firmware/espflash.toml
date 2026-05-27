@@ -1,2 +1,5 @@
-# [idf]
-# partition_table = "partition-table.bin"
+format = "EspIdf"
+
+[idf_format_args]
+
+[flash]

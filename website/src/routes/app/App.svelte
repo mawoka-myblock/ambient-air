@@ -2,6 +2,7 @@
 	import type { AmbientAir, Measurement } from '$lib/ble/device';
 	import { onMount } from 'svelte';
 	import Card from './card.svelte';
+	import Measurements from './Measurements.svelte';
 
 	let { aa }: { aa: AmbientAir } = $props();
 
@@ -33,6 +34,7 @@
 			samples: count
 		});
 		await aa.send('measure_command', payload);
+		window.location.reload();
 	}
 
 	async function readSamples() {
@@ -67,7 +69,7 @@
 </script>
 
 <div>
-	<div class="grid grid-cols-2 gap-4">
+	<div class="grid grid-cols-2 gap-4 py-4">
 		<Card label="Temperature" value={`${temp.toFixed(2)} °C`} />
 		<Card label="Humidity" value={`${humidity.toFixed(1)} %`} />
 		<Card label="Pressure" value={`${pressure.toFixed(2)} kPa`} />
@@ -77,11 +79,19 @@
 		<Card label="Battery" value={`${battery}%`} />
 		<Card label="Power" value={`${power_mw}mw`} />
 		<Card label="Time" value={(ms_since_boot / 1000).toString()} />
+
+		<div class="flex flex-row justify-around rounded-xl bg-slate-800 p-4 shadow">
+			<button
+				class="rounded bg-emerald-600 px-4 py-2 text-sm transition-colors hover:cursor-pointer hover:bg-emerald-500"
+				onclick={toggle_voc}
+				>{#if voc_enabled}Disable{:else}Enable{/if} VOC</button
+			>
+			<button
+				class="rounded bg-emerald-600 px-4 py-2 text-sm transition-colors hover:cursor-pointer hover:bg-emerald-500"
+				onclick={readSamples}>Read samples</button
+			>
+		</div>
 	</div>
-	<button onclick={toggle_voc}
-		>{#if voc_enabled}Disable{:else}Enable{/if} VOC</button
-	>
-	<button onclick={readSamples}>Read samples</button>
 
 	<div class="space-y-4 rounded-lg border border-slate-700 bg-slate-800 p-4">
 		<h2 class="font-semibold text-slate-200">Sampling</h2>
@@ -107,7 +117,7 @@
 		</div>
 		<button
 			onclick={() => startSampling(sampling_data.interval, sampling_data.count)}
-			class="rounded bg-emerald-600 px-4 py-2 text-sm transition-colors hover:bg-emerald-500"
+			class="rounded bg-emerald-600 px-4 py-2 text-sm transition-colors hover:cursor-pointer hover:bg-emerald-500"
 		>
 			Start Sampling
 		</button>
@@ -120,7 +130,8 @@
 				Start Measurement Program
 			</button> -->
 	{#if measurements.length !== 0}
-		<div class="overflow-x-auto rounded-lg border border-slate-700">
+		<Measurements {measurements} />
+		<!-- <div class="overflow-x-auto rounded-lg border border-slate-700">
 			<table class="w-full text-sm">
 				<thead class="bg-slate-800 text-slate-400">
 					<tr>
@@ -134,7 +145,7 @@
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-slate-700">
-					{#each measurements as sample (sample.ms_offset)}
+					{#each measurements as sample}
 						<tr class="bg-slate-900 transition-colors hover:bg-slate-800">
 							<td class="px-4 py-2 text-slate-400">{sample.ms_offset}</td>
 							<td class="px-4 py-2 text-right">{(sample.temp_t / 100).toFixed(2)}</td>
@@ -147,7 +158,7 @@
 					{/each}
 				</tbody>
 			</table>
-		</div>
+		</div> -->
 		<p class="text-sm text-slate-400">Read {measurements.length} samples</p>
 	{/if}
 </div>

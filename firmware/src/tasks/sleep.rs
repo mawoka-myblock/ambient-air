@@ -50,7 +50,7 @@ pub fn deep_sleep_basic_with_cfg<'a>(rtc: &'a mut Rtc<'a>, d: &SleepOptions) -> 
         let _ = wake_sources.push(timer_ws.as_ref().unwrap());
     }
     let mut rtc_cfg = RtcSleepConfig::deep();
-    rtc_cfg.set_rtc_peri_pd_en(false);
+    rtc_cfg.set_rtc_peri_pd_en(true);
     rtc.sleep(&rtc_cfg, &wake_sources);
     unreachable!();
 }
