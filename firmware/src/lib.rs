@@ -117,3 +117,5 @@ pub static COMMAND_CHANNEL: PubSubChannel<CriticalSectionRawMutex, Commands, 2, 
     PubSubChannel::new();
 
 pub static CONFIG_SIGNAL: Watch<CriticalSectionRawMutex, data::Config, 1> = Watch::new();
+
+pub static BT_IS_CONNECTED_STATE: Watch<CriticalSectionRawMutex, bool, 1> = Watch::new();

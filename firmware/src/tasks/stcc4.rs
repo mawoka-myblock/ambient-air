@@ -1,4 +1,4 @@
-use defmt::{Debug2Format, Format, info, unwrap};
+use defmt::{Debug2Format, Format, debug, info, unwrap};
 use embassy_time::Timer;
 use esp_hal::{peripherals, rtc_cntl::Rtc, time::Duration};
 
@@ -59,7 +59,7 @@ pub enum Stcc4State {
 pub fn get_stcc4_state(now_ts: &Duration) -> Stcc4State {
     let ts = unsafe { crate::STTCC4_CONT_UNTIL_S };
     let now_s = now_ts.as_secs() as u32;
-    info!("TS: {}, Now: {}", ts, now_s);
+    debug!("TS: {}, Now: {}", ts, now_s);
 
     if ts == 0 {
         Stcc4State::Normal

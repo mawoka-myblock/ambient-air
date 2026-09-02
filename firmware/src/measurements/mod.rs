@@ -2,7 +2,7 @@ pub mod lp;
 pub mod sampling;
 pub mod sensors;
 pub mod voc;
-use defmt::{Debug2Format, Format, error, info};
+use defmt::{Debug2Format, Format, debug, error};
 use embassy_embedded_hal::shared_bus::I2cDeviceError;
 use embassy_time::{Duration, Instant, Timer};
 use esp_hal::{peripherals, rtc_cntl::Rtc, time::Duration as HalDuration};
@@ -37,7 +37,7 @@ pub async fn measure(devices: &'static Devices<'static>) {
             &Rtc::new(unsafe { peripherals::LPWR::steal() }).time_since_power_up(),
         )
         .await;
-
+        debug!("{:?}", d);
         if first_run {
             d.voc.readings_until_warmup_complete = d
                 .voc
@@ -87,9 +87,12 @@ pub async fn measure_once(
         })
     }
     .await
-    .unwrap_or_else(|_| PressureData {
-        error: true,
-        ..PressureData::default()
+    .unwrap_or_else(|e| {
+        error!("Pressure: {:?}", Debug2Format(&e));
+        PressureData {
+            error: true,
+            ..PressureData::default()
+        }
     });
     let temperature = match devices.aht20.lock().await.measure().await {
         Ok(d) => TemperatureData {
@@ -97,10 +100,13 @@ pub async fn measure_once(
             temperature: d.temperature,
             error: false,
         },
-        Err(_) => TemperatureData {
-            error: true,
-            ..TemperatureData::default()
-        },
+        Err(e) => {
+            error!("CO2: {:?}", Debug2Format(&e));
+            TemperatureData {
+                error: true,
+                ..TemperatureData::default()
+            }
+        }
     };
     let voc = async {
         if unsafe { crate::SGP40_ENABLED == 1 } {
@@ -130,9 +136,12 @@ pub async fn measure_once(
         }
     }
     .await
-    .unwrap_or_else(|_| VocData {
-        error: true,
-        ..VocData::default()
+    .unwrap_or_else(|e| {
+        error!("VOC: {:?}", Debug2Format(&e));
+        VocData {
+            error: true,
+            ..VocData::default()
+        }
     });
     let co2 = match include_co2 {
         false => Co2Data::default(),
@@ -150,13 +159,13 @@ pub async fn measure_once(
                 Stcc4State::NeedsContinousStop => stcc4.stop_continuous().await?,
                 Stcc4State::Normal => stcc4.single_shot(true).await?,
             };
-            info!("STCC4 State: {}", stcc4_state);
+            debug!("STCC4 State: {}", stcc4_state);
             let (co2, _, _) = stcc4.read_measurement().await?;
             Ok::<_, async_stcc4::Error<I2cDevError>>(Co2Data { co2, error: false })
         }
         .await
         .unwrap_or_else(|e| {
-            error!("{:?}", Debug2Format(&e));
+            error!("CO2: {:?}", Debug2Format(&e));
             Co2Data {
                 error: true,
                 ..Co2Data::default()
@@ -177,9 +186,12 @@ pub async fn measure_once(
         })
     }
     .await
-    .unwrap_or_else(|_| Battery {
-        error: true,
-        ..Battery::default()
+    .unwrap_or_else(|e| {
+        error!("Battery: {:?}", Debug2Format(&e));
+        Battery {
+            error: true,
+            ..Battery::default()
+        }
     });
     MeasurementResult {
         co2,

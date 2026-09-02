@@ -13,7 +13,7 @@ use crate::bluetooth::long_write::{ConnectionContext, LongWriteAccumulator};
 use crate::bluetooth::services::{MeasurementVec, Server};
 use crate::data::Devices;
 use crate::measurements::sampling::from_nvs;
-use crate::{MEASUREMENT_SIGNAL, SAMPLES_PER_BUFFER};
+use crate::{BT_IS_CONNECTED_STATE, MEASUREMENT_SIGNAL, SAMPLES_PER_BUFFER};
 use defmt::unwrap;
 use embassy_futures::join::join;
 /// Max number of connections
@@ -48,11 +48,12 @@ pub async fn run_bt(
         appearance: &appearance::power_device::GENERIC_POWER_DEVICE,
     }))
     .unwrap();
-
+    BT_IS_CONNECTED_STATE.dyn_sender().send(false);
     let _ = join(ble_task(runner), async {
         loop {
             match advertise("AmbientAir", &mut peripheral, &server).await {
                 Ok(conn) => {
+                    BT_IS_CONNECTED_STATE.dyn_sender().send(true);
                     // set up tasks when the connection is established to a central, so they don't run when no one is connected.
                     let a = gatt_events_task(&server, &conn, devices);
                     let b = notify_task(&server, &conn, devices);
@@ -67,6 +68,7 @@ pub async fn run_bt(
                     panic!("[adv] error: {:?}", e);
                 }
             }
+            BT_IS_CONNECTED_STATE.dyn_sender().send(false);
         }
     })
     .await;

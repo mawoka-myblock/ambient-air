@@ -5241,6 +5241,315 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "easyeda2kicad:RX8111CE"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at 0 10.16 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "RX8111CE"
+				(at 0 -10.16 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "easyeda2kicad:OSC-SMD_10P-L3.2-W2.5-BL-1"
+				(at 0 -12.7 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.lcsc.com/datasheet/C2929261.pdf"
+				(at 0 -15.24 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Manufacturer" "EPSON(爱普生)"
+				(at 0 -17.78 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "MPN" "RX8111CE B"
+				(at 0 -20.32 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "LCSC Part" "C2929261"
+				(at 0 -22.86 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "Real-time Clocks (RTC)"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "RX8111CE_0_1"
+				(rectangle
+					(start -8.89 7.62)
+					(end 8.89 -7.62)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(circle
+					(center -7.62 6.35)
+					(radius 0.38)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin unspecified line
+					(at -11.43 5.08 0)
+					(length 2.54)
+					(name "VDD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin unspecified line
+					(at -11.43 2.54 0)
+					(length 2.54)
+					(name "VOUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin unspecified line
+					(at -11.43 0 0)
+					(length 2.54)
+					(name "VBAT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin unspecified line
+					(at -11.43 -2.54 0)
+					(length 2.54)
+					(name "FOUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin unspecified line
+					(at -11.43 -5.08 0)
+					(length 2.54)
+					(name "SCL"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin unspecified line
+					(at 11.43 -5.08 180)
+					(length 2.54)
+					(name "EVIN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin unspecified line
+					(at 11.43 -2.54 180)
+					(length 2.54)
+					(name "SDA"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin unspecified line
+					(at 11.43 0 180)
+					(length 2.54)
+					(name "VIO"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin unspecified line
+					(at 11.43 2.54 180)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin unspecified line
+					(at 11.43 5.08 180)
+					(length 2.54)
+					(name "/INT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "easyeda2kicad:SGP40-D-R4"
 			(pin_names
 				(offset 1.016)
@@ -6249,7 +6558,7 @@
 	)
 	(text "Standby: 34µA"
 		(exclude_from_sim no)
-		(at 352.552 77.216 0)
+		(at 254.762 216.916 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6276,6 +6585,16 @@
 			)
 		)
 		(uuid "93193e81-0e57-4dca-9943-7ce950421f56")
+	)
+	(text "I2C Address: 0x32"
+		(exclude_from_sim no)
+		(at 338.836 196.088 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "937336ec-ae04-4297-94eb-6991222d8bdf")
 	)
 	(text "I2C Address: 0x38"
 		(exclude_from_sim no)
@@ -6310,7 +6629,7 @@
 	)
 	(text "I2C Address: 0x59"
 		(exclude_from_sim no)
-		(at 352.044 72.644 0)
+		(at 254.254 212.344 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6395,6 +6714,12 @@
 		(uuid "37a35ffd-d1f9-4dd0-82a5-feb28deb66ec")
 	)
 	(junction
+		(at 290.83 217.17)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "3a5247ba-e2b8-4e10-a3e3-63b1eee6077f")
+	)
+	(junction
 		(at 45.72 133.35)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -6443,6 +6768,12 @@
 		(uuid "608a582a-55bb-4a53-a995-4f5c2650a156")
 	)
 	(junction
+		(at 250.19 223.52)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "6f94409e-a72c-47a8-985f-0bb3b81ec68c")
+	)
+	(junction
 		(at 50.8 80.01)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -6455,10 +6786,16 @@
 		(uuid "78a2c78b-4e70-46fd-b964-cecbd0eb0313")
 	)
 	(junction
-		(at 347.98 81.28)
+		(at 250.19 220.98)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "8693f04b-61a4-4277-be3f-619c0f19b63a")
+	)
+	(junction
+		(at 311.15 205.74)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "883e9723-cc62-45d1-92a8-efb1b0ba5688")
 	)
 	(junction
 		(at 110.49 180.34)
@@ -6473,16 +6810,10 @@
 		(uuid "8c8dc378-a374-4e20-851e-207dcd9ec12a")
 	)
 	(junction
-		(at 367.03 63.5)
+		(at 254 195.58)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "8d079080-39b0-4250-82b0-78ef6e5dafef")
-	)
-	(junction
-		(at 347.98 83.82)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "92903b36-4d64-4dac-8d21-4a00f8a17f58")
+		(uuid "96b5e191-1ebf-4523-a788-d9c37ab1bae3")
 	)
 	(junction
 		(at 167.64 25.4)
@@ -6501,6 +6832,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "a56b6b6e-9714-48af-8cbf-b360c82d54d2")
+	)
+	(junction
+		(at 269.24 195.58)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "aee206aa-a674-44e7-9010-db349c95c92a")
 	)
 	(junction
 		(at 36.83 40.64)
@@ -6527,13 +6864,19 @@
 		(uuid "dd9f789b-37c0-412e-940a-77f9882f8eae")
 	)
 	(junction
+		(at 356.87 218.44)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "def45d73-7032-4c4a-b14d-ce5b9fada2cf")
+	)
+	(junction
 		(at 162.56 163.83)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "e21b9a93-dd98-401e-9de6-11c5f6d56173")
 	)
 	(junction
-		(at 364.49 66.04)
+		(at 266.7 205.74)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "e50b4d89-2ae0-4bdb-9261-1787af747a9d")
@@ -6579,10 +6922,6 @@
 	(no_connect
 		(at 85.09 170.18)
 		(uuid "5d1d9262-f571-4766-a45c-3c2cbc7dccce")
-	)
-	(no_connect
-		(at 29.21 152.4)
-		(uuid "606f05d0-82b9-4e1e-937a-63230cc0758f")
 	)
 	(no_connect
 		(at 87.63 63.5)
@@ -6644,6 +6983,30 @@
 		(at 60.96 35.56)
 		(uuid "f3aa609b-98ef-46a4-8b56-1aa69da4aa4d")
 	)
+	(no_connect
+		(at 313.69 215.9)
+		(uuid "fe5f10d2-f075-4e88-8729-2f111eea03ca")
+	)
+	(wire
+		(pts
+			(xy 313.69 205.74) (xy 311.15 205.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "04d51bf3-193c-42ce-bb00-75c5228ad822")
+	)
+	(wire
+		(pts
+			(xy 20.32 152.4) (xy 29.21 152.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "05cdb7c5-3ef5-4352-a6c7-8ceb8c240f6e")
+	)
 	(wire
 		(pts
 			(xy 125.73 43.18) (xy 133.35 43.18)
@@ -6653,6 +7016,16 @@
 			(type default)
 		)
 		(uuid "0704119d-4d6b-408a-be49-cc4884f3e8db")
+	)
+	(wire
+		(pts
+			(xy 290.83 210.82) (xy 313.69 210.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "08370c9b-762a-4247-a8c0-6f66f1d50534")
 	)
 	(wire
 		(pts
@@ -6756,6 +7129,16 @@
 	)
 	(wire
 		(pts
+			(xy 313.69 213.36) (xy 311.15 213.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "150c4530-e283-47ea-9bb3-c3d30d265e68")
+	)
+	(wire
+		(pts
 			(xy 196.85 34.29) (xy 196.85 31.75)
 		)
 		(stroke
@@ -6836,6 +7219,16 @@
 	)
 	(wire
 		(pts
+			(xy 309.88 218.44) (xy 313.69 218.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1bc0838c-c180-4d87-82b4-2c06f62c24f6")
+	)
+	(wire
+		(pts
 			(xy 46.99 69.85) (xy 50.8 69.85)
 		)
 		(stroke
@@ -6866,13 +7259,13 @@
 	)
 	(wire
 		(pts
-			(xy 356.87 63.5) (xy 367.03 63.5)
+			(xy 336.55 218.44) (xy 356.87 218.44)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "1f1bfd5f-cfcd-4c85-8925-a5a67f8afb93")
+		(uuid "1d76fb49-3bef-4105-a9f7-8ae96d027f29")
 	)
 	(wire
 		(pts
@@ -6936,7 +7329,17 @@
 	)
 	(wire
 		(pts
-			(xy 364.49 66.04) (xy 367.03 66.04)
+			(xy 311.15 205.74) (xy 280.67 205.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "290f7540-ac35-4258-b5a5-e3e73a595b9a")
+	)
+	(wire
+		(pts
+			(xy 266.7 205.74) (xy 269.24 205.74)
 		)
 		(stroke
 			(width 0)
@@ -6966,6 +7369,16 @@
 	)
 	(wire
 		(pts
+			(xy 280.67 205.74) (xy 280.67 212.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3031374f-566c-42f9-802d-876ec671e9cf")
+	)
+	(wire
+		(pts
 			(xy 201.93 31.75) (xy 196.85 31.75)
 		)
 		(stroke
@@ -6976,13 +7389,23 @@
 	)
 	(wire
 		(pts
-			(xy 364.49 74.93) (xy 364.49 81.28)
+			(xy 266.7 214.63) (xy 266.7 220.98)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "34b58166-23a2-41a6-ae6a-a013230f8a58")
+	)
+	(wire
+		(pts
+			(xy 254 195.58) (xy 261.62 195.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "360f0751-fc8e-4f2e-bf68-6ca1d092237e")
 	)
 	(wire
 		(pts
@@ -7006,7 +7429,7 @@
 	)
 	(wire
 		(pts
-			(xy 309.88 71.12) (xy 317.5 71.12)
+			(xy 212.09 210.82) (xy 219.71 210.82)
 		)
 		(stroke
 			(width 0)
@@ -7033,6 +7456,16 @@
 			(type default)
 		)
 		(uuid "3f27fff1-d25f-451d-a965-47b93583f981")
+	)
+	(wire
+		(pts
+			(xy 269.24 195.58) (xy 269.24 205.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4086ec00-96c7-498e-8cb1-ebb09f126950")
 	)
 	(wire
 		(pts
@@ -7073,6 +7506,16 @@
 			(type default)
 		)
 		(uuid "441aa4bd-2be2-4f70-800a-e0611adda68e")
+	)
+	(wire
+		(pts
+			(xy 350.52 207.01) (xy 350.52 213.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "44ef7992-744b-4710-a0ac-74bc1f2c8e2f")
 	)
 	(wire
 		(pts
@@ -7176,6 +7619,16 @@
 	)
 	(wire
 		(pts
+			(xy 311.15 205.74) (xy 311.15 213.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "509b1bdb-4b69-4794-9c60-1a1447372e11")
+	)
+	(wire
+		(pts
 			(xy 40.64 90.17) (xy 35.56 90.17)
 		)
 		(stroke
@@ -7216,16 +7669,6 @@
 	)
 	(wire
 		(pts
-			(xy 367.03 66.04) (xy 367.03 63.5)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5d14764b-6238-41b6-879c-1edc14292c58")
-	)
-	(wire
-		(pts
 			(xy 167.64 33.02) (xy 167.64 31.75)
 		)
 		(stroke
@@ -7256,7 +7699,7 @@
 	)
 	(wire
 		(pts
-			(xy 347.98 81.28) (xy 347.98 83.82)
+			(xy 250.19 220.98) (xy 250.19 223.52)
 		)
 		(stroke
 			(width 0)
@@ -7306,7 +7749,7 @@
 	)
 	(wire
 		(pts
-			(xy 364.49 66.04) (xy 364.49 69.85)
+			(xy 266.7 205.74) (xy 266.7 209.55)
 		)
 		(stroke
 			(width 0)
@@ -7326,13 +7769,23 @@
 	)
 	(wire
 		(pts
-			(xy 347.98 63.5) (xy 351.79 63.5)
+			(xy 251.46 195.58) (xy 254 195.58)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "662dff28-2424-418b-894d-c9135f4451c7")
+	)
+	(wire
+		(pts
+			(xy 269.24 194.31) (xy 269.24 195.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "68a791e7-0b8d-4a9c-878d-f1dd91579c22")
 	)
 	(wire
 		(pts
@@ -7466,6 +7919,16 @@
 	)
 	(wire
 		(pts
+			(xy 350.52 213.36) (xy 336.55 213.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "759c5952-af7f-45c1-a604-e62e99fd6ee7")
+	)
+	(wire
+		(pts
 			(xy 334.01 144.78) (xy 317.5 144.78)
 		)
 		(stroke
@@ -7516,7 +7979,7 @@
 	)
 	(wire
 		(pts
-			(xy 347.98 66.04) (xy 364.49 66.04)
+			(xy 250.19 205.74) (xy 266.7 205.74)
 		)
 		(stroke
 			(width 0)
@@ -7546,7 +8009,7 @@
 	)
 	(wire
 		(pts
-			(xy 364.49 81.28) (xy 347.98 81.28)
+			(xy 266.7 220.98) (xy 250.19 220.98)
 		)
 		(stroke
 			(width 0)
@@ -7593,6 +8056,16 @@
 			(type default)
 		)
 		(uuid "86258d02-bcda-43b2-b3c5-c7990046aa40")
+	)
+	(wire
+		(pts
+			(xy 356.87 224.79) (xy 356.87 218.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "880a9185-1a54-493c-b5e2-da7a131e7e98")
 	)
 	(wire
 		(pts
@@ -7696,6 +8169,16 @@
 	)
 	(wire
 		(pts
+			(xy 266.7 195.58) (xy 269.24 195.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "991e044c-8a5c-41e7-8070-53c3a5017247")
+	)
+	(wire
+		(pts
 			(xy 194.31 31.75) (xy 194.31 34.29)
 		)
 		(stroke
@@ -7796,6 +8279,16 @@
 	)
 	(wire
 		(pts
+			(xy 356.87 218.44) (xy 356.87 210.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a85be367-1ff9-4801-8668-991e51d662d3")
+	)
+	(wire
+		(pts
 			(xy 363.22 144.78) (xy 363.22 140.97)
 		)
 		(stroke
@@ -7836,7 +8329,7 @@
 	)
 	(wire
 		(pts
-			(xy 317.5 76.2) (xy 317.5 78.74)
+			(xy 219.71 215.9) (xy 219.71 218.44)
 		)
 		(stroke
 			(width 0)
@@ -7886,6 +8379,16 @@
 	)
 	(wire
 		(pts
+			(xy 280.67 217.17) (xy 290.83 217.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b580e032-27b0-492c-a4b2-f7339e3980e1")
+	)
+	(wire
+		(pts
 			(xy 148.59 48.26) (xy 148.59 50.8)
 		)
 		(stroke
@@ -7913,6 +8416,16 @@
 			(type default)
 		)
 		(uuid "b6999242-dce6-49fc-8d3e-db058d0ab7e6")
+	)
+	(wire
+		(pts
+			(xy 356.87 210.82) (xy 336.55 210.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b6b1f6d8-7325-4a8e-9277-94b479d37a0e")
 	)
 	(wire
 		(pts
@@ -8096,6 +8609,16 @@
 	)
 	(wire
 		(pts
+			(xy 254 200.66) (xy 254 203.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ce014461-0775-4432-8485-a1ad8e825597")
+	)
+	(wire
+		(pts
 			(xy 353.06 101.6) (xy 353.06 100.33)
 		)
 		(stroke
@@ -8116,7 +8639,7 @@
 	)
 	(wire
 		(pts
-			(xy 309.88 68.58) (xy 317.5 68.58)
+			(xy 212.09 208.28) (xy 219.71 208.28)
 		)
 		(stroke
 			(width 0)
@@ -8173,6 +8696,16 @@
 			(type default)
 		)
 		(uuid "da6e2f83-1658-45c4-a436-336b2283e919")
+	)
+	(wire
+		(pts
+			(xy 290.83 210.82) (xy 290.83 212.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "da990806-f9d9-49ac-a854-95be0cf66c17")
 	)
 	(wire
 		(pts
@@ -8236,6 +8769,16 @@
 	)
 	(wire
 		(pts
+			(xy 251.46 203.2) (xy 250.19 203.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e41a6356-b0be-476f-8b99-095ae9cd76d8")
+	)
+	(wire
+		(pts
 			(xy 45.72 133.35) (xy 45.72 134.62)
 		)
 		(stroke
@@ -8253,6 +8796,16 @@
 			(type default)
 		)
 		(uuid "e613e2dc-3445-492e-bb8d-21dfa2545577")
+	)
+	(wire
+		(pts
+			(xy 313.69 208.28) (xy 313.69 205.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e7d661c9-9ac3-4102-8c4e-cf29f365cbde")
 	)
 	(wire
 		(pts
@@ -8396,6 +8949,16 @@
 	)
 	(wire
 		(pts
+			(xy 251.46 195.58) (xy 251.46 203.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fed2d7fc-baee-4728-a0fd-26e61cb6e4b6")
+	)
+	(wire
+		(pts
 			(xy 27.94 36.83) (xy 27.94 40.64)
 		)
 		(stroke
@@ -8413,16 +8976,6 @@
 			(type default)
 		)
 		(uuid "ff91f2a5-ef82-4597-85a7-8941d46c29e9")
-	)
-	(label "SDA_EXT"
-		(at 309.88 71.12 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "008bb009-5aa9-4c4b-b4aa-6820c940fc0e")
 	)
 	(label "USB_D+"
 		(at 146.05 172.72 0)
@@ -8454,15 +9007,15 @@
 		)
 		(uuid "0ec47685-a338-491f-b092-19c64dfc356a")
 	)
-	(label "SCL_EXT"
-		(at 309.88 68.58 0)
+	(label "SCL"
+		(at 212.09 208.28 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left bottom)
 		)
-		(uuid "12419fc9-08b4-4088-b727-b7a7eaae3d4c")
+		(uuid "12eb56c3-bdcf-4c7f-8939-f487b1393e4c")
 	)
 	(label "SDA"
 		(at 119.38 80.01 0)
@@ -8493,6 +9046,16 @@
 			(justify left bottom)
 		)
 		(uuid "2069f031-4a8c-4a41-8a34-d26bf64ffd1c")
+	)
+	(label "TIME_INT"
+		(at 20.32 152.4 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "2d40cfd7-0ef6-413a-b659-0048a5efadce")
 	)
 	(label "SDA_EXT"
 		(at 279.4 86.36 0)
@@ -8535,6 +9098,16 @@
 		(uuid "41353562-45c7-4a2b-9149-c11350b8624e")
 	)
 	(label "SDA"
+		(at 212.09 210.82 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "432d8df0-4d1a-4704-b692-746da4959b94")
+	)
+	(label "SDA"
 		(at 85.09 144.78 0)
 		(effects
 			(font
@@ -8543,6 +9116,16 @@
 			(justify left bottom)
 		)
 		(uuid "4783beba-9680-4d6e-8a64-47da33934276")
+	)
+	(label "SDA"
+		(at 336.55 215.9 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "4a1d34a5-0d61-4a9d-8adb-054672971e78")
 	)
 	(label "VBAT_PRE"
 		(at 142.24 113.03 0)
@@ -8565,6 +9148,16 @@
 		(uuid "54d9866f-fe6c-49c1-82e0-5c85701528c1")
 	)
 	(label "VBAT"
+		(at 300.99 205.74 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "55655049-403e-48be-84b1-6ca0d355b1ee")
+	)
+	(label "VBAT"
 		(at 128.27 35.56 0)
 		(effects
 			(font
@@ -8583,6 +9176,16 @@
 			(justify left bottom)
 		)
 		(uuid "618f429c-7ad6-476e-9036-68680117c00f")
+	)
+	(label "TIME_INT"
+		(at 336.55 208.28 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "7091c19f-4926-4da1-8226-ca0f306e180f")
 	)
 	(label "SCL_EXT"
 		(at 326.39 140.97 0)
@@ -8663,6 +9266,16 @@
 			(justify left bottom)
 		)
 		(uuid "b0b1dd88-4e92-48ae-8ae5-dce927d096e0")
+	)
+	(label "SCL"
+		(at 309.88 218.44 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "b7fd6850-1878-4f40-8390-0f90e6d51b2d")
 	)
 	(label "SCL_EXT"
 		(at 279.4 83.82 0)
@@ -8868,7 +9481,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "04efca1b-c463-4a57-87f1-3da37318b472")
-		(property "Reference" "#PWR037"
+		(property "Reference" "#PWR014"
 			(at 123.19 78.74 0)
 			(hide yes)
 			(show_name no)
@@ -8928,7 +9541,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR037")
+					(reference "#PWR014")
 					(unit 1)
 				)
 			)
@@ -9014,6 +9627,84 @@
 	)
 	(symbol
 		(lib_id "power:GND")
+		(at 219.71 218.44 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0abc34d3-64a9-45b9-b0fb-cddcf64dda94")
+		(property "Reference" "#PWR026"
+			(at 219.71 224.79 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 219.71 223.52 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 219.71 218.44 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 219.71 218.44 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 219.71 218.44 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "5e83c720-19cc-44ea-8d91-e1cdc6cfa618")
+		)
+		(instances
+			(project "ambient-air"
+				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
+					(reference "#PWR026")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
 		(at 143.51 118.11 0)
 		(unit 1)
 		(body_style 1)
@@ -9024,7 +9715,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "0aeaa97f-798b-4693-891c-f4e65eecbb1f")
-		(property "Reference" "#PWR033"
+		(property "Reference" "#PWR019"
 			(at 143.51 124.46 0)
 			(hide yes)
 			(show_name no)
@@ -9084,7 +9775,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR033")
+					(reference "#PWR019")
 					(unit 1)
 				)
 			)
@@ -9102,7 +9793,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "12b9bc07-2020-40af-b771-ee4c7360fa7a")
-		(property "Reference" "U6"
+		(property "Reference" "U12"
 			(at 354.584 132.588 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9184,7 +9875,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "U6")
+					(reference "U12")
 					(unit 1)
 				)
 			)
@@ -9192,7 +9883,7 @@
 	)
 	(symbol
 		(lib_id "Device:C_Small")
-		(at 364.49 72.39 0)
+		(at 266.7 212.09 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -9203,7 +9894,7 @@
 		(fields_autoplaced yes)
 		(uuid "154bce11-0c1d-43f7-9c96-7f8a4dc59485")
 		(property "Reference" "C9"
-			(at 367.03 71.1262 0)
+			(at 269.24 210.8262 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9214,7 +9905,7 @@
 			)
 		)
 		(property "Value" "1µF"
-			(at 367.03 73.6662 0)
+			(at 269.24 213.3662 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9224,8 +9915,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-			(at 364.49 72.39 0)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 266.7 212.09 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9236,7 +9927,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 364.49 72.39 0)
+			(at 266.7 212.09 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9247,7 +9938,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor, small symbol"
-			(at 364.49 72.39 0)
+			(at 266.7 212.09 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9284,7 +9975,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "1addeef5-34e7-4a61-b6d6-a15d610bf556")
-		(property "Reference" "J3"
+		(property "Reference" "J1"
 			(at 130.81 77.4699 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9354,7 +10045,89 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "J3")
+					(reference "J1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Small")
+		(at 290.83 214.63 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1c59a957-3209-4771-af11-99bc31455138")
+		(property "Reference" "C10"
+			(at 293.37 213.3662 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "1µF"
+			(at 293.37 215.9062 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 290.83 214.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 290.83 214.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor, small symbol"
+			(at 290.83 214.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "116c4908-f54e-454e-b3e8-b997d9efac09")
+		)
+		(pin "2"
+			(uuid "a72ac157-a5c3-48fc-ba34-82f8d0ceec5e")
+		)
+		(instances
+			(project "ambient-air"
+				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
+					(reference "C10")
 					(unit 1)
 				)
 			)
@@ -9372,7 +10145,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "20629a61-3b5e-41d1-8fd3-73a81336172d")
-		(property "Reference" "#PWR042"
+		(property "Reference" "#PWR023"
 			(at 180.34 36.83 0)
 			(hide yes)
 			(show_name no)
@@ -9432,7 +10205,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR042")
+					(reference "#PWR023")
 					(unit 1)
 				)
 			)
@@ -9450,7 +10223,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "22ce17d2-7909-4420-a099-adee073c9b92")
-		(property "Reference" "C12"
+		(property "Reference" "C7"
 			(at 124.46 25.3935 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9472,7 +10245,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 121.92 26.67 0)
 			(hide yes)
 			(show_name no)
@@ -9514,7 +10287,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "C12")
+					(reference "C7")
 					(unit 1)
 				)
 			)
@@ -9532,7 +10305,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "240a7ef9-00b8-470e-a619-cb2519e050d6")
-		(property "Reference" "#PWR014"
+		(property "Reference" "#PWR034"
 			(at 304.8 149.86 0)
 			(hide yes)
 			(show_name no)
@@ -9592,7 +10365,85 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR014")
+					(reference "#PWR034")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 290.83 217.17 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "254ae74c-c0f8-422a-a222-286f2ea3277f")
+		(property "Reference" "#PWR032"
+			(at 290.83 223.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 290.83 222.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 290.83 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 290.83 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 290.83 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d57398af-737e-4551-b945-210c9a73c05c")
+		)
+		(instances
+			(project "ambient-air"
+				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
+					(reference "#PWR032")
 					(unit 1)
 				)
 			)
@@ -9680,7 +10531,7 @@
 	)
 	(symbol
 		(lib_id "easyeda2kicad:SGP40-D-R4")
-		(at 332.74 73.66 0)
+		(at 234.95 213.36 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -9690,8 +10541,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2dbd8e42-6697-47eb-b326-4f703dee527f")
-		(property "Reference" "U8"
-			(at 332.74 55.88 0)
+		(property "Reference" "U7"
+			(at 234.95 195.58 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9701,7 +10552,7 @@
 			)
 		)
 		(property "Value" "SGP40-D-R4"
-			(at 332.74 58.42 0)
+			(at 234.95 198.12 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9711,7 +10562,7 @@
 			)
 		)
 		(property "Footprint" "easyeda2kicad:XCDR_SGP40-D-R4"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9723,7 +10574,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9734,7 +10585,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9745,7 +10596,7 @@
 			)
 		)
 		(property "MF" "Sensirion AG"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9757,7 +10608,7 @@
 			)
 		)
 		(property "MAXIMUM_PACKAGE_HEIGHT" "0.95mm"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9769,7 +10620,7 @@
 			)
 		)
 		(property "Package" "None"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9781,7 +10632,7 @@
 			)
 		)
 		(property "Price" "None"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9793,7 +10644,7 @@
 			)
 		)
 		(property "Check_prices" "https://www.snapeda.com/parts/SGP40-D-R4/Sensirion/view-part/?ref=eda"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9805,7 +10656,7 @@
 			)
 		)
 		(property "STANDARD" "Manufacturer Recommendations"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9817,7 +10668,7 @@
 			)
 		)
 		(property "PARTREV" "1.2"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9829,7 +10680,7 @@
 			)
 		)
 		(property "SnapEDA_Link" "https://www.snapeda.com/parts/SGP40-D-R4/Sensirion/view-part/?ref=snap"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9841,7 +10692,7 @@
 			)
 		)
 		(property "MP" "SGP40-D-R4"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9853,7 +10704,7 @@
 			)
 		)
 		(property "Description_1" "AIR QUALITY GAS SENSOR LOW POWER"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9865,7 +10716,7 @@
 			)
 		)
 		(property "MANUFACTURER" "Sensirion AG"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9877,7 +10728,7 @@
 			)
 		)
 		(property "Availability" "In Stock"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9889,7 +10740,7 @@
 			)
 		)
 		(property "SNAPEDA_PN" "SGP40-D-R4"
-			(at 332.74 73.66 0)
+			(at 234.95 213.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9924,7 +10775,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "U8")
+					(reference "U7")
 					(unit 1)
 				)
 			)
@@ -10020,7 +10871,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "34b3be4f-d15d-4439-882c-c18fd8c79dcb")
-		(property "Reference" "#PWR018"
+		(property "Reference" "#PWR040"
 			(at 330.2 154.94 0)
 			(hide yes)
 			(show_name no)
@@ -10080,7 +10931,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR018")
+					(reference "#PWR040")
 					(unit 1)
 				)
 			)
@@ -10098,7 +10949,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "36112fe7-c31b-40e2-aca8-09df1be29186")
-		(property "Reference" "U10"
+		(property "Reference" "U5"
 			(at 148.59 15.24 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10194,7 +11045,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "U10")
+					(reference "U5")
 					(unit 1)
 				)
 			)
@@ -10212,7 +11063,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3af41a17-e8c6-46b2-b8e5-0c527a11a640")
-		(property "Reference" "C8"
+		(property "Reference" "C13"
 			(at 361.9563 95.25 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10274,7 +11125,89 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "C8")
+					(reference "C13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Small")
+		(at 280.67 214.63 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3b80cc9e-37d6-4925-84fa-9146a48602e6")
+		(property "Reference" "C11"
+			(at 283.21 213.3662 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 283.21 215.9062 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+			(at 280.67 214.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 280.67 214.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor, small symbol"
+			(at 280.67 214.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "8a3487ae-8cd5-458b-afcb-ae75919aa7b4")
+		)
+		(pin "2"
+			(uuid "9b1362ca-bc92-42da-acaf-822f1071d7e9")
+		)
+		(instances
+			(project "ambient-air"
+				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
+					(reference "C11")
 					(unit 1)
 				)
 			)
@@ -10372,7 +11305,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "41659f35-977d-494f-9e81-08b0e20497bf")
-		(property "Reference" "#PWR024"
+		(property "Reference" "#PWR044"
 			(at 353.06 49.53 0)
 			(hide yes)
 			(show_name no)
@@ -10432,7 +11365,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR024")
+					(reference "#PWR044")
 					(unit 1)
 				)
 			)
@@ -10450,7 +11383,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "42f09bd2-3216-4dbc-ab8b-65b6ae4c6cf5")
-		(property "Reference" "#PWR027"
+		(property "Reference" "#PWR048"
 			(at 367.03 109.22 0)
 			(hide yes)
 			(show_name no)
@@ -10510,7 +11443,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR027")
+					(reference "#PWR048")
 					(unit 1)
 				)
 			)
@@ -10528,7 +11461,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "4379e372-dada-4967-8dd6-c62cd907b8aa")
-		(property "Reference" "#PWR038"
+		(property "Reference" "#PWR030"
 			(at 287.02 85.09 0)
 			(hide yes)
 			(show_name no)
@@ -10588,7 +11521,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR038")
+					(reference "#PWR030")
 					(unit 1)
 				)
 			)
@@ -10606,7 +11539,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "44dd9d74-5854-42b2-9946-95a980a9b65f")
-		(property "Reference" "C11"
+		(property "Reference" "C8"
 			(at 182.88 26.6762 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10670,7 +11603,85 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "C11")
+					(reference "C8")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 356.87 224.79 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4518bc16-5e1b-4754-9e28-096627f14f53")
+		(property "Reference" "#PWR046"
+			(at 356.87 231.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 356.87 229.87 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 356.87 224.79 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 356.87 224.79 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 356.87 224.79 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f794b5ab-104c-43e4-86ae-73fb34ed329c")
+		)
+		(instances
+			(project "ambient-air"
+				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
+					(reference "#PWR046")
 					(unit 1)
 				)
 			)
@@ -10688,7 +11699,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "473f12eb-8bcc-4009-b81f-62fb7b380d6c")
-		(property "Reference" "#PWR035"
+		(property "Reference" "#PWR031"
 			(at 287.02 95.25 0)
 			(hide yes)
 			(show_name no)
@@ -10748,7 +11759,85 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR035")
+					(reference "#PWR031")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 350.52 207.01 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4bdfed58-e707-4e6d-b248-7dcc747ea5b3")
+		(property "Reference" "#PWR043"
+			(at 350.52 210.82 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 350.52 201.93 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 350.52 207.01 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 350.52 207.01 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 350.52 207.01 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "93ade59c-f8c0-43ca-b22f-24cfa527199a")
+		)
+		(instances
+			(project "ambient-air"
+				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
+					(reference "#PWR043")
 					(unit 1)
 				)
 			)
@@ -10766,7 +11855,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "4f4735f0-f966-420d-9f0d-9467f7f7ca81")
-		(property "Reference" "#PWR046"
+		(property "Reference" "#PWR025"
 			(at 210.82 33.02 0)
 			(hide yes)
 			(show_name no)
@@ -10826,7 +11915,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR046")
+					(reference "#PWR025")
 					(unit 1)
 				)
 			)
@@ -10844,7 +11933,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "527984e2-65f4-4862-b2a9-deb5cd2fd23c")
-		(property "Reference" "R11"
+		(property "Reference" "R7"
 			(at 137.16 110.49 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10906,7 +11995,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "R11")
+					(reference "R7")
 					(unit 1)
 				)
 			)
@@ -10924,7 +12013,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "54723203-5c69-47b4-ab61-2ee6204a6ca1")
-		(property "Reference" "#PWR041"
+		(property "Reference" "#PWR020"
 			(at 148.59 58.42 0)
 			(hide yes)
 			(show_name no)
@@ -10984,7 +12073,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR041")
+					(reference "#PWR020")
 					(unit 1)
 				)
 			)
@@ -11002,7 +12091,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "55efb54a-81bb-4951-a792-325aa5942bb6")
-		(property "Reference" "#PWR036"
+		(property "Reference" "#PWR015"
 			(at 123.19 88.9 0)
 			(hide yes)
 			(show_name no)
@@ -11062,7 +12151,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR036")
+					(reference "#PWR015")
 					(unit 1)
 				)
 			)
@@ -11080,7 +12169,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "57c4dacb-8297-4f86-a550-53d325872336")
-		(property "Reference" "U11"
+		(property "Reference" "U6"
 			(at 224.79 24.13 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11160,7 +12249,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "U11")
+					(reference "U6")
 					(unit 1)
 				)
 			)
@@ -11178,7 +12267,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "58f7863c-3d5e-458e-afe8-b4cc2ae720a2")
-		(property "Reference" "#PWR025"
+		(property "Reference" "#PWR045"
 			(at 353.06 104.14 0)
 			(hide yes)
 			(show_name no)
@@ -11238,7 +12327,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR025")
+					(reference "#PWR045")
 					(unit 1)
 				)
 			)
@@ -11334,7 +12423,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5ba58888-0b49-4142-b432-f7c3b0085071")
-		(property "Reference" "R16"
+		(property "Reference" "R12"
 			(at 204.47 26.67 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11396,7 +12485,85 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "R16")
+					(reference "R12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 250.19 223.52 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5c7099cd-f07f-4ca6-a418-5ee2b38dfb09")
+		(property "Reference" "#PWR028"
+			(at 250.19 229.87 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 250.19 228.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 250.19 223.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 250.19 223.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 250.19 223.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "b2206e95-56e7-4339-95f4-51b07815c55f")
+		)
+		(instances
+			(project "ambient-air"
+				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
+					(reference "#PWR028")
 					(unit 1)
 				)
 			)
@@ -11414,7 +12581,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5d03404e-fd39-4ac1-9a9f-9b243c0682a6")
-		(property "Reference" "R12"
+		(property "Reference" "R6"
 			(at 128.27 44.4499 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11478,7 +12645,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "R12")
+					(reference "R6")
 					(unit 1)
 				)
 			)
@@ -11578,7 +12745,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5fc6f523-433e-431d-80de-1246e67b0166")
-		(property "Reference" "#PWR023"
+		(property "Reference" "#PWR047"
 			(at 363.22 144.78 0)
 			(hide yes)
 			(show_name no)
@@ -11638,7 +12805,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR023")
+					(reference "#PWR047")
 					(unit 1)
 				)
 			)
@@ -11904,7 +13071,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "68970a4a-cf90-442b-a581-6cce0ae87ec5")
-		(property "Reference" "SW3"
+		(property "Reference" "SW2"
 			(at 105.41 139.7 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11966,7 +13133,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "SW3")
+					(reference "SW2")
 					(unit 1)
 				)
 			)
@@ -11983,7 +13150,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "6fbaa756-8a7b-4b63-b3c2-f89aaf5f421d")
-		(property "Reference" "#PWR031"
+		(property "Reference" "#PWR021"
 			(at 151.13 156.21 0)
 			(hide yes)
 			(show_name no)
@@ -12043,7 +13210,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR031")
+					(reference "#PWR021")
 					(unit 1)
 				)
 			)
@@ -12061,7 +13228,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "77574104-4579-44be-8ddc-53965252b818")
-		(property "Reference" "SW1"
+		(property "Reference" "SW3"
 			(at 105.41 149.86 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12123,7 +13290,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "SW1")
+					(reference "SW3")
 					(unit 1)
 				)
 			)
@@ -12424,6 +13591,84 @@
 		)
 	)
 	(symbol
+		(lib_id "power:+3V3")
+		(at 269.24 194.31 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "79e2d1e3-e1c0-402d-9de5-4da3a380e9f9")
+		(property "Reference" "#PWR029"
+			(at 269.24 198.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 269.24 189.23 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 269.24 194.31 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 269.24 194.31 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 269.24 194.31 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6e3d3235-a53f-4387-ab46-9eed463e4a09")
+		)
+		(instances
+			(project "ambient-air"
+				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
+					(reference "#PWR029")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R_Small")
 		(at 167.64 29.21 0)
 		(unit 1)
@@ -12435,7 +13680,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8523e61a-c34f-4255-8b71-2dc0a8bd1ab6")
-		(property "Reference" "R13"
+		(property "Reference" "R10"
 			(at 170.18 27.9399 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12499,7 +13744,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "R13")
+					(reference "R10")
 					(unit 1)
 				)
 			)
@@ -12584,6 +13829,84 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 254 203.2 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "89e12a63-3db7-4079-a934-9d3ff7b70b01")
+		(property "Reference" "#PWR049"
+			(at 254 209.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 254 208.28 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 254 203.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 254 203.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 254 203.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ee4f8816-00f4-4e0b-b1f0-07490df6f053")
+		)
+		(instances
+			(project "ambient-air"
+				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
+					(reference "#PWR049")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
 		(at 148.59 115.57 0)
 		(unit 1)
@@ -12595,7 +13918,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8b94f7be-fe4b-4a88-8256-9963c253f368")
-		(property "Reference" "J2"
+		(property "Reference" "J3"
 			(at 151.13 115.5699 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12659,7 +13982,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "J2")
+					(reference "J3")
 					(unit 1)
 				)
 			)
@@ -12677,7 +14000,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8e79523b-b44f-49ba-b25f-d2e9cecde452")
-		(property "Reference" "U7"
+		(property "Reference" "U11"
 			(at 334.01 31.75 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12762,7 +14085,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "U7")
+					(reference "U11")
 					(unit 1)
 				)
 			)
@@ -12858,7 +14181,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "90aae626-2685-4db0-a890-e21294248dac")
-		(property "Reference" "C10"
+		(property "Reference" "C12"
 			(at 309.88 88.9062 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12922,7 +14245,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "C10")
+					(reference "C12")
 					(unit 1)
 				)
 			)
@@ -12940,7 +14263,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "93c3d765-4197-4f00-ad46-13463f611549")
-		(property "Reference" "#PWR047"
+		(property "Reference" "#PWR027"
 			(at 224.79 55.88 0)
 			(hide yes)
 			(show_name no)
@@ -13000,7 +14323,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR047")
+					(reference "#PWR027")
 					(unit 1)
 				)
 			)
@@ -13227,7 +14550,7 @@
 	)
 	(symbol
 		(lib_id "Device:R_Small")
-		(at 354.33 63.5 90)
+		(at 264.16 195.58 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -13237,8 +14560,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "98b56d46-783a-4130-9c44-82667430c290")
-		(property "Reference" "R6"
-			(at 354.33 58.42 90)
+		(property "Reference" "R13"
+			(at 264.16 190.5 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13248,7 +14571,7 @@
 			)
 		)
 		(property "Value" "4.7Ω"
-			(at 354.33 60.96 90)
+			(at 264.16 193.04 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13258,7 +14581,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 354.33 63.5 0)
+			(at 264.16 195.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13269,7 +14592,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 354.33 63.5 0)
+			(at 264.16 195.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13280,7 +14603,7 @@
 			)
 		)
 		(property "Description" "Resistor, small symbol"
-			(at 354.33 63.5 0)
+			(at 264.16 195.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13299,7 +14622,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "R6")
+					(reference "R13")
 					(unit 1)
 				)
 			)
@@ -13395,7 +14718,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "9af6fb6a-502f-422a-903d-a461d307a8cd")
-		(property "Reference" "#PWR043"
+		(property "Reference" "#PWR017"
 			(at 125.73 54.61 0)
 			(hide yes)
 			(show_name no)
@@ -13455,7 +14778,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR043")
+					(reference "#PWR017")
 					(unit 1)
 				)
 			)
@@ -13555,7 +14878,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a0bf7ee1-5d16-4871-981a-ccfedb5e54fb")
-		(property "Reference" "#PWR040"
+		(property "Reference" "#PWR036"
 			(at 307.34 99.06 0)
 			(hide yes)
 			(show_name no)
@@ -13615,7 +14938,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR040")
+					(reference "#PWR036")
 					(unit 1)
 				)
 			)
@@ -13713,7 +15036,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a471a6d7-1180-4566-a3aa-b152d88ecf7f")
-		(property "Reference" "#PWR013"
+		(property "Reference" "#PWR033"
 			(at 304.8 132.08 0)
 			(hide yes)
 			(show_name no)
@@ -13773,7 +15096,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR013")
+					(reference "#PWR033")
 					(unit 1)
 				)
 			)
@@ -13858,84 +15181,6 @@
 		)
 	)
 	(symbol
-		(lib_id "power:+3V3")
-		(at 367.03 63.5 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "a72065a2-40a2-4ea2-9a12-119136f3aef9")
-		(property "Reference" "#PWR026"
-			(at 367.03 67.31 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "+3V3_EXT"
-			(at 367.03 58.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 367.03 63.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 367.03 63.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 367.03 63.5 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "d72412cd-efdb-4bdd-bfe9-9b9b41cc2061")
-		)
-		(instances
-			(project "ambient-air"
-				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR026")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Sensor_Humidity:SHT4x")
 		(at 307.34 146.05 180)
 		(unit 1)
@@ -13947,7 +15192,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a8438911-720e-45c2-b09a-6a0b1822a473")
-		(property "Reference" "U5"
+		(property "Reference" "U8"
 			(at 300.99 147.3201 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14019,7 +15264,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "U5")
+					(reference "U8")
 					(unit 1)
 				)
 			)
@@ -14128,7 +15373,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ac5ab5a6-264c-4448-85d7-d57e25f87fa0")
-		(property "Reference" "SW2"
+		(property "Reference" "SW1"
 			(at 92.71 12.7 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14210,7 +15455,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "SW2")
+					(reference "SW1")
 					(unit 1)
 				)
 			)
@@ -14228,7 +15473,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ae500def-f970-4921-9364-67b1ff576fda")
-		(property "Reference" "#PWR016"
+		(property "Reference" "#PWR038"
 			(at 314.96 125.73 0)
 			(hide yes)
 			(show_name no)
@@ -14288,7 +15533,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR016")
+					(reference "#PWR038")
 					(unit 1)
 				)
 			)
@@ -14306,7 +15551,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b027d672-644c-4404-9745-0549cae04030")
-		(property "Reference" "R10"
+		(property "Reference" "R8"
 			(at 156.21 158.75 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14368,7 +15613,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "R10")
+					(reference "R8")
 					(unit 1)
 				)
 			)
@@ -14386,7 +15631,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b2681fa8-78e0-47d1-b6d8-d5be5f177ceb")
-		(property "Reference" "#PWR032"
+		(property "Reference" "#PWR022"
 			(at 162.56 173.99 0)
 			(hide yes)
 			(show_name no)
@@ -14446,7 +15691,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR032")
+					(reference "#PWR022")
 					(unit 1)
 				)
 			)
@@ -14463,7 +15708,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "b281b684-bad2-4767-b635-3259cb50884f")
-		(property "Reference" "J1"
+		(property "Reference" "J2"
 			(at 130.81 144.78 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14574,85 +15819,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "J1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 347.98 83.82 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "b2d937dd-b587-4f74-a2eb-4d2eabf09b2e")
-		(property "Reference" "#PWR021"
-			(at 347.98 90.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND_EXT"
-			(at 347.98 88.9 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 347.98 83.82 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 347.98 83.82 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 347.98 83.82 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "f342967b-7154-4dbc-b6f4-217dba7e54d6")
-		)
-		(instances
-			(project "ambient-air"
-				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR021")
+					(reference "J2")
 					(unit 1)
 				)
 			)
@@ -14750,7 +15917,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "bd7c8dad-16a1-474c-9331-9fabf75179f2")
-		(property "Reference" "#PWR015"
+		(property "Reference" "#PWR037"
 			(at 312.42 109.22 0)
 			(hide yes)
 			(show_name no)
@@ -14810,7 +15977,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR015")
+					(reference "#PWR037")
 					(unit 1)
 				)
 			)
@@ -14828,7 +15995,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c00e8e3c-93b5-4ed5-be63-68ca84960f4d")
-		(property "Reference" "R17"
+		(property "Reference" "R11"
 			(at 196.85 35.5599 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14892,7 +16059,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "R17")
+					(reference "R11")
 					(unit 1)
 				)
 			)
@@ -14910,7 +16077,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c5640edc-69e0-42bb-ac4d-6237af6331a3")
-		(property "Reference" "#PWR019"
+		(property "Reference" "#PWR039"
 			(at 320.04 45.72 0)
 			(hide yes)
 			(show_name no)
@@ -14970,7 +16137,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR019")
+					(reference "#PWR039")
 					(unit 1)
 				)
 			)
@@ -14988,7 +16155,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c6c210a2-428a-4058-9f62-1a796d1cd2e2")
-		(property "Reference" "#PWR022"
+		(property "Reference" "#PWR042"
 			(at 350.52 127 0)
 			(hide yes)
 			(show_name no)
@@ -15048,7 +16215,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR022")
+					(reference "#PWR042")
 					(unit 1)
 				)
 			)
@@ -15127,6 +16294,88 @@
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
 					(reference "#PWR06")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Small")
+		(at 254 198.12 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "cadab9b8-6a13-4fc1-b47c-188c04a7a9e6")
+		(property "Reference" "C15"
+			(at 256.54 196.8562 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "1µF"
+			(at 256.54 199.3962 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 254 198.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 254 198.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor, small symbol"
+			(at 254 198.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "8dafb053-9b63-4ab7-a4b7-ede728ad2b18")
+		)
+		(pin "2"
+			(uuid "15be6a76-6ff2-415d-a13e-f0c0b53e33f7")
+		)
+		(instances
+			(project "ambient-air"
+				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
+					(reference "C15")
 					(unit 1)
 				)
 			)
@@ -15226,7 +16475,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "cdf23e4b-e50d-4e73-be30-9c9355c69856")
-		(property "Reference" "#PWR044"
+		(property "Reference" "#PWR013"
 			(at 121.92 35.56 0)
 			(hide yes)
 			(show_name no)
@@ -15286,7 +16535,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR044")
+					(reference "#PWR013")
 					(unit 1)
 				)
 			)
@@ -15395,7 +16644,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d0aa4ee4-eb3f-4a37-912d-0ad1cf3b0779")
-		(property "Reference" "C7"
+		(property "Reference" "C14"
 			(at 368.3 147.3262 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -15459,7 +16708,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "C7")
+					(reference "C14")
 					(unit 1)
 				)
 			)
@@ -15477,7 +16726,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d6f34bcd-6c3d-4b26-ba51-97747d25cce9")
-		(property "Reference" "#PWR039"
+		(property "Reference" "#PWR035"
 			(at 307.34 91.44 0)
 			(hide yes)
 			(show_name no)
@@ -15537,7 +16786,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR039")
+					(reference "#PWR035")
 					(unit 1)
 				)
 			)
@@ -15803,7 +17052,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "eadeae0f-d271-4c06-8c16-db48184f00cd")
-		(property "Reference" "U9"
+		(property "Reference" "U10"
 			(at 332.74 92.71 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16034,7 +17283,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "U9")
+					(reference "U10")
 					(unit 1)
 				)
 			)
@@ -16052,7 +17301,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "eec5f9db-5a15-47c2-b155-7815ba0c0718")
-		(property "Reference" "#PWR045"
+		(property "Reference" "#PWR024"
 			(at 194.31 45.72 0)
 			(hide yes)
 			(show_name no)
@@ -16112,7 +17361,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR045")
+					(reference "#PWR024")
 					(unit 1)
 				)
 			)
@@ -16152,7 +17401,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 36.83 45.72 0)
 			(hide yes)
 			(show_name no)
@@ -16282,84 +17531,6 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 317.5 78.74 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "f280c4d3-ceaa-45f2-bf4f-900accc4cb32")
-		(property "Reference" "#PWR017"
-			(at 317.5 85.09 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND_EXT"
-			(at 317.5 83.82 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 317.5 78.74 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 317.5 78.74 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 317.5 78.74 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "8dbe2c20-a85f-42bc-929e-f3e3568571ea")
-		)
-		(instances
-			(project "ambient-air"
-				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR017")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
 		(at 344.17 158.75 0)
 		(unit 1)
 		(body_style 1)
@@ -16370,7 +17541,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f4bccc51-38ab-4f32-9a11-a7128d63313b")
-		(property "Reference" "#PWR020"
+		(property "Reference" "#PWR041"
 			(at 344.17 165.1 0)
 			(hide yes)
 			(show_name no)
@@ -16430,7 +17601,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR020")
+					(reference "#PWR041")
 					(unit 1)
 				)
 			)
@@ -16593,6 +17764,143 @@
 		)
 	)
 	(symbol
+		(lib_id "easyeda2kicad:RX8111CE")
+		(at 325.12 213.36 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f7061454-7b60-4dfc-889f-375755782289")
+		(property "Reference" "U9"
+			(at 325.12 200.66 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "RX8111CE"
+			(at 325.12 203.2 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "easyeda2kicad:OSC-SMD_10P-L3.2-W2.5-BL-1"
+			(at 325.12 226.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.lcsc.com/datasheet/C2929261.pdf"
+			(at 325.12 228.6 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 325.12 213.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "EPSON(爱普生)"
+			(at 325.12 231.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "RX8111CE B"
+			(at 325.12 233.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C2929261"
+			(at 325.12 236.22 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "5"
+			(uuid "c7c80690-e3a8-4751-a252-ab807b5f5ac1")
+		)
+		(pin "4"
+			(uuid "73276ce2-bc7e-4960-9044-52f0417f907c")
+		)
+		(pin "3"
+			(uuid "434fa7ec-b524-4454-b76c-22ff6a284474")
+		)
+		(pin "2"
+			(uuid "4fbb7486-c0fc-44ae-941e-9c3c95e124e9")
+		)
+		(pin "8"
+			(uuid "7917dfa3-2f84-4b30-a85d-80069bffd195")
+		)
+		(pin "9"
+			(uuid "35e174fa-5c9e-4cb8-a107-90b73fed6217")
+		)
+		(pin "1"
+			(uuid "2911d11b-b716-4feb-92d5-388dbc75d5bf")
+		)
+		(pin "10"
+			(uuid "f02c1ad2-875b-4cc4-966c-eacb9ed6df72")
+		)
+		(pin "7"
+			(uuid "4e9091c7-d80e-4395-871f-698f35c1ac72")
+		)
+		(pin "6"
+			(uuid "0e3647f9-8445-4c45-a3ff-a07c18dee292")
+		)
+		(instances
+			(project "ambient-air"
+				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
+					(reference "U9")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 123.19 190.5 0)
 		(unit 1)
@@ -16604,7 +17912,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f8a3ded5-7d15-4a45-9b6c-0dbd85b92038")
-		(property "Reference" "#PWR028"
+		(property "Reference" "#PWR016"
 			(at 123.19 196.85 0)
 			(hide yes)
 			(show_name no)
@@ -16664,7 +17972,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR028")
+					(reference "#PWR016")
 					(unit 1)
 				)
 			)
@@ -16682,7 +17990,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "fa71dd03-dbb7-4575-9100-4f2382e51784")
-		(property "Reference" "#PWR030"
+		(property "Reference" "#PWR018"
 			(at 130.81 196.85 0)
 			(hide yes)
 			(show_name no)
@@ -16742,7 +18050,7 @@
 		(instances
 			(project "ambient-air"
 				(path "/4d5c102a-1998-4d9e-b03e-1e9ddf9294c2"
-					(reference "#PWR030")
+					(reference "#PWR018")
 					(unit 1)
 				)
 			)

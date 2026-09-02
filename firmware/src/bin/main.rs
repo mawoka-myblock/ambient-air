@@ -31,6 +31,7 @@ use firmware::measurements::measure;
 use firmware::measurements::sampling::{move_to_nvs, record_sample};
 use firmware::measurements::voc::restore_voc_state;
 use firmware::storage::Nvs;
+use firmware::tasks::battery;
 use firmware::tasks::{settings, sleep, stcc4};
 use firmware::{COMMAND_CHANNEL, Commands, PowerState};
 use trouble_host::prelude::ExternalController;
@@ -158,6 +159,10 @@ async fn main(spawner: Spawner) {
     spawner.spawn(sleep::sleep_task(devices, peripherals.LPWR).unwrap());
     spawner.spawn(settings::settings_task().unwrap());
     spawner.spawn(stcc4::stcc4_task(devices).unwrap());
+    spawner.spawn(battery::auto_sleep().unwrap());
+
+    // Deep sleep for 1 year if battery is super low
+    battery::deep_sleep_forever_on_low_battery(devices).await;
 
     // -----------------
     // Init Bluetooth
@@ -170,7 +175,7 @@ async fn main(spawner: Spawner) {
     // -----------------
     // Main loop breathing led
     // -----------------
-    firmware::tasks::battery::show_battery_percentage().await;
+    battery::show_battery_percentage().await;
 
     loop {
         Timer::after_millis(1500).await;
